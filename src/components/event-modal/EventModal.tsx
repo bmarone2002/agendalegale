@@ -185,6 +185,8 @@ export function EventModal({
   const [popoverContainer, setPopoverContainer] = useState<HTMLElement | null>(null);
   /** Se true, non sovrascrivere la lista preview con l'useEffect (l'utente ha rimosso elementi con ×). Si resetta solo al click su Calcola. */
   const previewEditedByUserRef = useRef(false);
+  /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
+  const userHasClickedCalcolaRef = useRef(false);
 
   const loadEvent = useCallback(async (id: string) => {
     setLoading(true);
@@ -309,6 +311,7 @@ export function EventModal({
       const result = await getSubEventsPreview(payload);
       previewEditedByUserRef.current = false;
       if (result.success && result.data && result.data.length > 0) {
+        userHasClickedCalcolaRef.current = true;
         setPreviewSubEvents(
           result.data.map((c) => ({
             id: c.id,
@@ -387,8 +390,10 @@ export function EventModal({
           return;
         }
         if (result.data && form.generateSubEvents) {
-          const selectedIds = previewSubEvents.map((p) => p.id);
-          const regen = await createSubEventsFromPreview(result.data.id, selectedIds);
+          const usePreviewList = userHasClickedCalcolaRef.current;
+          const regen = usePreviewList
+            ? await createSubEventsFromPreview(result.data.id, previewSubEvents.map((p) => p.id))
+            : await regenerateSubEvents(result.data.id);
           if (!regen.success) {
             setError(
               regen.error ?? "Errore creazione sottoeventi. Riprova o rigenera dalla tab Regole."
