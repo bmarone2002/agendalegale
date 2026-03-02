@@ -306,9 +306,9 @@ export function CalendarView() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-2">
           <div className="flex items-center gap-2">
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="h-9 rounded-md bg-[#0b5fff] px-4 text-sm font-medium text-white shadow-sm hover:bg-[#0a55e5]"
+              className="h-9 rounded-md px-4 text-sm font-medium border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-100"
               onClick={() => setModalState({ mode: "create" })}
             >
               <span className="mr-1">Nuovo evento</span>
@@ -328,10 +328,10 @@ export function CalendarView() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className={`h-8 px-3 text-xs sm:text-sm rounded-md ${
+                  className={`h-8 px-3 text-xs sm:text-sm rounded-md font-medium border-zinc-300 ${
                     currentView === view.id
-                      ? "border-[#0b5fff] bg-[#e7f1ff] text-[#0b5fff] hover:bg-[#d7e6ff]"
-                      : "border-transparent bg-white text-zinc-700 hover:bg-zinc-100"
+                      ? "bg-zinc-100 text-zinc-800 hover:bg-zinc-200"
+                      : "bg-white text-zinc-800 hover:bg-zinc-100"
                   }`}
                   onClick={() => handleChangeView(view.id)}
                 >
