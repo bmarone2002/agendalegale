@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -162,6 +163,7 @@ export function EventModal({
   onChanged,
   onDeleted,
 }: EventModalProps) {
+  const router = useRouter();
   // Data evento: solo i valori attuali del form contano. initialStart/initialEnd servono solo come default iniziale se apri da click sul calendario; se modifichi data/ora in creazione, resta ciò che hai impostato.
   const [form, setForm] = useState<EventFormState>(() => defaultEvent(initialStart, initialEnd));
   const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
@@ -429,6 +431,7 @@ export function EventModal({
         // La rigenerazione avviene solo quando l'utente clicca esplicitamente su "Rigenera sottoeventi".
       }
       onChanged?.();
+      router.refresh();
       onClose();
     } finally {
       setSaving(false);
