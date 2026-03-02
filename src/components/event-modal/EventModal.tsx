@@ -535,6 +535,8 @@ export function EventModal({
       <DialogContent
         ref={setPopoverContainer}
         className="max-w-2xl max-h-[90vh] flex flex-col bg-white event-modal-light"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <PopoverContainerContext.Provider value={popoverContainer}>
         <DialogHeader>
