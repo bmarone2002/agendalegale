@@ -533,31 +533,6 @@ export function EventModal({
                 />
               </div>
 
-              {/* Data e ora inizio/fine: solo per Evento generico. Per Atto Giuridico (e altre categorie in MACRO_TYPES_WITH_CALCULATION_DATE_ONLY) la data è quella del blocco "Dati per il calcolo" sotto. */}
-              {!usesCalculationDateOnly(form.macroType) && (
-                <>
-                  <div>
-                    <Label>Data e ora inizio</Label>
-                    {mode === "create" && (
-                      <p className="text-xs text-zinc-500 mb-1">Se hai cliccato su un giorno, qui vedi una data suggerita; modificala come vuoi: l’evento userà le date che imposti qui.</p>
-                    )}
-                    <DateTimePicker
-                      value={form.startAt}
-                      onChange={(d) => setForm((f) => ({ ...f, startAt: d }))}
-                      placeholder="Data e ora inizio"
-                    />
-                  </div>
-                  <div>
-                    <Label>Data e ora fine</Label>
-                    <DateTimePicker
-                      value={form.endAt}
-                      onChange={(d) => setForm((f) => ({ ...f, endAt: d }))}
-                      placeholder="Data e ora fine"
-                    />
-                  </div>
-                </>
-              )}
-
               {/* 2. Primo menu: Atto Giuridico oppure Evento generico */}
               <div>
                 <Label>Tipo</Label>
@@ -584,7 +559,35 @@ export function EventModal({
                 </Select>
               </div>
 
-              {/* 3a. Se Atto Giuridico: secondo menu (Sotto-categoria) e terzo menu (Modalità) */}
+              {/* 3. Data e ora inizio/fine: solo per Evento generico. Per Atto Giuridico (e altre categorie in MACRO_TYPES_WITH_CALCULATION_DATE_ONLY) la data è quella del blocco "Dati per il calcolo" sotto. */}
+              {!usesCalculationDateOnly(form.macroType) && (
+                <>
+                  <div>
+                    <Label>Data e ora inizio</Label>
+                    {mode === "create" && (
+                      <p className="text-xs text-zinc-500 mb-1">
+                        Se hai cliccato su un giorno, qui vedi una data suggerita; modificala come
+                        vuoi: l’evento userà le date che imposti qui.
+                      </p>
+                    )}
+                    <DateTimePicker
+                      value={form.startAt}
+                      onChange={(d) => setForm((f) => ({ ...f, startAt: d }))}
+                      placeholder="Data e ora inizio"
+                    />
+                  </div>
+                  <div>
+                    <Label>Data e ora fine</Label>
+                    <DateTimePicker
+                      value={form.endAt}
+                      onChange={(d) => setForm((f) => ({ ...f, endAt: d }))}
+                      placeholder="Data e ora fine"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* 4a. Se Atto Giuridico: secondo menu (Sotto-categoria) e terzo menu (Modalità) */}
               {form.macroType === "ATTO_GIURIDICO" && (
                 <>
                   <div>
@@ -634,7 +637,7 @@ export function EventModal({
                 </>
               )}
 
-              {/* 3b. Se Evento generico: tipo evento + opzione sottoeventi */}
+              {/* 4b. Se Evento generico: tipo evento + opzione sottoeventi */}
               {form.macroType !== "ATTO_GIURIDICO" && (
                 <>
                   <div>
@@ -643,11 +646,11 @@ export function EventModal({
                       value={form.type}
                       onValueChange={(v) => setForm((f) => ({ ...f, type: v as EventType }))}
                     >
-<SelectTrigger className="bg-white dark:bg-white border-zinc-200 dark:border-zinc-200 text-zinc-900 dark:text-zinc-900">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EVENT_TYPES.map((t) => (
+                      <SelectTrigger className="bg-white dark:bg-white border-zinc-200 dark:border-zinc-200 text-zinc-900 dark:text-zinc-900">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EVENT_TYPES.map((t) => (
                           <SelectItem key={t} value={t}>
                             {t}
                           </SelectItem>
@@ -688,6 +691,7 @@ export function EventModal({
                 </>
               )}
 
+              {/* 5. Note */}
               <div>
                 <Label>Note / Descrizione</Label>
                 <textarea
@@ -697,7 +701,8 @@ export function EventModal({
                   placeholder="Note o descrizione"
                 />
               </div>
-              {/* Colore tag: applicato a evento e sottoeventi in calendario */}
+
+              {/* 6. Colore tag: applicato a evento e sottoeventi in calendario */}
               <div>
                 <Label>Colore tag</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">

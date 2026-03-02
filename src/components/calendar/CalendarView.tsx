@@ -326,12 +326,12 @@ export function CalendarView() {
                 <Button
                   key={view.id}
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className={`h-8 px-3 text-xs sm:text-sm rounded-md border ${
+                  className={`h-8 px-3 text-xs sm:text-sm rounded-md ${
                     currentView === view.id
-                      ? "border-[#0b5fff] bg-[#e7f1ff] text-[#0b5fff]"
-                      : "border-transparent text-zinc-700 hover:bg-zinc-100"
+                      ? "border-[#0b5fff] bg-[#e7f1ff] text-[#0b5fff] hover:bg-[#d7e6ff]"
+                      : "border-transparent bg-white text-zinc-700 hover:bg-zinc-100"
                   }`}
                   onClick={() => handleChangeView(view.id)}
                 >

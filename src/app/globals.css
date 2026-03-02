@@ -105,8 +105,8 @@ body {
 .calendar-theme .fc-event.fc-event-madre .fc-event-main * { color: #171717 !important; text-shadow: none; }
 .calendar-theme .fc .fc-daygrid-event.fc-event-madre .fc-event-title { font-weight: 600; color: #171717 !important; text-shadow: none; }
 .calendar-theme .fc .fc-daygrid-event.fc-event-madre .fc-event-time { color: #171717 !important; }
-/* Sottoeventi: cornice (bordo sinistro) colorata come il tag dell'evento madre, testo scuro */
-.calendar-theme .fc-event.fc-event-sub { border-left-width: 4px; border-left-style: solid; }
+/* Sottoeventi: singola cornice colorata (solo interno), testo scuro */
+.calendar-theme .fc-event.fc-event-sub { border-left-width: 0; border-left-style: none; }
 .calendar-theme .fc-event.fc-event-sub .fc-event-main * { color: #171717 !important; }
 
 /* Modale evento: sempre sfondo chiaro, niente barre nere */
