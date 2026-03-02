@@ -308,7 +308,7 @@ export function CalendarView() {
             <Button
               variant="outline"
               size="sm"
-              className="h-9 rounded-md px-4 text-sm font-medium border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-100"
+              className="h-9 rounded-md px-4 text-sm font-medium border-zinc-300 bg-white text-black hover:bg-zinc-100"
               onClick={() => setModalState({ mode: "create" })}
             >
               <span className="mr-1">Nuovo evento</span>
@@ -330,8 +330,8 @@ export function CalendarView() {
                   size="sm"
                   className={`h-8 px-3 text-xs sm:text-sm rounded-md font-medium border-zinc-300 ${
                     currentView === view.id
-                      ? "bg-zinc-100 text-zinc-800 hover:bg-zinc-200"
-                      : "bg-white text-zinc-800 hover:bg-zinc-100"
+                      ? "bg-zinc-100 text-black hover:bg-zinc-200"
+                      : "bg-white text-black hover:bg-zinc-100"
                   }`}
                   onClick={() => handleChangeView(view.id)}
                 >
