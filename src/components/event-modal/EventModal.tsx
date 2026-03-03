@@ -598,7 +598,19 @@ export function EventModal({
                     )}
                     <DateTimePicker
                       value={form.startAt}
-                      onChange={(d) => setForm((f) => ({ ...f, startAt: d }))}
+                      onChange={(d) =>
+                        setForm((f) => {
+                          const newStart = d;
+                          let newEnd = f.endAt;
+                          // Per evento generico: durata di default 1h e fine non può essere prima dell'inizio
+                          if (f.macroType !== "ATTO_GIURIDICO") {
+                            if (!newEnd || newEnd <= newStart) {
+                              newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
+                            }
+                          }
+                          return { ...f, startAt: newStart, endAt: newEnd };
+                        })
+                      }
                       placeholder="Data e ora inizio"
                     />
                   </div>
@@ -606,7 +618,17 @@ export function EventModal({
                     <Label>Data e ora fine</Label>
                     <DateTimePicker
                       value={form.endAt}
-                      onChange={(d) => setForm((f) => ({ ...f, endAt: d }))}
+                      onChange={(d) =>
+                        setForm((f) => {
+                          let newEnd = d;
+                          const start = f.startAt;
+                          // Per evento generico: non permettere una fine precedente all'inizio
+                          if (f.macroType !== "ATTO_GIURIDICO" && newEnd < start) {
+                            newEnd = new Date(start.getTime() + 60 * 60 * 1000);
+                          }
+                          return { ...f, endAt: newEnd };
+                        })
+                      }
                       placeholder="Data e ora fine"
                     />
                   </div>
