@@ -378,7 +378,6 @@ export function CalendarView() {
               }}
             />
           </button>
-          <span className="fc-list-event-dot" style={{ borderColor: arg.event.backgroundColor }} />
           <span className="fc-list-event-title flex-1 truncate" style={{ color: "#171717" }}>{arg.event.title}</span>
           {kind && (
             <span className="text-calendar-muted text-xs shrink-0">{kind}</span>
