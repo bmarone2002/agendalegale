@@ -51,7 +51,7 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
   const rawTitle = (e.title ?? "").trimStart();
   const titleWithoutNumber = rawTitle.replace(/^\d+\s*[-–.)]?\s*/, "").trimStart();
   const mainTitleCore = titleWithoutNumber.length > 0 ? titleWithoutNumber : rawTitle;
-  const mainTitle = `• ${mainTitleCore}`;
+  const mainTitle = mainTitleCore;
   const out: Array<Record<string, unknown>> = [
     {
       id: e.id,
@@ -415,10 +415,11 @@ export function CalendarView() {
         </div>
       );
     }
-    // Evento madre in vista Mese/Giorno/Settimana: nascondi l'orario e mostra solo il titolo (già con pallino)
+    // Evento madre in vista Mese/Giorno/Settimana: nascondi l'orario e mostra solo il titolo, aggiungendo qui il pallino
     if (!isSub && arg.view.type.startsWith("dayGrid")) {
       return (
         <div className="fc-event-main-frame flex items-center gap-1">
+          <span aria-hidden className="mr-1" style={{ color: "#171717" }}>•</span>
           <span className="truncate" style={{ color: "#171717" }}>{arg.event.title}</span>
         </div>
       );
