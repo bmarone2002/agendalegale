@@ -506,7 +506,7 @@ export function CalendarView() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 text-xs sm:text-sm rounded-md border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-100"
+                  className="h-8 px-3 text-xs sm:text-sm rounded-md border-zinc-300 bg-white text-black hover:bg-zinc-100 dark:!bg-white dark:!text-black dark:hover:!bg-zinc-100"
                   onClick={handleClearSearch}
                 >
                   Mostra tutti gli eventi
