@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -90,6 +90,7 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
 
 export function CalendarView() {
   const calendarRef = useRef<InstanceType<typeof FullCalendar> | null>(null);
+  const [initialView, setInitialView] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>("dayGridMonth");
   const [viewTitle, setViewTitle] = useState<string>("");
   const [modalState, setModalState] = useState<
@@ -102,10 +103,22 @@ export function CalendarView() {
   const [allEvents, setAllEvents] = useState<AppEvent[]>([]);
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const [searchFilterEventId, setSearchFilterEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("calendar:lastView");
+    const allowedViews = new Set(["timeGridDay", "timeGridWeek", "dayGridMonth", "listFromToday"]);
+    const viewToUse = stored && allowedViews.has(stored) ? stored : "dayGridMonth";
+    setInitialView(viewToUse);
+    setCurrentView(viewToUse);
+  }, []);
   const handleDatesSet = useCallback(
     (arg: { start: Date; end: Date; view: { type: string; title: string } }) => {
       setCurrentView(arg.view.type);
       setViewTitle(arg.view.title);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("calendar:lastView", arg.view.type);
+      }
     },
     []
   );
@@ -313,6 +326,9 @@ export function CalendarView() {
     const api = calendarRef.current?.getApi();
     if (!api) return;
     api.changeView(view);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("calendar:lastView", view);
+    }
   }, []);
 
   const handleToday = useCallback(() => {
@@ -552,10 +568,11 @@ export function CalendarView() {
         </div>
       </div>
       <div className="w-full calendar-month-container">
+        {initialView && (
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
+          initialView={initialView}
           headerToolbar={false}
           buttonText={{
             today: "Oggi",
@@ -614,6 +631,7 @@ export function CalendarView() {
           slotDuration="01:00:00"
           slotLabelInterval="01:00:00"
         />
+        )}
       </div>
       {modalState && (
         <EventModal

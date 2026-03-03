@@ -79,7 +79,13 @@ export function DateTimePicker({
           <CalendarIcon className="h-4 w-4 shrink-0 text-zinc-500" />
         </button>
       </PopoverTrigger>
-      <PopoverContent container={popoverContainer} className="z-[100] w-auto p-0" align="start">
+      <PopoverContent
+        container={popoverContainer}
+        className="z-[100] w-[360px] max-w-[360px] p-0"
+        align="start"
+        side="bottom"
+        avoidCollisions={false}
+      >
         <div className="flex flex-col gap-3 p-3">
           <Calendar
             mode="single"
