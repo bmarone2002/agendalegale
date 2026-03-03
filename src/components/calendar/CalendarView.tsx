@@ -427,9 +427,9 @@ export function CalendarView() {
   }, []);
 
   return (
-    <div className="flex h-full flex-col gap-2 sm:gap-3 calendar-theme">
+      <div className="flex h-full flex-col gap-2 sm:gap-3 calendar-theme">
       <div className="flex flex-col gap-2 sm:gap-3 mb-1">
-        {/* Prima riga: Nuovo evento + viste + filtro + azioni (stile ribbon) */}
+        {/* Riga 1: Nuovo evento + ricerca */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-2">
           <div className="flex items-center gap-2">
             <Button
@@ -442,7 +442,92 @@ export function CalendarView() {
               <span className="text-xs">▾</span>
             </Button>
           </div>
-          <div className="flex flex-wrap items-center gap-2 justify-end">
+          <div className="flex items-center gap-2">
+            {isSearchActive && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs sm:text-sm rounded-md border-zinc-300 bg-white text-black hover:bg-zinc-100 dark:!bg-white dark:!text-black dark:hover:!bg-zinc-100"
+                onClick={handleClearSearch}
+              >
+                Mostra tutti gli eventi
+              </Button>
+            )}
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Cerca per titolo o promemoria…"
+                className="h-8 w-52 sm:w-64 rounded-md border border-zinc-300 bg-white px-2 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+              />
+              {searchSuggestions.length > 0 && (
+                <div className="absolute z-20 mt-1 w-64 sm:w-72 rounded-md border border-zinc-200 bg-white shadow-lg max-h-60 overflow-auto text-xs sm:text-sm">
+                  {searchSuggestions.map((s) => (
+                    <button
+                      key={`${s.eventId}-${s.label}-${s.matchType}`}
+                      type="button"
+                      className="flex w-full flex-col items-start px-3 py-1.5 text-left hover:bg-zinc-100"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSuggestionClick(s);
+                      }}
+                    >
+                      <span className="font-medium text-zinc-800 truncate">
+                        {s.label}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+                        {s.matchType === "titolo" ? "Titolo evento" : "Promemoria"}
+                      </span>
+                      {s.detail && (
+                        <span className="text-[11px] text-zinc-500 truncate">
+                          Evento: {s.detail}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* Riga 2: Oggi + frecce + titolo mese/anno + viste */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs sm:text-sm font-normal text-zinc-700 h-8 hover:bg-zinc-100"
+              onClick={handleToday}
+            >
+              Oggi
+            </button>
+            <div className="flex overflow-hidden rounded-md border border-zinc-300 bg-white">
+              <button
+                type="button"
+                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100"
+                onClick={handlePrev}
+                aria-label="Periodo precedente"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100 border-l border-zinc-200"
+                onClick={handleNext}
+                aria-label="Periodo successivo"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm sm:text-base font-semibold text-[var(--calendar-brown)]">
+              {viewTitle}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 justify-end">
             <div className="flex items-center gap-1 rounded-md border border-zinc-300 bg-white p-0.5 shadow-sm">
               {[
                 { id: "timeGridDay", label: "Giorno" },
@@ -465,90 +550,6 @@ export function CalendarView() {
                   {view.label}
                 </Button>
               ))}
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs sm:text-sm font-normal text-zinc-700 h-8 hover:bg-zinc-100"
-              onClick={handleToday}
-            >
-              Oggi
-            </button>
-            <div className="flex overflow-hidden rounded-md border border-zinc-300 bg-white">
-              <button
-                type="button"
-                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100"
-                onClick={handlePrev}
-                aria-label="Mese precedente"
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100 border-l border-zinc-200"
-                onClick={handleNext}
-                aria-label="Mese successivo"
-              >
-                ›
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-sm sm:text-base font-semibold text-[var(--calendar-brown)]">
-              {viewTitle}
-            </div>
-            <div className="flex items-center gap-2">
-              {isSearchActive && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-3 text-xs sm:text-sm rounded-md border-zinc-300 bg-white text-black hover:bg-zinc-100 dark:!bg-white dark:!text-black dark:hover:!bg-zinc-100"
-                  onClick={handleClearSearch}
-                >
-                  Mostra tutti gli eventi
-                </Button>
-              )}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  placeholder="Cerca per titolo o promemoria…"
-                  className="h-8 w-52 sm:w-64 rounded-md border border-zinc-300 bg-white px-2 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
-                />
-                {searchSuggestions.length > 0 && (
-                  <div className="absolute z-20 mt-1 w-64 sm:w-72 rounded-md border border-zinc-200 bg-white shadow-lg max-h-60 overflow-auto text-xs sm:text-sm">
-                    {searchSuggestions.map((s) => (
-                      <button
-                        key={`${s.eventId}-${s.label}-${s.matchType}`}
-                        type="button"
-                        className="flex w-full flex-col items-start px-3 py-1.5 text-left hover:bg-zinc-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          handleSuggestionClick(s);
-                        }}
-                      >
-                        <span className="font-medium text-zinc-800 truncate">
-                          {s.label}
-                        </span>
-                        <span className="text-[10px] uppercase tracking-wide text-zinc-500">
-                          {s.matchType === "titolo" ? "Titolo evento" : "Promemoria"}
-                        </span>
-                        {s.detail && (
-                          <span className="text-[11px] text-zinc-500 truncate">
-                            Evento: {s.detail}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
