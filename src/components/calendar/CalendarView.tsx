@@ -387,7 +387,7 @@ export function CalendarView() {
             <span className="text-calendar-muted text-xs shrink-0">{kind}</span>
           )}
           {parentTitle && (
-            <span className="text-calendar-muted text-xs truncate max-w-[120px]" title={parentTitle}>
+            <span className="text-calendar-muted text-xs truncate max-w-[45vw]" title={parentTitle}>
               ← {parentTitle}
             </span>
           )}
