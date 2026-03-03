@@ -68,6 +68,7 @@ export const ADEMPIMENTO_SUGGERITO_LABELS: Record<AdempimentoSuggerito, string> 
 // ── Interfacce dati ─────────────────────────────────────────────────
 
 export const DEFAULT_GIORNI_ALERT = 5;
+export const DEFAULT_GIORNI_ALERT_UDIENZA = 3;
 
 export interface Adempimento {
   id: string;

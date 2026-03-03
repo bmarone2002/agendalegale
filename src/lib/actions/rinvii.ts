@@ -4,7 +4,8 @@ import { prisma } from "../db";
 import { getSettings } from "../settings";
 import { adjustToNextBusinessDay, applyDeadlineTime } from "@/lib/date-utils";
 import { addDays } from "date-fns";
-import type { Rinvio, Adempimento, CreateRinvioInput, UpdateRinvioInput } from "@/types/rinvio";
+import type { Rinvio, Adempimento, CreateRinvioInput, UpdateRinvioInput, TipoUdienza } from "@/types/rinvio";
+import { TIPO_UDIENZA_LABELS, DEFAULT_GIORNI_ALERT_UDIENZA } from "@/types/rinvio";
 import type { ActionResult } from "./events";
 
 const RINVIO_RULE_ID = "rinvio-udienza";
@@ -44,15 +45,74 @@ function toRinvio(r: {
   };
 }
 
+function resolveUdienzaLabel(
+  tipoUdienza: string,
+  tipoUdienzaCustom: string | null | undefined
+): string {
+  if (tipoUdienza === "ALTRO" && tipoUdienzaCustom) return tipoUdienzaCustom;
+  return TIPO_UDIENZA_LABELS[tipoUdienza as TipoUdienza] ?? tipoUdienza;
+}
+
+interface RinvioUdienzaInfo {
+  dataUdienza: Date;
+  tipoUdienza: string;
+  tipoUdienzaCustom?: string | null;
+}
+
 async function generateSubEventsForRinvio(
   parentEventId: string,
   rinvioId: string,
+  udienzaInfo: RinvioUdienzaInfo,
   adempimenti: Adempimento[]
 ): Promise<void> {
-  if (adempimenti.length === 0) return;
-
   const settings = await getSettings();
+  const udienzaLabel = resolveUdienzaLabel(
+    udienzaInfo.tipoUdienza,
+    udienzaInfo.tipoUdienzaCustom
+  );
 
+  // SubEvent per la data udienza stessa
+  const udienzaDueAt = applyDeadlineTime(udienzaInfo.dataUdienza, settings);
+
+  await prisma.subEvent.create({
+    data: {
+      parentEventId,
+      title: `Udienza: ${udienzaLabel}`,
+      kind: "termine",
+      dueAt: udienzaDueAt,
+      status: "pending",
+      priority: 2,
+      ruleId: RINVIO_RULE_ID,
+      ruleParams: JSON.stringify({ rinvioId, tipo: "udienza" }),
+      explanation: `Udienza di ${udienzaLabel.toLowerCase()} da rinvio`,
+      createdBy: "automatico",
+      locked: false,
+    },
+  });
+
+  // Promemoria N giorni prima dell'udienza
+  const alertDays = DEFAULT_GIORNI_ALERT_UDIENZA;
+  const alertRaw = addDays(udienzaInfo.dataUdienza, -alertDays);
+  const alertAdjusted = adjustToNextBusinessDay(alertRaw, settings);
+  const alertDueAt = applyDeadlineTime(alertAdjusted, settings);
+
+  await prisma.subEvent.create({
+    data: {
+      parentEventId,
+      title: `Udienza: ${udienzaLabel} – Promemoria (${alertDays} gg prima)`,
+      kind: "promemoria",
+      dueAt: alertDueAt,
+      status: "pending",
+      priority: 0,
+      ruleId: RINVIO_RULE_ID,
+      ruleParams: JSON.stringify({ rinvioId, tipo: "udienza" }),
+      explanation: `Promemoria ${alertDays} giorni prima dell'udienza`,
+      createdBy: "automatico",
+      locked: false,
+    },
+  });
+
+  // SubEvents per ogni adempimento
   for (const a of adempimenti) {
     if (!a.scadenza || !a.titolo) continue;
 
@@ -79,16 +139,16 @@ async function generateSubEventsForRinvio(
     });
 
     if (a.giorniAlert > 0) {
-      const alertRaw = addDays(rawDate, -a.giorniAlert);
-      const alertAdjusted = adjustToNextBusinessDay(alertRaw, settings);
-      const alertDueAt = applyDeadlineTime(alertAdjusted, settings);
+      const adempAlertRaw = addDays(rawDate, -a.giorniAlert);
+      const adempAlertAdjusted = adjustToNextBusinessDay(adempAlertRaw, settings);
+      const adempAlertDueAt = applyDeadlineTime(adempAlertAdjusted, settings);
 
       await prisma.subEvent.create({
         data: {
           parentEventId,
           title: `${a.titolo} – Promemoria (${a.giorniAlert} gg prima)`,
           kind: "promemoria",
-          dueAt: alertDueAt,
+          dueAt: adempAlertDueAt,
           status: "pending",
           priority: 0,
           ruleId: RINVIO_RULE_ID,
@@ -168,6 +228,11 @@ export async function createRinvio(
     await generateSubEventsForRinvio(
       data.parentEventId,
       rinvio.id,
+      {
+        dataUdienza: data.dataUdienza,
+        tipoUdienza: data.tipoUdienza,
+        tipoUdienzaCustom: data.tipoUdienzaCustom,
+      },
       data.adempimenti
     );
 
@@ -205,12 +270,23 @@ export async function updateRinvio(
       },
     });
 
-    if (data.adempimenti != null) {
+    const needsRegeneration =
+      data.adempimenti != null ||
+      data.dataUdienza != null ||
+      data.tipoUdienza != null ||
+      data.tipoUdienzaCustom !== undefined;
+
+    if (needsRegeneration) {
       await deleteSubEventsForRinvio(id);
       await generateSubEventsForRinvio(
         existing.parentEventId,
         id,
-        data.adempimenti
+        {
+          dataUdienza: rinvio.dataUdienza,
+          tipoUdienza: rinvio.tipoUdienza,
+          tipoUdienzaCustom: rinvio.tipoUdienzaCustom,
+        },
+        parseAdempimenti(rinvio.adempimenti)
       );
     }
 
