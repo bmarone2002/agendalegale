@@ -418,12 +418,15 @@ export function CalendarView() {
         </div>
       );
     }
-    // Evento madre in vista Agenda: testo scuro per leggibilità
+    // Evento madre in vista Agenda: testo scuro per leggibilità.
+    // Non aggiungiamo un pallino personalizzato perché la vista Agenda di FullCalendar
+    // mostra già il suo indicatore di colore; altrimenti si vedrebbero due pallini.
     if (isListView) {
       return (
         <div className="fc-event-main-frame flex items-center gap-2">
-          <span className="fc-list-event-dot" style={{ borderColor: arg.event.backgroundColor }} />
-          <span className="fc-list-event-title flex-1 truncate font-medium" style={{ color: "#171717" }}>{arg.event.title}</span>
+          <span className="fc-list-event-title flex-1 truncate font-medium" style={{ color: "#171717" }}>
+            {arg.event.title}
+          </span>
         </div>
       );
     }
