@@ -105,19 +105,24 @@ export function adjustToNextBusinessDay(
   return d;
 }
 
+const SLOT_START_HOUR = 8;
+const SLOT_END_HOUR = 22;
+const SLOT_RANGE = SLOT_END_HOUR - SLOT_START_HOUR; // 14 slots (08–21)
+
 /**
- * Applica orario standard scadenza alla data.
+ * Applica orario standard scadenza alla data (default 08:00).
  */
 export function applyDeadlineTime(d: Date, settings: AppSettings): Date {
-  const timeStr = settings.defaultTimeForDeadlines ?? "12:00";
+  const timeStr = settings.defaultTimeForDeadlines ?? "08:00";
   const [h, m] = timeStr.split(":").map(Number);
-  return setMinutes(setHours(startOfDay(d), h ?? 12), m ?? 0);
+  return setMinutes(setHours(startOfDay(d), h ?? 8), m ?? 0);
 }
 
 /**
  * Assegna slot orari ai sotto-eventi raggruppati per giorno:
- * il primo evento di ogni giorno mantiene il suo orario originale (da applyDeadlineTime),
- * i successivi vengono spostati di +1h per evitare sovrapposizioni.
+ * il primo evento parte da 08:00, ognuno successivo +1h.
+ * Range 08:00–22:00; superato il limite si ricomincia da 08:00
+ * (sovrapposizione oraria consentita, mai cambio giorno).
  */
 export function assignTimeSlots(
   candidates: SubEventCandidate[],
@@ -130,9 +135,7 @@ export function assignTimeSlots(
     const count = dayMap.get(dayKey) ?? 0;
     dayMap.set(dayKey, count + 1);
 
-    if (count === 0) return c;
-    const baseHour = c.dueAt.getHours();
-    const hour = (baseHour + count) % 24;
+    const hour = SLOT_START_HOUR + (count % SLOT_RANGE);
     const adjusted = setMinutes(setHours(startOfDay(c.dueAt), hour), 0);
     return { ...c, dueAt: adjusted };
   });

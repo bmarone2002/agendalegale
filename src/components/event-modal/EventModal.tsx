@@ -75,11 +75,17 @@ type EventFormState = {
   status: "pending" | "done";
 };
 
-const defaultEvent = (start?: Date, end?: Date): EventFormState => ({
+const defaultEvent = (start?: Date, end?: Date): EventFormState => {
+  const now = new Date();
+  const defaultStart = new Date(now);
+  defaultStart.setHours(8, 0, 0, 0);
+  const defaultEnd = new Date(defaultStart);
+  defaultEnd.setHours(9, 0, 0, 0);
+  return {
   title: "",
   description: "",
-  startAt: start ?? new Date(),
-  endAt: end ?? new Date(new Date().setHours(new Date().getHours() + 1)),
+  startAt: start ?? defaultStart,
+  endAt: end ?? defaultEnd,
   type: "altro",
   tags: [],
   notes: "",
@@ -92,7 +98,8 @@ const defaultEvent = (start?: Date, end?: Date): EventFormState => ({
   color: null,
   reminderOffsets: [7, 1],
   status: "pending",
-});
+  };
+};
 
 /** Categorie per cui non si mostrano Data/Ora inizio-fine: la data evento è solo quella del pannello "Dati per il calcolo". Estendere qui per future categorie. */
 const MACRO_TYPES_WITH_CALCULATION_DATE_ONLY: (string | null)[] = ["ATTO_GIURIDICO"];
