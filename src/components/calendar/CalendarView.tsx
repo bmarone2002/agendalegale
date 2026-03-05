@@ -61,7 +61,7 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
       allDay: false,
       backgroundColor: mainBackground,
       borderColor: mainBorder,
-      extendedProps: { type: e.type, tags: e.tags, isSubEvent: false },
+      extendedProps: { type: e.type, tags: e.tags, isSubEvent: false, status: e.status ?? "pending" },
     },
   ];
   (e.subEvents ?? []).forEach((se: SubEvent) => {
@@ -103,6 +103,10 @@ export function CalendarView() {
   const [allEvents, setAllEvents] = useState<AppEvent[]>([]);
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const [searchFilterEventId, setSearchFilterEventId] = useState<string | null>(null);
+  const [hideSubEvents, setHideSubEvents] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("calendar:hideSubEvents") === "true";
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -147,6 +151,10 @@ export function CalendarView() {
             }
 
             let events = eventsData.flatMap(toFullCalendarEvents);
+            // Filtro "Solo eventi principali": nasconde promemoria e sottoeventi
+            if (hideSubEvents) {
+              events = events.filter((ev) => !(ev.extendedProps as { isSubEvent?: boolean }).isSubEvent);
+            }
             // In Agenda: mostrare solo eventi a partire dal giorno corrente (incluso)
             if (viewType === "listFromToday") {
               events = filterEventsFromToday(events);
@@ -170,7 +178,7 @@ export function CalendarView() {
           )
         );
     },
-    [isSearchActive, searchFilterEventId]
+    [isSearchActive, searchFilterEventId, hideSubEvents]
   );
 
   const applySuggestionSelection = useCallback(
@@ -267,6 +275,17 @@ export function CalendarView() {
     if (api) {
       api.refetchEvents();
     }
+  }, []);
+
+  const handleToggleHideSubEvents = useCallback(() => {
+    setHideSubEvents((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("calendar:hideSubEvents", String(next));
+      }
+      calendarRef.current?.getApi()?.refetchEvents();
+      return next;
+    });
   }, []);
 
   const handleSelect = useCallback((arg: DateSelectArg) => {
@@ -418,24 +437,46 @@ export function CalendarView() {
         </div>
       );
     }
-    // Evento madre in vista Agenda: testo scuro per leggibilità.
-    // Non aggiungiamo un pallino personalizzato perché la vista Agenda di FullCalendar
-    // mostra già il suo indicatore di colore; altrimenti si vedrebbero due pallini.
+    // Evento madre in vista Agenda: mostra spunta verde se completato
     if (isListView) {
+      const evStatus = arg.event.extendedProps.status as string | undefined;
+      const isDoneEv = evStatus === "done";
       return (
         <div className="fc-event-main-frame flex items-center gap-2">
-          <span className="fc-list-event-title flex-1 truncate font-medium" style={{ color: "#171717" }}>
+          {isDoneEv && (
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 shrink-0">
+              <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
+                <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          )}
+          <span
+            className={`fc-list-event-title flex-1 truncate font-medium ${isDoneEv ? "line-through text-zinc-400" : ""}`}
+            style={{ color: isDoneEv ? undefined : "#171717" }}
+          >
             {arg.event.title}
           </span>
         </div>
       );
     }
-    // Evento madre in vista Mese/Giorno/Settimana: nascondi l'orario e mostra solo il titolo, aggiungendo qui il pallino
+    // Evento madre in vista Mese/Giorno/Settimana: pallino (o spunta verde se completato) + titolo
     if (!isSub && arg.view.type.startsWith("dayGrid")) {
+      const evStatus = arg.event.extendedProps.status as string | undefined;
+      const isDoneEv = evStatus === "done";
       return (
         <div className="fc-event-main-frame flex items-center gap-1">
-          <span aria-hidden className="mr-1" style={{ color: "#171717" }}>•</span>
-          <span className="truncate" style={{ color: "#171717" }}>{arg.event.title}</span>
+          {isDoneEv ? (
+            <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-green-500 shrink-0 mr-0.5">
+              <svg viewBox="0 0 16 16" fill="none" className="w-2.5 h-2.5">
+                <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          ) : (
+            <span aria-hidden className="mr-1" style={{ color: "#171717" }}>•</span>
+          )}
+          <span className={`truncate ${isDoneEv ? "line-through text-zinc-400" : ""}`} style={{ color: isDoneEv ? undefined : "#171717" }}>
+            {arg.event.title}
+          </span>
         </div>
       );
     }
@@ -459,6 +500,20 @@ export function CalendarView() {
             </Button>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleToggleHideSubEvents}
+              title={hideSubEvents ? "Filtro attivo: solo eventi principali. Clicca per mostrare tutto" : "Mostra solo eventi principali (nasconde promemoria)"}
+              className={`h-8 px-3 text-xs sm:text-sm rounded-md border transition-colors ${
+                hideSubEvents
+                  ? "bg-[var(--calendar-brown)] border-[var(--calendar-brown)] text-white hover:opacity-90 dark:bg-[var(--calendar-brown)] dark:border-[var(--calendar-brown)] dark:text-white"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 dark:!bg-white dark:!text-zinc-700 dark:hover:!bg-zinc-100"
+              }`}
+            >
+              {hideSubEvents ? "Solo eventi" : "Tutti gli eventi"}
+            </Button>
             {isSearchActive && (
               <Button
                 type="button"

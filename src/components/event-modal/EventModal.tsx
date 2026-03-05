@@ -631,37 +631,39 @@ export function EventModal({
                       onChange={(d) =>
                         setForm((f) => {
                           const newStart = d;
-                          let newEnd = f.endAt;
-                          // Per evento generico: durata di default 1h e fine non può essere prima dell'inizio
-                          if (f.macroType !== "ATTO_GIURIDICO") {
-                            if (!newEnd || newEnd <= newStart) {
-                              newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
-                            }
-                          }
+                          // Pratiche in Corso: durata sempre 1h fissa
+                          const newEnd =
+                            f.macroType === null
+                              ? new Date(newStart.getTime() + 60 * 60 * 1000)
+                              : f.endAt <= newStart
+                                ? new Date(newStart.getTime() + 60 * 60 * 1000)
+                                : f.endAt;
                           return { ...f, startAt: newStart, endAt: newEnd };
                         })
                       }
                       placeholder="Data e ora inizio"
                     />
                   </div>
-                  <div>
-                    <Label>Data e ora fine</Label>
-                    <DateTimePicker
-                      value={form.endAt}
-                      onChange={(d) =>
-                        setForm((f) => {
-                          let newEnd = d;
-                          const start = f.startAt;
-                          // Per evento generico: non permettere una fine precedente all'inizio
-                          if (f.macroType !== "ATTO_GIURIDICO" && newEnd < start) {
-                            newEnd = new Date(start.getTime() + 60 * 60 * 1000);
-                          }
-                          return { ...f, endAt: newEnd };
-                        })
-                      }
-                      placeholder="Data e ora fine"
-                    />
-                  </div>
+                  {/* Data e ora fine: nascosta per Pratiche in Corso (macroType===null) */}
+                  {form.macroType !== null && (
+                    <div>
+                      <Label>Data e ora fine</Label>
+                      <DateTimePicker
+                        value={form.endAt}
+                        onChange={(d) =>
+                          setForm((f) => {
+                            let newEnd = d;
+                            const start = f.startAt;
+                            if (newEnd < start) {
+                              newEnd = new Date(start.getTime() + 60 * 60 * 1000);
+                            }
+                            return { ...f, endAt: newEnd };
+                          })
+                        }
+                        placeholder="Data e ora fine"
+                      />
+                    </div>
+                  )}
                 </>
               )}
 
@@ -722,20 +724,37 @@ export function EventModal({
                   <div className="space-y-2 mt-1.5">
                     {form.reminderOffsets.map((days, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          min={1}
-                          value={days}
-                          onChange={(e) => {
-                            const val = Math.max(1, parseInt(e.target.value) || 1);
+                        <button
+                          type="button"
+                          onClick={() =>
                             setForm((f) => {
                               const next = [...f.reminderOffsets];
-                              next[i] = val;
+                              next[i] = Math.max(1, next[i] - 1);
                               return { ...f, reminderOffsets: next };
-                            });
-                          }}
-                          className="w-24 bg-white border-zinc-200 text-zinc-900"
-                        />
+                            })
+                          }
+                          className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
+                          aria-label="Diminuisci giorni"
+                        >
+                          −
+                        </button>
+                        <span className="w-10 text-center text-sm font-medium text-zinc-900 select-none">
+                          {days}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => {
+                              const next = [...f.reminderOffsets];
+                              next[i] = next[i] + 1;
+                              return { ...f, reminderOffsets: next };
+                            })
+                          }
+                          className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
+                          aria-label="Aumenta giorni"
+                        >
+                          +
+                        </button>
                         <span className="text-sm text-zinc-600">giorni prima</span>
                         <button
                           type="button"
