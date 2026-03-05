@@ -6,6 +6,98 @@ import { runRulesForEvent } from "../rules/engine";
 import type { Event, SubEvent } from "@/types";
 import type { ActionResult } from "./events";
 import { parseJsonField } from "@/lib/utils";
+import { toSubEvent } from "@/lib/mappers";
+import type { SubEventCandidate } from "../rules/types";
+
+export { toSubEvent };
+
+// ── Shared helpers for regenerate / createFromPreview ─────────────
+
+interface ParentContext {
+  parent: NonNullable<Awaited<ReturnType<typeof prisma.event.findUnique>>>;
+  eventForRule: Event;
+  userSelections: Record<string, unknown>;
+  subEvents: Array<{ id: string; locked: boolean; ruleId: string | null }>;
+}
+
+async function loadParentContext(parentEventId: string): Promise<ParentContext | null> {
+  const parent = await prisma.event.findUnique({
+    where: { id: parentEventId },
+    include: { subEvents: { select: { id: true, locked: true, ruleId: true } } },
+  });
+  if (!parent) return null;
+
+  const inputsParsed = parent.inputs ? (JSON.parse(parent.inputs) as Record<string, unknown>) : {};
+  const ruleParamsParsed = (JSON.parse(parent.ruleParams || "{}") || {}) as Record<string, unknown>;
+
+  const eventForRule: Event = {
+    id: parent.id,
+    title: parent.title,
+    description: parent.description,
+    startAt: parent.startAt,
+    endAt: parent.endAt,
+    type: parent.type as Event["type"],
+    tags: JSON.parse(parent.tags || "[]") as string[],
+    caseId: parent.caseId,
+    notes: parent.notes,
+    generateSubEvents: parent.generateSubEvents,
+    ruleTemplateId: parent.ruleTemplateId,
+    ruleParams: parseJsonField(parent.ruleParams),
+    macroType: parent.macroType === "ATTO_GIURIDICO" ? "ATTO_GIURIDICO" : undefined,
+    actionType: parent.actionType ?? undefined,
+    actionMode: parent.actionMode ?? undefined,
+    inputs: inputsParsed,
+    createdAt: parent.createdAt,
+    updatedAt: parent.updatedAt,
+  };
+
+  const userSelections = (parent.ruleTemplateId === "atto-giuridico"
+    ? inputsParsed
+    : { ...inputsParsed, ...ruleParamsParsed }) as Record<string, unknown>;
+
+  return { parent, eventForRule, userSelections, subEvents: parent.subEvents };
+}
+
+async function replaceSubEvents(
+  parentEventId: string,
+  candidates: SubEventCandidate[],
+  existingSubEvents: Array<{ id: string; locked: boolean; ruleId: string | null }>
+): Promise<SubEvent[]> {
+  const toDelete = existingSubEvents.filter(
+    (s) => !s.locked && s.ruleId !== "rinvio-udienza"
+  );
+  if (toDelete.length > 0) {
+    await prisma.subEvent.deleteMany({
+      where: { id: { in: toDelete.map((s) => s.id) } },
+    });
+  }
+
+  if (candidates.length > 0) {
+    await prisma.subEvent.createMany({
+      data: candidates.map((c) => ({
+        parentEventId,
+        title: c.title,
+        kind: c.kind,
+        dueAt: c.dueAt,
+        status: c.status ?? "pending",
+        priority: c.priority ?? 0,
+        ruleId: c.ruleId,
+        ruleParams: c.ruleParams ? JSON.stringify(c.ruleParams) : null,
+        explanation: c.explanation,
+        createdBy: "automatico",
+        locked: false,
+      })),
+    });
+  }
+
+  const list = await prisma.subEvent.findMany({
+    where: { parentEventId },
+    orderBy: { dueAt: "asc" },
+  });
+  return list.map(toSubEvent);
+}
+
+// ── Public API ────────────────────────────────────────────────────
 
 export interface PreviewSubEventInput {
   title: string;
@@ -14,7 +106,6 @@ export interface PreviewSubEventInput {
   type: Event["type"];
   tags: string[];
   ruleTemplateId: string;
-  /** Per ruleTemplateId "atto-giuridico" */
   macroType?: string | null;
   actionType?: string | null;
   actionMode?: string | null;
@@ -85,120 +176,25 @@ export async function getSubEventsPreview(
   }
 }
 
-function toSubEvent(r: {
-  id: string;
-  parentEventId: string;
-  title: string;
-  kind: string;
-  dueAt: Date;
-  status: string;
-  priority: number;
-  ruleId: string | null;
-  ruleParams: string | null;
-  explanation: string | null;
-  createdBy: string;
-  locked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}): SubEvent {
-  return {
-    id: r.id,
-    parentEventId: r.parentEventId,
-    title: r.title,
-    kind: r.kind as "termine" | "promemoria" | "attivita",
-    dueAt: r.dueAt,
-    status: r.status as "pending" | "done" | "cancelled",
-    priority: r.priority,
-    ruleId: r.ruleId,
-    ruleParams: parseJsonField(r.ruleParams),
-    explanation: r.explanation,
-    createdBy: r.createdBy as "manuale" | "automatico",
-    locked: r.locked,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-  };
-}
-
 export async function regenerateSubEvents(parentEventId: string): Promise<
   ActionResult<SubEvent[]>
 > {
   try {
-    const parent = await prisma.event.findUnique({
-      where: { id: parentEventId },
-      include: { subEvents: true },
-    });
-    if (!parent) {
-      return { success: false, error: "Evento non trovato" };
-    }
-    if (!parent.generateSubEvents || !parent.ruleTemplateId) {
+    const ctx = await loadParentContext(parentEventId);
+    if (!ctx) return { success: false, error: "Evento non trovato" };
+    if (!ctx.parent.generateSubEvents || !ctx.parent.ruleTemplateId) {
       return { success: true, data: [] };
     }
 
     const settings = await getSettings();
-    const inputsParsed = parent.inputs ? (JSON.parse(parent.inputs) as Record<string, unknown>) : {};
-    const eventForRule: Event = {
-      id: parent.id,
-      title: parent.title,
-      description: parent.description,
-      startAt: parent.startAt,
-      endAt: parent.endAt,
-      type: parent.type as Event["type"],
-      tags: JSON.parse(parent.tags || "[]") as string[],
-      caseId: parent.caseId,
-      notes: parent.notes,
-      generateSubEvents: parent.generateSubEvents,
-      ruleTemplateId: parent.ruleTemplateId,
-      ruleParams: parseJsonField(parent.ruleParams),
-      macroType: parent.macroType === "ATTO_GIURIDICO" ? "ATTO_GIURIDICO" : undefined,
-      actionType: parent.actionType ?? undefined,
-      actionMode: parent.actionMode ?? undefined,
-      inputs: inputsParsed,
-      createdAt: parent.createdAt,
-      updatedAt: parent.updatedAt,
-    };
-
-    const ruleParamsParsed = (JSON.parse(parent.ruleParams || "{}") || {}) as Record<string, unknown>;
-    const userSelections = (parent.ruleTemplateId === "atto-giuridico"
-      ? inputsParsed
-      : { ...inputsParsed, ...ruleParamsParsed }) as Record<string, unknown>;
-    const candidates = runRulesForEvent(parent.ruleTemplateId, {
-      event: eventForRule,
+    const candidates = runRulesForEvent(ctx.parent.ruleTemplateId, {
+      event: ctx.eventForRule,
       settings,
-      userSelections,
+      userSelections: ctx.userSelections,
     });
 
-    const toDelete = parent.subEvents.filter(
-      (s) => !s.locked && s.ruleId !== "rinvio-udienza"
-    );
-    await prisma.subEvent.deleteMany({
-      where: { id: { in: toDelete.map((s) => s.id) } },
-    });
-
-    const created = await Promise.all(
-      candidates.map((c) =>
-        prisma.subEvent.create({
-          data: {
-            parentEventId,
-            title: c.title,
-            kind: c.kind,
-            dueAt: c.dueAt,
-            status: c.status ?? "pending",
-            priority: c.priority ?? 0,
-            ruleId: c.ruleId,
-            ruleParams: c.ruleParams ? JSON.stringify(c.ruleParams) : null,
-            explanation: c.explanation,
-            createdBy: "automatico",
-            locked: false,
-          },
-        })
-      )
-    );
-
-    const list = await prisma.subEvent.findMany({
-      where: { parentEventId },
-      orderBy: { dueAt: "asc" },
-    });
-    return { success: true, data: list.map(toSubEvent) };
+    const data = await replaceSubEvents(parentEventId, candidates, ctx.subEvents);
+    return { success: true, data };
   } catch (e) {
     return {
       success: false,
@@ -207,55 +203,22 @@ export async function regenerateSubEvents(parentEventId: string): Promise<
   }
 }
 
-/** Crea solo i sottoeventi i cui id preview sono in selectedPreviewIds (stesso id restituito da getSubEventsPreview). */
 export async function createSubEventsFromPreview(
   parentEventId: string,
   selectedPreviewIds: string[]
 ): Promise<ActionResult<SubEvent[]>> {
   try {
-    const parent = await prisma.event.findUnique({
-      where: { id: parentEventId },
-      include: { subEvents: true },
-    });
-    if (!parent) {
-      return { success: false, error: "Evento non trovato" };
-    }
-    if (!parent.generateSubEvents || !parent.ruleTemplateId) {
+    const ctx = await loadParentContext(parentEventId);
+    if (!ctx) return { success: false, error: "Evento non trovato" };
+    if (!ctx.parent.generateSubEvents || !ctx.parent.ruleTemplateId) {
       return { success: true, data: [] };
     }
 
     const settings = await getSettings();
-    const inputsParsed = parent.inputs ? (JSON.parse(parent.inputs) as Record<string, unknown>) : {};
-    const eventForRule: Event = {
-      id: parent.id,
-      title: parent.title,
-      description: parent.description,
-      startAt: parent.startAt,
-      endAt: parent.endAt,
-      type: parent.type as Event["type"],
-      tags: JSON.parse(parent.tags || "[]") as string[],
-      caseId: parent.caseId,
-      notes: parent.notes,
-      generateSubEvents: parent.generateSubEvents,
-      ruleTemplateId: parent.ruleTemplateId,
-      ruleParams: parseJsonField(parent.ruleParams),
-      macroType: parent.macroType === "ATTO_GIURIDICO" ? "ATTO_GIURIDICO" : undefined,
-      actionType: parent.actionType ?? undefined,
-      actionMode: parent.actionMode ?? undefined,
-      inputs: inputsParsed,
-      createdAt: parent.createdAt,
-      updatedAt: parent.updatedAt,
-    };
-
-    const ruleParamsParsedForPreview = (JSON.parse(parent.ruleParams || "{}") || {}) as Record<string, unknown>;
-    const userSelections = (parent.ruleTemplateId === "atto-giuridico"
-      ? inputsParsed
-      : { ...inputsParsed, ...ruleParamsParsedForPreview }) as Record<string, unknown>;
-
-    const candidates = runRulesForEvent(parent.ruleTemplateId, {
-      event: eventForRule,
+    const candidates = runRulesForEvent(ctx.parent.ruleTemplateId, {
+      event: ctx.eventForRule,
       settings,
-      userSelections,
+      userSelections: ctx.userSelections,
     });
 
     const selectedSet = new Set(selectedPreviewIds);
@@ -265,43 +228,12 @@ export async function createSubEventsFromPreview(
       return selectedSet.has(previewId);
     });
 
-    const toDelete = parent.subEvents.filter(
-      (s) => !s.locked && s.ruleId !== "rinvio-udienza"
-    );
-    await prisma.subEvent.deleteMany({
-      where: { id: { in: toDelete.map((s) => s.id) } },
-    });
-
-    const created = await Promise.all(
-      filtered.map((c) =>
-        prisma.subEvent.create({
-          data: {
-            parentEventId,
-            title: c.title,
-            kind: c.kind,
-            dueAt: c.dueAt,
-            status: c.status ?? "pending",
-            priority: c.priority ?? 0,
-            ruleId: c.ruleId,
-            ruleParams: c.ruleParams ? JSON.stringify(c.ruleParams) : null,
-            explanation: c.explanation,
-            createdBy: "automatico",
-            locked: false,
-          },
-        })
-      )
-    );
-
-    const list = await prisma.subEvent.findMany({
-      where: { parentEventId },
-      orderBy: { dueAt: "asc" },
-    });
-    return { success: true, data: list.map(toSubEvent) };
+    const data = await replaceSubEvents(parentEventId, filtered, ctx.subEvents);
+    return { success: true, data };
   } catch (e) {
     return {
       success: false,
-      error:
-        e instanceof Error ? e.message : "Errore creazione sottoeventi selezionati",
+      error: e instanceof Error ? e.message : "Errore creazione sottoeventi selezionati",
     };
   }
 }
@@ -341,4 +273,3 @@ export async function deleteSubEvent(id: string): Promise<ActionResult<void>> {
     };
   }
 }
-

@@ -116,14 +116,13 @@ export function applyDeadlineTime(d: Date, settings: AppSettings): Date {
 
 /**
  * Assegna slot orari ai sotto-eventi raggruppati per giorno:
- * parte da 12:00 e incrementa di 1h per ogni evento nello stesso giorno.
- * Se supera le 23:00, riparte da 00:00.
+ * il primo evento di ogni giorno mantiene il suo orario originale (da applyDeadlineTime),
+ * i successivi vengono spostati di +1h per evitare sovrapposizioni.
  */
 export function assignTimeSlots(
   candidates: SubEventCandidate[],
-  settings: AppSettings
+  _settings: AppSettings
 ): SubEventCandidate[] {
-  const baseHour = 12;
   const dayMap = new Map<string, number>();
 
   return candidates.map((c) => {
@@ -131,6 +130,8 @@ export function assignTimeSlots(
     const count = dayMap.get(dayKey) ?? 0;
     dayMap.set(dayKey, count + 1);
 
+    if (count === 0) return c;
+    const baseHour = c.dueAt.getHours();
     const hour = (baseHour + count) % 24;
     const adjusted = setMinutes(setHours(startOfDay(c.dueAt), hour), 0);
     return { ...c, dueAt: adjusted };

@@ -5,6 +5,7 @@ import { prisma } from "../db";
 import type { Event, CreateEventInput, UpdateEventInput, EventType } from "@/types";
 import { getOrCreateDbUser } from "@/lib/db/user";
 import { parseJsonField } from "@/lib/utils";
+import { toSubEvent } from "@/lib/mappers";
 
 function parseTags(tags: string): string[] {
   try {
@@ -75,22 +76,7 @@ function toEvent(r: {
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
     ...(r.subEvents && {
-      subEvents: r.subEvents.map((s) => ({
-        id: s.id,
-        parentEventId: s.parentEventId,
-        title: s.title,
-        kind: s.kind as "termine" | "promemoria" | "attivita",
-        dueAt: s.dueAt,
-        status: s.status as "pending" | "done" | "cancelled",
-        priority: s.priority,
-        ruleId: s.ruleId,
-        ruleParams: parseJsonField(s.ruleParams),
-        explanation: s.explanation,
-        createdBy: s.createdBy as "manuale" | "automatico",
-        locked: s.locked,
-        createdAt: s.createdAt,
-        updatedAt: s.updatedAt,
-      })),
+      subEvents: r.subEvents.map(toSubEvent),
     }),
   };
 }
@@ -245,9 +231,9 @@ export async function getEvents(start: Date, end: Date): Promise<ActionResult<Ev
   try {
     const dbUser = await getOrCreateDbUser();
     const rangeStart = new Date(start);
-    rangeStart.setUTCDate(rangeStart.getUTCDate() - 2);
+    rangeStart.setUTCDate(rangeStart.getUTCDate() - 1);
     const rangeEnd = new Date(end);
-    rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 2);
+    rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
     const events = await prisma.event.findMany({
       where: {
         userId: dbUser.id,

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +24,7 @@ import {
   deleteSubEvent,
 } from "@/lib/actions/sub-events";
 import type { EventType, SubEvent } from "@/types";
-import { EVENT_TYPES, RULE_TEMPLATES } from "@/types";
+import { RULE_TEMPLATES } from "@/types";
 import type { ActionType, ActionMode } from "@/types/atto-giuridico";
 import { ACTION_TYPES, ACTION_MODES, ACTION_TYPE_LABELS, ACTION_MODE_LABELS } from "@/types/atto-giuridico";
 import { AttoGiuridicoPanel } from "./AttoGiuridicoPanel";
@@ -176,7 +175,6 @@ export function EventModal({
   onDraft,
   onDraftCleared,
 }: EventModalProps) {
-  const router = useRouter();
   // Data evento: solo i valori attuali del form contano. initialStart/initialEnd servono solo come default iniziale se apri da click sul calendario; se modifichi data/ora in creazione, resta ciò che hai impostato.
   const [form, setForm] = useState<EventFormState>(() => {
     const base = defaultEvent(initialStart, initialEnd);
@@ -262,52 +260,57 @@ export function EventModal({
       return;
     }
     if (previewEditedByUserRef.current) return;
-    (async () => {
-      let startAt = form.startAt;
-      let endAt = form.endAt;
-      if (usesCalculationDateOnly(form.macroType)) {
-        const primary = getPrimaryDateFromInputs(form.inputs);
-        if (primary) {
-          startAt = primary;
-          endAt = new Date(primary.getTime() + 60 * 60 * 1000);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      (async () => {
+        let startAt = form.startAt;
+        let endAt = form.endAt;
+        if (usesCalculationDateOnly(form.macroType)) {
+          const primary = getPrimaryDateFromInputs(form.inputs);
+          if (primary) {
+            startAt = primary;
+            endAt = new Date(primary.getTime() + 60 * 60 * 1000);
+          }
         }
-      }
-      const payload = {
-        title: form.title,
-        startAt: startAt.toISOString(),
-        endAt: endAt.toISOString(),
-        type: form.type,
-        tags: form.tags,
-        ruleTemplateId: form.ruleTemplateId,
-        ...(form.ruleTemplateId === "atto-giuridico"
-          ? {
-              macroType: "ATTO_GIURIDICO",
-              actionType: form.actionType,
-              actionMode: form.actionMode,
-              inputs: serializeInputsForServer(form.inputs),
-            }
-          : {
-              inputs: { reminderOffsets: form.reminderOffsets },
-            }),
-      };
-      const result = await getSubEventsPreview(payload);
-      if (result.success && result.data) {
-        setPreviewSubEvents(
-          result.data.map((c) => ({
-            id: c.id,
-            title: c.title,
-            dueAt: new Date(c.dueAt),
-            explanation: c.explanation,
-            ruleId: c.ruleId,
-            ruleParams: c.ruleParams ?? null,
-            kind: c.kind,
-            priority: c.priority,
-          }))
-        );
-      } else {
-        setPreviewSubEvents([]);
-      }
-    })();
+        const payload = {
+          title: form.title,
+          startAt: startAt.toISOString(),
+          endAt: endAt.toISOString(),
+          type: form.type,
+          tags: form.tags,
+          ruleTemplateId: form.ruleTemplateId,
+          ...(form.ruleTemplateId === "atto-giuridico"
+            ? {
+                macroType: "ATTO_GIURIDICO",
+                actionType: form.actionType,
+                actionMode: form.actionMode,
+                inputs: serializeInputsForServer(form.inputs),
+              }
+            : {
+                inputs: { reminderOffsets: form.reminderOffsets },
+              }),
+        };
+        const result = await getSubEventsPreview(payload);
+        if (cancelled) return;
+        if (result.success && result.data) {
+          setPreviewSubEvents(
+            result.data.map((c) => ({
+              id: c.id,
+              title: c.title,
+              dueAt: new Date(c.dueAt),
+              explanation: c.explanation,
+              ruleId: c.ruleId,
+              ruleParams: c.ruleParams ?? null,
+              kind: c.kind,
+              priority: c.priority,
+            }))
+          );
+        } else {
+          setPreviewSubEvents([]);
+        }
+      })();
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [
     form.title,
     form.startAt,
@@ -498,7 +501,6 @@ export function EventModal({
       // Dopo il salvataggio, una eventuale bozza collegata può essere rimossa
       onDraftCleared?.(draftId ?? null);
       onChanged?.();
-      router.refresh();
       onClose();
     } finally {
       setSaving(false);
@@ -535,6 +537,7 @@ export function EventModal({
         inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
         ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
         color: form.color ?? undefined,
+        status: form.status,
       });
       if (!up.success) {
         setError(normalizeDisplayError(up.error));

@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 
-export async function getOrCreateDbUser() {
+async function _getOrCreateDbUser() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -31,4 +32,6 @@ export async function getOrCreateDbUser() {
 
   return created;
 }
+
+export const getOrCreateDbUser = cache(_getOrCreateDbUser);
 

@@ -142,11 +142,7 @@ export function CalendarView() {
       const viewType =
         info.view?.type ?? calendarRef.current?.getApi()?.view?.type ?? "";
 
-      const start = new Date(info.start);
-      start.setDate(start.getDate() - 1);
-      const end = new Date(info.end);
-      end.setDate(end.getDate() + 1);
-      getEvents(start, end)
+      getEvents(info.start, info.end)
         .then((result) => {
           if (result.success && result.data) {
             let eventsData = result.data;

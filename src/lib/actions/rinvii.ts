@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "../db";
+import type { Prisma } from "@prisma/client";
 import { getSettings } from "../settings";
 import { adjustToNextBusinessDay, applyDeadlineTime } from "@/lib/date-utils";
 import { addDays } from "date-fns";
@@ -72,9 +73,13 @@ async function generateSubEventsForRinvio(
   );
 
   const udienzaDueAt = applyDeadlineTime(udienzaInfo.dataUdienza, settings);
+  const alertDays = DEFAULT_GIORNI_ALERT_UDIENZA;
+  const alertRaw = addDays(udienzaInfo.dataUdienza, -alertDays);
+  const alertAdjusted = adjustToNextBusinessDay(alertRaw, settings);
+  const alertDueAt = applyDeadlineTime(alertAdjusted, settings);
 
-  await prisma.subEvent.create({
-    data: {
+  const batch: Prisma.SubEventCreateManyInput[] = [
+    {
       parentEventId,
       title: `Udienza: ${udienzaLabel}`,
       kind: "termine",
@@ -87,16 +92,7 @@ async function generateSubEventsForRinvio(
       createdBy: "automatico",
       locked: false,
     },
-  });
-
-  // Promemoria N giorni prima dell'udienza
-  const alertDays = DEFAULT_GIORNI_ALERT_UDIENZA;
-  const alertRaw = addDays(udienzaInfo.dataUdienza, -alertDays);
-  const alertAdjusted = adjustToNextBusinessDay(alertRaw, settings);
-  const alertDueAt = applyDeadlineTime(alertAdjusted, settings);
-
-  await prisma.subEvent.create({
-    data: {
+    {
       parentEventId,
       title: `Udienza: ${udienzaLabel} – Promemoria (${alertDays} gg prima)`,
       kind: "promemoria",
@@ -109,32 +105,28 @@ async function generateSubEventsForRinvio(
       createdBy: "automatico",
       locked: false,
     },
-  });
+  ];
 
-  // SubEvents per ogni adempimento
   for (const a of adempimenti) {
     if (!a.scadenza || !a.titolo) continue;
-
     const rawDate = new Date(a.scadenza + "T12:00:00");
     if (isNaN(rawDate.getTime())) continue;
 
     const adjusted = adjustToNextBusinessDay(rawDate, settings);
     const dueAt = applyDeadlineTime(adjusted, settings);
 
-    await prisma.subEvent.create({
-      data: {
-        parentEventId,
-        title: a.titolo,
-        kind: "termine",
-        dueAt,
-        status: "pending",
-        priority: 1,
-        ruleId: RINVIO_RULE_ID,
-        ruleParams: JSON.stringify({ rinvioId, adempimentoId: a.id }),
-        explanation: `Adempimento da rinvio udienza: ${a.titolo}`,
-        createdBy: "automatico",
-        locked: false,
-      },
+    batch.push({
+      parentEventId,
+      title: a.titolo,
+      kind: "termine",
+      dueAt,
+      status: "pending",
+      priority: 1,
+      ruleId: RINVIO_RULE_ID,
+      ruleParams: JSON.stringify({ rinvioId, adempimentoId: a.id }),
+      explanation: `Adempimento da rinvio udienza: ${a.titolo}`,
+      createdBy: "automatico",
+      locked: false,
     });
 
     if (a.giorniAlert > 0) {
@@ -142,32 +134,32 @@ async function generateSubEventsForRinvio(
       const adempAlertAdjusted = adjustToNextBusinessDay(adempAlertRaw, settings);
       const adempAlertDueAt = applyDeadlineTime(adempAlertAdjusted, settings);
 
-      await prisma.subEvent.create({
-        data: {
-          parentEventId,
-          title: `${a.titolo} – Promemoria (${a.giorniAlert} gg prima)`,
-          kind: "promemoria",
-          dueAt: adempAlertDueAt,
-          status: "pending",
-          priority: 0,
-          ruleId: RINVIO_RULE_ID,
-          ruleParams: JSON.stringify({ rinvioId, adempimentoId: a.id }),
-          explanation: `Promemoria ${a.giorniAlert} giorni prima della scadenza`,
-          createdBy: "automatico",
-          locked: false,
-        },
+      batch.push({
+        parentEventId,
+        title: `${a.titolo} – Promemoria (${a.giorniAlert} gg prima)`,
+        kind: "promemoria",
+        dueAt: adempAlertDueAt,
+        status: "pending",
+        priority: 0,
+        ruleId: RINVIO_RULE_ID,
+        ruleParams: JSON.stringify({ rinvioId, adempimentoId: a.id }),
+        explanation: `Promemoria ${a.giorniAlert} giorni prima della scadenza`,
+        createdBy: "automatico",
+        locked: false,
       });
     }
   }
+
+  await prisma.subEvent.createMany({ data: batch });
 }
 
-async function deleteSubEventsForRinvio(rinvioId: string): Promise<void> {
-  const allSubs = await prisma.subEvent.findMany({
-    where: { ruleId: RINVIO_RULE_ID },
+async function deleteSubEventsForRinvio(parentEventId: string, rinvioId: string): Promise<void> {
+  const subs = await prisma.subEvent.findMany({
+    where: { parentEventId, ruleId: RINVIO_RULE_ID },
     select: { id: true, ruleParams: true },
   });
 
-  const toDelete = allSubs.filter((s) => {
+  const toDelete = subs.filter((s) => {
     if (!s.ruleParams) return false;
     try {
       const params = JSON.parse(s.ruleParams) as Record<string, unknown>;
@@ -276,7 +268,7 @@ export async function updateRinvio(
       data.tipoUdienzaCustom !== undefined;
 
     if (needsRegeneration) {
-      await deleteSubEventsForRinvio(id);
+      await deleteSubEventsForRinvio(existing.parentEventId, id);
       await generateSubEventsForRinvio(
         existing.parentEventId,
         id,
@@ -302,7 +294,10 @@ export async function deleteRinvio(
   id: string
 ): Promise<ActionResult<void>> {
   try {
-    await deleteSubEventsForRinvio(id);
+    const existing = await prisma.rinvio.findUnique({ where: { id }, select: { parentEventId: true } });
+    if (existing) {
+      await deleteSubEventsForRinvio(existing.parentEventId, id);
+    }
     await prisma.rinvio.delete({ where: { id } });
     return { success: true, data: undefined };
   } catch (e) {

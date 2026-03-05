@@ -51,7 +51,7 @@ body {
 .calendar-theme .fc .fc-timegrid-axis-chunk table { min-height: 960px !important; height: 960px !important; }
 .calendar-theme .fc .fc-timegrid-slot { background: #fff; height: 40px; min-height: 40px; }
 .calendar-theme .fc .fc-timegrid-axis { background: #f5f1ed; width: 4.5em; }
-.calendar-theme .fc .fc-timegrid-slot-label { border-bottom: 1px solid #E8E0D9; padding: 0.35rem 0.5rem; font-size: 0.8rem; font-weight: 500; color: var(--calendar-brown); height: 40px; min-height: 40px; box-sizing: border-box; }
+.calendar-theme .fc .fc-timegrid-slot-label { border-bottom: 1px solid #E8E0D9; padding: 0.35rem 0.5rem; font-size: 0.8rem; font-weight: 500; color: var(--calendar-brown); height: 40px; min-height: 40px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
 .calendar-theme .fc .fc-timegrid-axis .fc-timegrid-slot-label-frame { display: block; }
 .calendar-theme .fc .fc-timegrid-slot-minor { height: 40px; min-height: 40px; border-top: 1px solid #E8E0D9; }
 .calendar-theme .fc .fc-timegrid-divider { background: var(--calendar-brown-pale); }
@@ -67,7 +67,6 @@ body {
 .calendar-theme .fc .fc-timegrid .fc-scrollgrid-sync-table { min-height: 960px; }
 .calendar-theme .fc .fc-view-harness { min-height: 400px; }
 /* Vista Mese: niente scroll, tutte le 6 settimane visibili (righe compatte) */
-.calendar-theme .fc .fc-daygrid-day-frame { min-height: 100px; }
 .calendar-theme .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1px; }
 .calendar-theme .fc-daygrid-view .fc-scrollgrid-sync-table { height: 1px !important; }
 .calendar-theme .fc-daygrid-view .fc-daygrid-body { overflow: visible !important; }
@@ -140,7 +139,6 @@ body {
 .calendar-theme .fc .fc-timegrid .fc-col-header-cell-cushion { padding: 0.5rem; font-size: 0.875rem; }
 .calendar-theme .fc .fc-timegrid .fc-col-header-cell { background: #fff; border-bottom: 1px solid #E8E0D9; }
 .calendar-theme .fc .fc-timegrid .fc-scrollgrid-sync-inner { background: #fff; }
-.calendar-theme .fc .fc-timegrid-slot-label { font-variant-numeric: tabular-nums; }
 .calendar-theme .fc .fc-timegrid .fc-day-num { color: #2563eb; font-weight: 600; }
 .calendar-theme .fc .fc-timegrid .fc-day-name { color: #171717; margin-left: 0.25rem; }
 /* Riga "Tutto il giorno" e indice ore: ogni ora ben visibile a sinistra */
