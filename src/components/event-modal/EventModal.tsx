@@ -451,8 +451,24 @@ export function EventModal({
           setError(normalizeDisplayError(result.error));
           return;
         }
-        // Per la modifica di un evento esistente NON rigeneriamo più automaticamente i sottoeventi.
-        // La rigenerazione avviene solo quando l'utente clicca esplicitamente su "Rigenera sottoeventi".
+        // In modifica: se l'utente ha cliccato Calcola e l'evento genera sottoeventi,
+        // aggiorniamo i promemoria in base alla data corrente prima di chiudere.
+        if (form.generateSubEvents) {
+          const usePreviewList = userHasClickedCalcolaRef.current;
+          if (usePreviewList) {
+            const regen = await createSubEventsFromPreview(eventId, previewSubEvents.map((p) => p.id));
+            if (!regen.success) {
+              setError(
+                regen.error ?? "Errore aggiornamento sottoeventi. Riprova o rigenera dalla tab Regole."
+              );
+              return;
+            }
+            if (regen.data) {
+              setSubEvents(regen.data);
+              setSelectedSubEventId(null);
+            }
+          }
+        }
       }
       onChanged?.();
       router.refresh();
