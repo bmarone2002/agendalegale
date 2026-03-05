@@ -316,7 +316,21 @@ export function CalendarView() {
   }, []);
 
   const handleSelect = useCallback((arg: DateSelectArg) => {
-    setModalState({ mode: "create", start: arg.start, end: arg.end });
+    // Normalizza la selezione: se il click/drag parte da mezzanotte (vista Mese),
+    // usiamo come orario di default le 08:00, con durata conservata o 1h.
+    let start = new Date(arg.start);
+    let end = arg.end ? new Date(arg.end) : new Date(start.getTime() + 60 * 60 * 1000);
+
+    const isMidnight = start.getHours() === 0 && start.getMinutes() === 0;
+    if (isMidnight) {
+      const rawDuration = arg.end ? arg.end.getTime() - arg.start.getTime() : 60 * 60 * 1000;
+      const duration = rawDuration > 0 ? rawDuration : 60 * 60 * 1000;
+
+      start.setHours(8, 0, 0, 0);
+      end = new Date(start.getTime() + duration);
+    }
+
+    setModalState({ mode: "create", start, end });
   }, []);
 
   const handleEventClick = useCallback(
