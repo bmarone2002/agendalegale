@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "../db";
-import type { Prisma } from "@prisma/client";
 import { getSettings } from "../settings";
 import { adjustToNextBusinessDay, applyDeadlineTime } from "@/lib/date-utils";
 import { addDays } from "date-fns";
@@ -78,7 +77,7 @@ async function generateSubEventsForRinvio(
   const alertAdjusted = adjustToNextBusinessDay(alertRaw, settings);
   const alertDueAt = applyDeadlineTime(alertAdjusted, settings);
 
-  const batch: Prisma.SubEventCreateManyInput[] = [
+  const batch = [
     {
       parentEventId,
       title: `Udienza: ${udienzaLabel}`,
