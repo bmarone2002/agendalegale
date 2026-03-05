@@ -39,6 +39,7 @@ model Event {
   actionMode        String? // COSTITUZIONE | DA_NOTIFICARE
   inputs            String? // JSON: date e selezioni per regole
   color             String? // hex colore tag (evento + sottoeventi)
+  status            String   @default("pending") // pending | done
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

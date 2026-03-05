@@ -7,6 +7,8 @@ export type EventType =
   | "scadenza"
   | "altro";
 
+export type EventStatus = "pending" | "done";
+
 /** Macro-tipo: ATTO_GIURIDICO attiva actionType/actionMode/inputs */
 export type MacroType = "ATTO_GIURIDICO" | null;
 
@@ -34,6 +36,8 @@ export interface Event {
   inputs?: Record<string, unknown> | null;
   /** Colore tag (hex): applicato a evento e sottoeventi in calendario */
   color?: string | null;
+  /** Stato completamento evento */
+  status?: EventStatus;
   createdAt: Date;
   updatedAt: Date;
   subEvents?: SubEvent[];
@@ -73,6 +77,7 @@ export interface CreateEventInput {
   actionMode?: string | null;
   inputs?: Record<string, unknown> | null;
   color?: string | null;
+  status?: EventStatus;
 }
 
 export interface UpdateEventInput {
@@ -92,6 +97,7 @@ export interface UpdateEventInput {
   actionMode?: string | null;
   inputs?: Record<string, unknown> | null;
   color?: string | null;
+  status?: EventStatus;
 }
 
 export const EVENT_TYPES: EventType[] = [

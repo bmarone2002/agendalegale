@@ -148,6 +148,7 @@ exports.Prisma.EventScalarFieldEnum = {
   actionMode: 'actionMode',
   inputs: 'inputs',
   color: 'color',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId',

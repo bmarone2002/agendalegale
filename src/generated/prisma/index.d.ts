@@ -2233,6 +2233,7 @@ export namespace Prisma {
     actionMode: string | null
     inputs: string | null
     color: string | null
+    status: string | null
     createdAt: Date | null
     updatedAt: Date | null
     userId: string | null
@@ -2257,6 +2258,7 @@ export namespace Prisma {
     actionMode: string | null
     inputs: string | null
     color: string | null
+    status: string | null
     createdAt: Date | null
     updatedAt: Date | null
     userId: string | null
@@ -2281,6 +2283,7 @@ export namespace Prisma {
     actionMode: number
     inputs: number
     color: number
+    status: number
     createdAt: number
     updatedAt: number
     userId: number
@@ -2307,6 +2310,7 @@ export namespace Prisma {
     actionMode?: true
     inputs?: true
     color?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     userId?: true
@@ -2331,6 +2335,7 @@ export namespace Prisma {
     actionMode?: true
     inputs?: true
     color?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     userId?: true
@@ -2355,6 +2360,7 @@ export namespace Prisma {
     actionMode?: true
     inputs?: true
     color?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     userId?: true
@@ -2452,6 +2458,7 @@ export namespace Prisma {
     actionMode: string | null
     inputs: string | null
     color: string | null
+    status: string
     createdAt: Date
     updatedAt: Date
     userId: string
@@ -2493,6 +2500,7 @@ export namespace Prisma {
     actionMode?: boolean
     inputs?: boolean
     color?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     userId?: boolean
@@ -2521,6 +2529,7 @@ export namespace Prisma {
     actionMode?: boolean
     inputs?: boolean
     color?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     userId?: boolean
@@ -2546,6 +2555,7 @@ export namespace Prisma {
     actionMode?: boolean
     inputs?: boolean
     color?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     userId?: boolean
@@ -2587,6 +2597,7 @@ export namespace Prisma {
       actionMode: string | null
       inputs: string | null
       color: string | null
+      status: string
       createdAt: Date
       updatedAt: Date
       userId: string
@@ -3004,6 +3015,7 @@ export namespace Prisma {
     readonly actionMode: FieldRef<"Event", 'String'>
     readonly inputs: FieldRef<"Event", 'String'>
     readonly color: FieldRef<"Event", 'String'>
+    readonly status: FieldRef<"Event", 'String'>
     readonly createdAt: FieldRef<"Event", 'DateTime'>
     readonly updatedAt: FieldRef<"Event", 'DateTime'>
     readonly userId: FieldRef<"Event", 'String'>
@@ -6367,6 +6379,7 @@ export namespace Prisma {
     actionMode: 'actionMode',
     inputs: 'inputs',
     color: 'color',
+    status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     userId: 'userId',
@@ -6591,6 +6604,7 @@ export namespace Prisma {
     actionMode?: StringNullableFilter<"Event"> | string | null
     inputs?: StringNullableFilter<"Event"> | string | null
     color?: StringNullableFilter<"Event"> | string | null
+    status?: StringFilter<"Event"> | string
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     userId?: StringFilter<"Event"> | string
@@ -6618,6 +6632,7 @@ export namespace Prisma {
     actionMode?: SortOrderInput | SortOrder
     inputs?: SortOrderInput | SortOrder
     color?: SortOrderInput | SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     userId?: SortOrder
@@ -6648,6 +6663,7 @@ export namespace Prisma {
     actionMode?: StringNullableFilter<"Event"> | string | null
     inputs?: StringNullableFilter<"Event"> | string | null
     color?: StringNullableFilter<"Event"> | string | null
+    status?: StringFilter<"Event"> | string
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     userId?: StringFilter<"Event"> | string
@@ -6675,6 +6691,7 @@ export namespace Prisma {
     actionMode?: SortOrderInput | SortOrder
     inputs?: SortOrderInput | SortOrder
     color?: SortOrderInput | SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     userId?: SortOrder
@@ -6705,6 +6722,7 @@ export namespace Prisma {
     actionMode?: StringNullableWithAggregatesFilter<"Event"> | string | null
     inputs?: StringNullableWithAggregatesFilter<"Event"> | string | null
     color?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    status?: StringWithAggregatesFilter<"Event"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
     userId?: StringWithAggregatesFilter<"Event"> | string
@@ -7010,6 +7028,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -7036,6 +7055,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
@@ -7062,6 +7082,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7088,6 +7109,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
@@ -7114,6 +7136,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
@@ -7138,6 +7161,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7161,6 +7185,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
@@ -7588,6 +7613,7 @@ export namespace Prisma {
     actionMode?: SortOrder
     inputs?: SortOrder
     color?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     userId?: SortOrder
@@ -7612,6 +7638,7 @@ export namespace Prisma {
     actionMode?: SortOrder
     inputs?: SortOrder
     color?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     userId?: SortOrder
@@ -7636,6 +7663,7 @@ export namespace Prisma {
     actionMode?: SortOrder
     inputs?: SortOrder
     color?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     userId?: SortOrder
@@ -8162,6 +8190,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -8187,6 +8216,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -8241,6 +8271,7 @@ export namespace Prisma {
     actionMode?: StringNullableFilter<"Event"> | string | null
     inputs?: StringNullableFilter<"Event"> | string | null
     color?: StringNullableFilter<"Event"> | string | null
+    status?: StringFilter<"Event"> | string
     createdAt?: DateTimeFilter<"Event"> | Date | string
     updatedAt?: DateTimeFilter<"Event"> | Date | string
     userId?: StringFilter<"Event"> | string
@@ -8457,6 +8488,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -8482,6 +8514,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
@@ -8523,6 +8556,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8548,6 +8582,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
@@ -8573,6 +8608,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -8598,6 +8634,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     userId: string
@@ -8639,6 +8676,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8664,6 +8702,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
@@ -8689,6 +8728,7 @@ export namespace Prisma {
     actionMode?: string | null
     inputs?: string | null
     color?: string | null
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
@@ -8712,6 +8752,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8737,6 +8778,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8762,6 +8804,7 @@ export namespace Prisma {
     actionMode?: NullableStringFieldUpdateOperationsInput | string | null
     inputs?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null

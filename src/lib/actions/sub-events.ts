@@ -157,7 +157,10 @@ export async function regenerateSubEvents(parentEventId: string): Promise<
       updatedAt: parent.updatedAt,
     };
 
-    const userSelections = (parent.ruleTemplateId === "atto-giuridico" ? inputsParsed : (JSON.parse(parent.ruleParams || "{}") || {})) as Record<string, unknown>;
+    const ruleParamsParsed = (JSON.parse(parent.ruleParams || "{}") || {}) as Record<string, unknown>;
+    const userSelections = (parent.ruleTemplateId === "atto-giuridico"
+      ? inputsParsed
+      : { ...inputsParsed, ...ruleParamsParsed }) as Record<string, unknown>;
     const candidates = runRulesForEvent(parent.ruleTemplateId, {
       event: eventForRule,
       settings,
@@ -244,9 +247,10 @@ export async function createSubEventsFromPreview(
       updatedAt: parent.updatedAt,
     };
 
+    const ruleParamsParsedForPreview = (JSON.parse(parent.ruleParams || "{}") || {}) as Record<string, unknown>;
     const userSelections = (parent.ruleTemplateId === "atto-giuridico"
       ? inputsParsed
-      : (JSON.parse(parent.ruleParams || "{}") || {})) as Record<string, unknown>;
+      : { ...inputsParsed, ...ruleParamsParsedForPreview }) as Record<string, unknown>;
 
     const candidates = runRulesForEvent(parent.ruleTemplateId, {
       event: eventForRule,

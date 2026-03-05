@@ -68,6 +68,8 @@ type EventFormState = {
   actionMode: ActionMode;
   inputs: Record<string, unknown>;
   color: string | null;
+  reminderOffsets: number[];
+  status: "pending" | "done";
 };
 
 const defaultEvent = (start?: Date, end?: Date): EventFormState => ({
@@ -85,6 +87,8 @@ const defaultEvent = (start?: Date, end?: Date): EventFormState => ({
   actionMode: ACTION_MODES[0],
   inputs: {},
   color: null,
+  reminderOffsets: [7, 1],
+  status: "pending",
 });
 
 /** Categorie per cui non si mostrano Data/Ora inizio-fine: la data evento è solo quella del pannello "Dati per il calcolo". Estendere qui per future categorie. */
@@ -199,6 +203,10 @@ export function EventModal({
     setLoading(false);
     if (result.success && result.data) {
       const e = result.data;
+      const savedRuleParams = (e.ruleParams as Record<string, unknown> | null | undefined) ?? {};
+      const savedOffsets = Array.isArray(savedRuleParams.reminderOffsets)
+        ? (savedRuleParams.reminderOffsets as number[])
+        : [7, 1];
       setForm({
         title: e.title,
         description: e.description ?? "",
@@ -214,6 +222,8 @@ export function EventModal({
         actionMode: (e.actionMode as ActionMode) ?? ACTION_MODES[0],
         inputs: (e.inputs as Record<string, unknown>) ?? {},
         color: e.color ?? null,
+        reminderOffsets: savedOffsets,
+        status: (e.status === "done" ? "done" : "pending") as "pending" | "done",
       });
       setSubEvents(e.subEvents ?? []);
       setSelectedSubEventId(null);
@@ -248,12 +258,16 @@ export function EventModal({
         type: form.type,
         tags: form.tags,
         ruleTemplateId: form.ruleTemplateId,
-        ...(form.ruleTemplateId === "atto-giuridico" && {
-          macroType: "ATTO_GIURIDICO",
-          actionType: form.actionType,
-          actionMode: form.actionMode,
-          inputs: serializeInputsForServer(form.inputs),
-        }),
+        ...(form.ruleTemplateId === "atto-giuridico"
+          ? {
+              macroType: "ATTO_GIURIDICO",
+              actionType: form.actionType,
+              actionMode: form.actionMode,
+              inputs: serializeInputsForServer(form.inputs),
+            }
+          : {
+              inputs: { reminderOffsets: form.reminderOffsets },
+            }),
       };
       const result = await getSubEventsPreview(payload);
       if (result.success && result.data) {
@@ -285,6 +299,7 @@ export function EventModal({
     form.actionType,
     form.actionMode,
     form.inputs,
+    form.reminderOffsets,
   ]);
 
   const handleCalcola = useCallback(async () => {
@@ -307,12 +322,16 @@ export function EventModal({
         type: form.type,
         tags: form.tags,
         ruleTemplateId: form.ruleTemplateId,
-        ...(form.ruleTemplateId === "atto-giuridico" && {
-          macroType: "ATTO_GIURIDICO",
-          actionType: form.actionType,
-          actionMode: form.actionMode,
-          inputs: serializeInputsForServer(form.inputs),
-        }),
+        ...(form.ruleTemplateId === "atto-giuridico"
+          ? {
+              macroType: "ATTO_GIURIDICO",
+              actionType: form.actionType,
+              actionMode: form.actionMode,
+              inputs: serializeInputsForServer(form.inputs),
+            }
+          : {
+              inputs: { reminderOffsets: form.reminderOffsets },
+            }),
       };
       const result = await getSubEventsPreview(payload);
       previewEditedByUserRef.current = false;
@@ -389,7 +408,9 @@ export function EventModal({
           actionType: form.macroType ? form.actionType : undefined,
           actionMode: form.macroType ? form.actionMode : undefined,
           inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
+          ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
           color: form.color ?? undefined,
+          status: form.status,
         });
         if (!result.success) {
           setError(result.error);
@@ -422,7 +443,9 @@ export function EventModal({
           actionType: form.macroType ? form.actionType : undefined,
           actionMode: form.macroType ? form.actionMode : undefined,
           inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
+          ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
           color: form.color ?? undefined,
+          status: form.status,
         });
         if (!result.success) {
           setError(normalizeDisplayError(result.error));
@@ -467,6 +490,7 @@ export function EventModal({
         actionType: form.macroType ? form.actionType : undefined,
         actionMode: form.macroType ? form.actionMode : undefined,
         inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
+        ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
         color: form.color ?? undefined,
       });
       if (!up.success) {
@@ -547,7 +571,7 @@ export function EventModal({
           <TabsList className="bg-zinc-100 dark:bg-zinc-100 dark:text-zinc-600 p-1">
             <TabsTrigger value="dettagli" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Dettagli</TabsTrigger>
             <TabsTrigger value="regole" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Regole & Sottoeventi</TabsTrigger>
-            {mode === "edit" && eventId && form.macroType === "ATTO_GIURIDICO" && (
+            {mode === "edit" && eventId && (
               <TabsTrigger value="prosecuzione" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Prosecuzione</TabsTrigger>
             )}
           </TabsList>
@@ -573,9 +597,11 @@ export function EventModal({
                     setForm((f) => ({
                       ...f,
                       macroType: isAtto ? "ATTO_GIURIDICO" : null,
-                      ruleTemplateId: isAtto ? "atto-giuridico" : RULE_TEMPLATES[0].id,
-                      generateSubEvents: isAtto,
-                      ...(isAtto ? {} : { actionType: ACTION_TYPES[0], actionMode: ACTION_MODES[0], inputs: {} }),
+                      ruleTemplateId: isAtto ? "atto-giuridico" : "reminder",
+                      generateSubEvents: true,
+                      ...(isAtto
+                        ? {}
+                        : { actionType: ACTION_TYPES[0], actionMode: ACTION_MODES[0], inputs: {} }),
                     }));
                   }}
                 >
@@ -583,7 +609,7 @@ export function EventModal({
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="generico">Evento generico</SelectItem>
+                    <SelectItem value="generico">Pratiche in Corso</SelectItem>
                     <SelectItem value="ATTO_GIURIDICO">Atto Giuridico</SelectItem>
                   </SelectContent>
                 </Select>
@@ -689,72 +715,108 @@ export function EventModal({
                 </>
               )}
 
-              {/* 4b. Se Evento generico: tipo evento + opzione sottoeventi */}
+              {/* 4b. Se Pratiche in Corso: promemoria builder */}
               {form.macroType !== "ATTO_GIURIDICO" && (
-                <>
-                  <div>
-                    <Label>Tipo evento</Label>
-                    <Select
-                      value={form.type}
-                      onValueChange={(v) => setForm((f) => ({ ...f, type: v as EventType }))}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-white border-zinc-200 dark:border-zinc-200 text-zinc-900 dark:text-zinc-900">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {EVENT_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="gen-sub"
-                      checked={form.generateSubEvents}
-                      onCheckedChange={(c) =>
-                        setForm((f) => ({ ...f, generateSubEvents: c === true }))
+                <div>
+                  <Label>Promemoria</Label>
+                  <div className="space-y-2 mt-1.5">
+                    {form.reminderOffsets.map((days, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min={1}
+                          value={days}
+                          onChange={(e) => {
+                            const val = Math.max(1, parseInt(e.target.value) || 1);
+                            setForm((f) => {
+                              const next = [...f.reminderOffsets];
+                              next[i] = val;
+                              return { ...f, reminderOffsets: next };
+                            });
+                          }}
+                          className="w-24 bg-white border-zinc-200 text-zinc-900"
+                        />
+                        <span className="text-sm text-zinc-600">giorni prima</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              reminderOffsets: f.reminderOffsets.filter((_, idx) => idx !== i),
+                              generateSubEvents: f.reminderOffsets.length > 1,
+                              ruleTemplateId: f.reminderOffsets.length > 1 ? "reminder" : f.ruleTemplateId,
+                            }))
+                          }
+                          className="text-red-500 hover:text-red-700 text-lg leading-none px-1"
+                          aria-label="Rimuovi promemoria"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          reminderOffsets: [...f.reminderOffsets, 7],
+                          generateSubEvents: true,
+                          ruleTemplateId: "reminder",
+                        }))
                       }
-                    />
-                    <Label htmlFor="gen-sub">Genera sottoeventi automaticamente</Label>
+                      className="mt-1 border-zinc-300 text-zinc-700 hover:bg-zinc-50"
+                    >
+                      + Aggiungi promemoria
+                    </Button>
                   </div>
-                  {form.generateSubEvents && (
-                    <div>
-                      <Label>Template regole</Label>
-                      <Select
-                        value={form.ruleTemplateId}
-                        onValueChange={(v) => setForm((f) => ({ ...f, ruleTemplateId: v }))}
-                      >
-                        <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 dark:bg-white dark:border-zinc-200 dark:text-zinc-900">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RULE_TEMPLATES.filter((t) => t.id !== "atto-giuridico").map((t) => (
-                            <SelectItem key={t.id} value={t.id}>
-                              {t.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </>
+                </div>
               )}
 
               {/* 5. Note */}
               <div>
-                <Label>Note / Descrizione</Label>
+                <Label>Adempimenti / Note</Label>
                 <textarea
                   className="flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-brown)] focus-visible:ring-offset-2"
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="Note o descrizione"
+                  placeholder="Adempimenti o note"
                 />
               </div>
 
-              {/* 6. Colore tag: applicato a evento e sottoeventi in calendario */}
+              {/* 6. Stato completamento evento */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, status: f.status === "done" ? "pending" : "done" }))
+                  }
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                    form.status === "done"
+                      ? "bg-green-100 border-green-400 text-green-800 hover:bg-green-200"
+                      : "bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50"
+                  }`}
+                  aria-label="Segna come completato"
+                >
+                  <span
+                    className={`inline-block w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                      form.status === "done"
+                        ? "bg-green-500 border-green-500"
+                        : "border-zinc-400"
+                    }`}
+                  >
+                    {form.status === "done" && (
+                      <svg viewBox="0 0 16 16" fill="none" className="w-full h-full">
+                        <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
+                  {form.status === "done" ? "Completato" : "Segna come completato"}
+                </button>
+              </div>
+
+              {/* 7. Colore tag: applicato a evento e sottoeventi in calendario */}
               <div>
                 <Label>Colore tag</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
@@ -887,7 +949,7 @@ export function EventModal({
               )}
             </div>
           </TabsContent>
-          {mode === "edit" && eventId && form.macroType === "ATTO_GIURIDICO" && (
+          {mode === "edit" && eventId && (
             <TabsContent value="prosecuzione" className="flex-1 overflow-auto mt-2">
               <ProsecuzionePanel
                 eventId={eventId}

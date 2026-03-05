@@ -33,6 +33,7 @@ function toEvent(r: {
   actionMode?: string | null;
   inputs?: string | null;
   color?: string | null;
+  status?: string | null;
   createdAt: Date;
   updatedAt: Date;
   subEvents?: Array<{
@@ -70,6 +71,7 @@ function toEvent(r: {
     actionMode: r.actionMode ?? undefined,
     inputs: parseJsonField(r.inputs ?? null),
     color: r.color ?? null,
+    status: (r.status === "done" ? "done" : "pending") as import("@/types").EventStatus,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
     ...(r.subEvents && {
@@ -110,6 +112,7 @@ const createEventSchema = z.object({
   actionMode: z.string().nullable().optional(),
   inputs: z.record(z.unknown()).nullable().optional(),
   color: z.string().nullable().optional(),
+  status: z.enum(["pending", "done"]).optional(),
 });
 
 const updateEventSchema = createEventSchema.partial();
@@ -151,6 +154,7 @@ export async function createEvent(data: CreateEventInput): Promise<ActionResult<
         actionMode: p.actionMode ?? null,
         inputs: p.inputs != null ? JSON.stringify(p.inputs) : null,
         color: p.color ?? null,
+        status: p.status ?? "pending",
       },
     });
     return { success: true, data: toEvent(event) };
@@ -204,6 +208,7 @@ export async function updateEvent(
           inputs: p.inputs != null ? JSON.stringify(p.inputs) : null,
         }),
         ...(p.color !== undefined && { color: p.color ?? null }),
+        ...(p.status !== undefined && { status: p.status }),
       },
     });
     return { success: true, data: toEvent(event) };
