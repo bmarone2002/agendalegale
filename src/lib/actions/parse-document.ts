@@ -25,20 +25,27 @@ export type ParseDocumentActionResult =
   | { success: false; error: string };
 
 const EXTRACT_PROMPT = `Sei un assistente che estrae dati da documenti legali italiani (citazioni, ricorsi, opposizioni, appelli, decreti ingiuntivi, sentenze, ecc.).
-Dal testo del documento (o dalla descrizione dell'immagine) estrai i dati per compilare un evento in un calendario legale.
+Dal testo del documento estrai TUTTI i dati utili per un calendario legale, in particolare LE DATE.
+
+REGOLA FONDAMENTALE: Cerca sempre nel testo ogni data (udienza, notifica, deposito, scadenza, pubblicazione, ecc.) e inseriscila in "inputs" con la chiave corretta. Le date in Italia sono spesso scritte come gg/mm/aaaa, "il 15 marzo 2024", "udienza del 20/04/2024", "data notifica 10.05.2024". Converti SEMPRE in formato ISO: YYYY-MM-DD (es. 2024-03-15). Se è indicata anche l'ora, usa YYYY-MM-DDTHH:mm:ss.
 
 Restituisci SOLO un JSON valido, senza markdown né testo prima/dopo, con queste chiavi:
-- title: stringa breve che riassume la pratica (es. "Citazione Tizio vs Caio", "Opposizione decreto ingiuntivo n. 123/2024")
+- title: stringa breve che riassume la pratica (es. "Citazione Tizio vs Caio")
 - description: stringa opzionale con dettagli o adempimenti
 - type: uno tra "udienza", "notifica", "deposito", "scadenza", "altro"
 - actionType: uno tra "CITAZIONE", "RICORSO_OPPOSIZIONE", "RICORSO_TRIBUTARIO", "APPELLO_CIVILE", "APPELLO_TRIBUTARIO", "RICORSO_CASSAZIONE"
 - actionMode: uno tra "COSTITUZIONE", "DA_NOTIFICARE"
-- inputs: oggetto con le date e i campi richiesti per questo tipo di atto. Usa formato ISO per le date: YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss.
-  Chiavi possibili a seconda del tipo: dataNotifica, dataUdienzaComparizione, dataUdienzaRiferimentoMemorie, dataNotificaCitazione, dataNotificaDecretoIngiuntivo, dataUdienzaOpposizione, dataUdienza, dataNotificaAttoImpugnato, dataNotificaRicorso, dataNotificaSentenza, dataPubblicazioneSentenza, dataNotificaAppello, dataNotificaSentenzaTributaria, dataPubblicazioneSentenzaTributaria, notificaEstero (boolean), giorniOpposizione, giorniIscrizioneRuolo, giorniCostituzione (number), sceltaTermineImpugnazione ("BREVE" o "LUNGO"), memorieLibere (array di { titolo: string, scadenza: "YYYY-MM-DD" }).
-  Inserisci solo i campi che riesci a ricavare dal documento.
+- inputs: OGGETTO OBBLIGATORIO con le date trovate nel documento. Usa ESATTAMENTE queste chiavi quando applicabile:
+  * Per citazione/notifica: dataNotifica, dataNotificaCitazione
+  * Per udienza: dataUdienzaComparizione, dataUdienza, dataUdienzaOpposizione, dataUdienzaRiferimentoMemorie
+  * Per decreto/opposizione: dataNotificaDecretoIngiuntivo
+  * Per ricorso/sentenza: dataNotificaRicorso, dataNotificaSentenza, dataPubblicazioneSentenza, dataNotificaAttoImpugnato
+  * Per appello: dataNotificaAppello, dataNotificaSentenzaTributaria, dataPubblicazioneSentenzaTributaria
+  * Altri: notificaEstero (true/false), giorniOpposizione, giorniIscrizioneRuolo, giorniCostituzione (numero), sceltaTermineImpugnazione ("BREVE" o "LUNGO")
+  Ogni data deve essere in formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss). Inserisci in inputs TUTTE le date che trovi nel testo.
 - notes: stringa opzionale con note
 
-Se non riesci a determinare actionType o actionMode, omettili o usa null. Il JSON deve essere parsabile.`;
+Esempio: se nel testo c'è "udienza fissata per il 15/04/2025 alle 9:30" e "data notifica 10 marzo 2025", inputs deve contenere almeno: { "dataUdienzaComparizione": "2025-04-15T09:30:00", "dataNotifica": "2025-03-10" } (e altre chiavi se le riconosci). Il JSON deve essere parsabile.`;
 
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   // pdf-parse@1.1.1: API legacy senza worker (evita errore pdf.worker.mjs su Railway/Next server)
