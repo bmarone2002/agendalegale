@@ -41,15 +41,12 @@ Restituisci SOLO un JSON valido, senza markdown né testo prima/dopo, con queste
 Se non riesci a determinare actionType o actionMode, omettili o usa null. Il JSON deve essere parsabile.`;
 
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
-  try {
-    const result = await parser.getText();
-    const text = (result?.text ?? "").trim();
-    return text || "(Nessun testo estratto dal PDF)";
-  } finally {
-    await parser.destroy();
-  }
+  // pdf-parse@1.1.1: API legacy senza worker (evita errore pdf.worker.mjs su Railway/Next server)
+  const mod = await import("pdf-parse");
+  const pdfParse = (mod as { default?: (buf: Buffer) => Promise<{ text?: string }> }).default ?? (mod as (buf: Buffer) => Promise<{ text?: string }>);
+  const data = await pdfParse(buffer);
+  const text = (data?.text ?? "").trim();
+  return text || "(Nessun testo estratto dal PDF)";
 }
 
 function parseJsonFromResponse(content: string): unknown {
