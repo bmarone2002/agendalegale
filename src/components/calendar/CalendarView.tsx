@@ -9,7 +9,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import itLocale from "@fullcalendar/core/locales/it";
 import type { EventClickArg, DateSelectArg, EventDropArg, EventContentArg } from "@fullcalendar/core";
 import { getEvents, updateEvent } from "@/lib/actions/events";
-import { regenerateSubEvents, updateSubEvent } from "@/lib/actions/sub-events";
+import { regenerateSubEvents, updateSubEvent, deleteSubEvent } from "@/lib/actions/sub-events";
 import type { Event as AppEvent, SubEvent } from "@/types";
 import { EventModal } from "@/components/event-modal/EventModal";
 import { Button } from "@/components/ui/button";
@@ -507,6 +507,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const borderColor = arg.event.borderColor as string | undefined;
       const status = arg.event.extendedProps.status as string | undefined;
       const isDone = status === "done";
+      const isReminder = kind === "promemoria";
       return (
         <div
           className="fc-event-main-frame flex items-center gap-2 rounded border-l-4 pl-1"
@@ -556,6 +557,24 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             <span className="text-calendar-muted text-xs truncate max-w-[45vw]" title={parentTitle}>
               ← {parentTitle}
             </span>
+          )}
+          {canEdit && isReminder && (
+            <button
+              type="button"
+              aria-label="Rimuovi promemoria"
+              title="Rimuovi solo questo promemoria"
+              className="ml-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full h-5 w-5 flex items-center justify-center shrink-0"
+              onClick={async (e) => {
+                e.stopPropagation();
+                const id = arg.event.id as string;
+                const result = await deleteSubEvent(id, targetUserId);
+                if (result.success) {
+                  arg.event.remove();
+                }
+              }}
+            >
+              ×
+            </button>
           )}
         </div>
       );
