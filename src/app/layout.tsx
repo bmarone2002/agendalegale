@@ -9,8 +9,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Calendario Legale",
-  description: "Calendario personale per avvocato con eventi e sottoeventi",
+  title: "Agenda Legale",
+  description: "Agenda personale per avvocato con eventi e sottoeventi",
 };
 
 export const viewport: Viewport = {

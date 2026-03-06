@@ -35,7 +35,7 @@ export function SharedCalendarsList() {
 
   return (
     <div>
-      <h3 className="text-base font-semibold text-[var(--calendar-brown)] mb-3">
+      <h3 className="text-base font-semibold text-[var(--navy)] mb-3">
         Calendari condivisi con me
       </h3>
       {loading ? (
@@ -72,7 +72,7 @@ export function SharedCalendarsList() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 text-xs border-[var(--calendar-brown)] text-[var(--calendar-brown)] hover:bg-[var(--calendar-brown-pale)]"
+                    className="h-8 text-xs border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
                   >
                     Visualizza calendario
                   </Button>

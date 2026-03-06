@@ -12,7 +12,7 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-4 w-4 shrink-0 rounded-sm border border-zinc-300 ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--calendar-brown)] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-[var(--calendar-brown)] data-[state=checked]:text-white data-[state=checked]:border-[var(--calendar-brown)]",
+      "peer h-4 w-4 shrink-0 rounded-sm border border-zinc-300 ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-[var(--navy)] data-[state=checked]:text-white data-[state=checked]:border-[var(--navy)]",
       className
     )}
     {...props}

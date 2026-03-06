@@ -53,7 +53,7 @@ export function SharedCalendarView({ ownerId }: SharedCalendarViewProps) {
     <div>
       <div className="mb-4 flex items-center gap-3">
         <p className="text-sm text-zinc-600">
-          Calendario di <span className="font-medium text-zinc-800">{ownerEmail ?? "utente"}</span>
+          Agenda di <span className="font-medium text-zinc-800">{ownerEmail ?? "utente"}</span>
         </p>
         <span
           className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${

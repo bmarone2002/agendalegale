@@ -1,6 +1,6 @@
-# Calendario Legale
+# Agenda Legale
 
-Calendario personale per avvocato con interfaccia stile Outlook: viste Mese/Settimana, drag & drop eventi, modale evento estensibile e rule engine per sottoeventi automatici.
+Agenda personale per avvocato con interfaccia stile Outlook: viste Mese/Settimana, drag & drop eventi, modale evento estensibile e rule engine per sottoeventi automatici.
 
 > Nota: ultima versione aggiornata con auto-posizionamento eventi da 1h, miglioramenti UI e fix deploy Railway (Mar 2026).
 

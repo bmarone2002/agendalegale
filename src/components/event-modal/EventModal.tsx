@@ -634,7 +634,7 @@ export function EventModal({
       >
         <PopoverContainerContext.Provider value={popoverContainer}>
         <DialogHeader>
-          <DialogTitle className="text-[var(--calendar-brown)]">
+          <DialogTitle className="text-[var(--navy)]">
             {readOnly ? "VISUALIZZAZIONE PRATICA" : mode === "create" ? "NUOVA PRATICA" : "DETTAGLIO PRATICA"}
           </DialogTitle>
           {mode === "create" && draftId && (
@@ -795,7 +795,7 @@ export function EventModal({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="border-[var(--calendar-brown)] text-[var(--calendar-brown)] bg-white hover:bg-[var(--calendar-brown-pale)]"
+                          className="border-[var(--navy)] text-[var(--navy)] bg-white hover:bg-[var(--calendar-brown-pale)]"
                           disabled={parsingDocument || saving || calculating}
                           onClick={() => fileInputRef.current?.click()}
                         >
@@ -931,7 +931,7 @@ export function EventModal({
               <div>
                 <Label>Adempimenti / Note</Label>
                 <textarea
-                  className="flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-brown)] focus-visible:ring-offset-2"
+                  className="flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-2"
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Adempimenti o note"
@@ -979,7 +979,7 @@ export function EventModal({
                     onClick={() => setForm((f) => ({ ...f, color: null }))}
                     className={`h-8 w-8 rounded-full border-2 shrink-0 transition-all ${
                       form.color === null
-                        ? "border-[var(--calendar-brown)]"
+                        ? "border-[var(--navy)]"
                         : "border-zinc-300 hover:border-zinc-400 bg-zinc-50"
                     }`}
                     title="Nessun tag"
@@ -993,7 +993,7 @@ export function EventModal({
                       onClick={() => setForm((f) => ({ ...f, color: hex }))}
                       className={`h-8 w-8 rounded-full shrink-0 border-2 transition-all ${
                         form.color === hex
-                          ? "border-[var(--calendar-brown)] shadow-[0_0_0_1px_rgba(93,64,55,0.45)]"
+                          ? "border-[var(--navy)] shadow-[0_0_0_1px_rgba(26,43,69,0.35)]"
                           : "border-transparent hover:opacity-90"
                       }`}
                       style={{ backgroundColor: hex }}
@@ -1089,7 +1089,7 @@ export function EventModal({
                   {mode === "edit" && eventId && (
                     <Button
                       variant="outline"
-                      className="border-[var(--calendar-brown)] text-[var(--calendar-brown)] bg-white hover:bg-[var(--calendar-brown-pale)] dark:bg-white dark:border-[var(--calendar-brown)] dark:text-[var(--calendar-brown)] dark:hover:bg-[var(--calendar-brown-pale)]"
+                      className="border-[var(--navy)] text-[var(--navy)] bg-white hover:bg-[var(--calendar-brown-pale)] dark:bg-white dark:border-[var(--navy)] dark:text-[var(--navy)] dark:hover:bg-[var(--calendar-brown-pale)]"
                       onClick={handleRigenera}
                       disabled={saving}
                     >
@@ -1183,7 +1183,7 @@ export function EventModal({
         <Dialog open onOpenChange={(open) => !open && setShowDeleteConfirm(false)}>
           <DialogContent className="max-w-md bg-white event-modal-light">
             <DialogHeader>
-              <DialogTitle className="text-[var(--calendar-brown)]">Conferma eliminazione</DialogTitle>
+              <DialogTitle className="text-[var(--navy)]">Conferma eliminazione</DialogTitle>
             </DialogHeader>
             <p className="text-zinc-700">
               {subEvents.length > 0

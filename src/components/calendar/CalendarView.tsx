@@ -641,13 +641,13 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       <div className="flex h-full flex-col gap-2 sm:gap-3 calendar-theme">
       <div className="flex flex-col gap-2 sm:gap-3 mb-1">
         {/* Riga 1: Nuovo evento + ricerca */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
           <div className="flex items-center gap-2">
             {canEdit && (
             <Button
-              variant="outline"
+              type="button"
               size="sm"
-              className="h-9 rounded-md px-4 text-sm font-medium border-zinc-300 bg-white text-black hover:bg-zinc-100 dark:!bg-white dark:!text-black dark:hover:!bg-zinc-100 transition-colors shadow-sm hover:shadow-md"
+              className="h-9 rounded-md px-4 text-sm font-medium bg-[var(--navy)] text-white hover:bg-[var(--navy-light)] border-0 shadow-sm transition-colors"
               onClick={() => {
                 const slot = findNextAvailableSlot(new Date(), allEvents);
                 setModalState({ mode: "create", start: slot.start, end: slot.end });
@@ -659,7 +659,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             )}
           </div>
           <div className="flex items-center gap-3">
-            {/* Toggle promemoria: interruttore con label */}
+            {/* Toggle promemoria */}
             <button
               type="button"
               onClick={handleToggleHideSubEvents}
@@ -671,7 +671,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors ${
                   hideSubEvents
                     ? "bg-zinc-300 border-zinc-400"
-                    : "bg-[var(--calendar-brown)] border-[var(--calendar-brown)]"
+                    : "bg-[var(--navy)] border-[var(--navy)]"
                 }`}
               >
                 <span
@@ -680,7 +680,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 />
               </span>
             </button>
-            {/* Barra di ricerca con X integrata per rimuovere il filtro */}
+            {/* Ricerca */}
             <div className="relative">
               <input
                 type="text"
@@ -688,8 +688,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 placeholder="Cerca per titolo o promemoria…"
-                className={`h-8 w-52 sm:w-64 rounded-md border bg-white px-2 pr-7 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400 ${
-                  isSearchActive ? "border-[var(--calendar-brown)] ring-1 ring-[var(--calendar-brown)]" : "border-zinc-300"
+                className={`h-8 w-52 sm:w-64 rounded-md border bg-white px-2 pr-7 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-[var(--navy)] focus:border-[var(--navy)] ${
+                  isSearchActive ? "border-[var(--navy)] ring-1 ring-[var(--navy)]" : "border-zinc-300"
                 }`}
               />
               {(isSearchActive || searchQuery.length > 0) && (
@@ -706,12 +706,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 </button>
               )}
               {searchSuggestions.length > 0 && (
-                <div className="absolute z-20 mt-1 w-64 sm:w-72 rounded-md border border-zinc-200 bg-white shadow-lg max-h-60 overflow-auto text-xs sm:text-sm">
+                <div className="absolute z-20 mt-1 w-64 sm:w-72 rounded-lg border border-zinc-200 bg-white shadow-md max-h-60 overflow-auto text-xs sm:text-sm">
                   {searchSuggestions.map((s) => (
                     <button
                       key={`${s.eventId}-${s.label}-${s.matchType}`}
                       type="button"
-                      className="flex w-full flex-col items-start px-3 py-1.5 text-left hover:bg-zinc-100"
+                      className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--surface)] transition-colors"
                       onMouseDown={(e) => {
                         e.preventDefault();
                         handleSuggestionClick(s);
@@ -735,12 +735,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             </div>
           </div>
         </div>
-        {/* Riga 2: Oggi + frecce + titolo mese/anno + viste */}
+        {/* Riga 2: Oggi + frecce + titolo + viste */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs sm:text-sm font-normal text-zinc-700 h-8 hover:bg-zinc-100"
+              className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs sm:text-sm font-normal text-zinc-700 h-8 hover:bg-zinc-50 hover:border-[var(--navy)]/30 transition-colors"
               onClick={handleToday}
             >
               Oggi
@@ -748,7 +748,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             <div className="flex overflow-hidden rounded-md border border-zinc-300 bg-white">
               <button
                 type="button"
-                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100"
+                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-50"
                 onClick={handlePrev}
                 aria-label="Periodo precedente"
               >
@@ -756,7 +756,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               </button>
               <button
                 type="button"
-                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-100 border-l border-zinc-200"
+                className="h-8 w-8 text-sm text-zinc-700 hover:bg-zinc-50 border-l border-zinc-200"
                 onClick={handleNext}
                 aria-label="Periodo successivo"
               >
@@ -765,12 +765,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm sm:text-base font-semibold text-[var(--calendar-brown)]">
+            <div className="text-sm sm:text-base font-semibold text-[var(--navy)]">
               {viewTitle}
             </div>
           </div>
           <div className="flex items-center gap-2 justify-end">
-            <div className="flex items-center gap-1 rounded-md border border-zinc-300 bg-white p-0.5 shadow-sm">
+            <div className="flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-white p-0.5 shadow-sm">
               {[
                 { id: "timeGridDay", label: "Giorno" },
                 { id: "timeGridWeek", label: "Settimana" },
@@ -782,10 +782,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className={`h-8 px-3 text-xs sm:text-sm rounded-md font-medium border-zinc-300 dark:!text-black transition-colors ${
+                  className={`h-8 px-3 text-xs sm:text-sm rounded-md font-medium transition-colors ${
                     currentView === view.id
-                      ? "bg-zinc-100 text-black border-zinc-400 shadow-sm hover:bg-zinc-200 dark:!bg-zinc-100 dark:hover:!bg-zinc-200"
-                      : "bg-white text-black hover:bg-zinc-100 hover:border-zinc-400 dark:!bg-white dark:hover:!bg-zinc-100"
+                      ? "bg-[var(--navy)] text-white border-[var(--navy)] hover:bg-[var(--navy-light)] hover:text-white"
+                      : "bg-transparent text-zinc-700 border-transparent hover:bg-zinc-100 hover:border-zinc-200"
                   }`}
                   onClick={() => handleChangeView(view.id)}
                 >

@@ -102,7 +102,7 @@ export function ShareManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-[var(--calendar-brown)] mb-3">
+        <h3 className="text-base font-semibold text-[var(--navy)] mb-3">
           Condividi il mio calendario
         </h3>
         <div className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
@@ -112,7 +112,7 @@ export function ShareManagement() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Inserisci l'email dell'utente..."
-              className="mt-1 bg-white text-zinc-800 placeholder-zinc-400 border border-zinc-300 focus-visible:ring-[var(--calendar-brown)] focus-visible:border-[var(--calendar-brown)]"
+              className="mt-1 bg-white text-zinc-800 placeholder-zinc-400 border border-zinc-300 focus-visible:ring-[var(--navy)] focus-visible:border-[var(--navy)]"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -164,7 +164,7 @@ export function ShareManagement() {
           <Button
             onClick={handleShare}
             disabled={saving || !email.trim()}
-            className="w-full bg-[var(--calendar-brown)] text-white hover:bg-[var(--calendar-brown)]/90"
+            className="w-full bg-[var(--navy)] text-white hover:bg-[var(--navy-light)]"
           >
             {saving ? "Condivisione..." : "Condividi"}
           </Button>
@@ -175,7 +175,7 @@ export function ShareManagement() {
       </div>
 
       <div>
-        <h3 className="text-base font-semibold text-[var(--calendar-brown)] mb-3">
+        <h3 className="text-base font-semibold text-[var(--navy)] mb-3">
           Condivisioni attive
         </h3>
         {loading ? (

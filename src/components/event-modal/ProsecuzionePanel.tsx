@@ -456,7 +456,7 @@ export function ProsecuzionePanel({
 
       {/* New rinvio form */}
       {!readOnly && showForm && (
-        <div className="space-y-3 rounded-md border border-dashed border-[var(--calendar-brown)] bg-zinc-50/50 p-4">
+        <div className="space-y-3 rounded-md border border-dashed border-[var(--navy)] bg-zinc-50/50 p-4">
           <h4 className="text-sm font-medium text-zinc-700">
             Nuovo rinvio di udienza
           </h4>
@@ -514,7 +514,7 @@ export function ProsecuzionePanel({
           <div>
             <Label className="text-xs">Note (opzionale)</Label>
             <textarea
-              className="flex min-h-[60px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--calendar-brown)] focus-visible:ring-offset-2"
+              className="flex min-h-[60px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-2"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Note o disposizioni del giudice..."
@@ -585,7 +585,7 @@ export function ProsecuzionePanel({
         <Button
           type="button"
           variant="outline"
-          className="w-full border-dashed border-[var(--calendar-brown)] text-[var(--calendar-brown)] hover:bg-[var(--calendar-brown-pale)]"
+          className="w-full border-dashed border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
           onClick={() => setShowForm(true)}
         >
           + Aggiungi rinvio di udienza
