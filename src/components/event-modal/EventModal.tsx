@@ -677,7 +677,7 @@ export function EventModal({
                     }));
                   }}
                 >
-                  <SelectTrigger className="bg-white border-zinc-200 text-zinc-900">
+                  <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -748,7 +748,7 @@ export function EventModal({
                       value={form.actionType}
                       onValueChange={(v) => setForm((f) => ({ ...f, actionType: v as ActionType }))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
                         <SelectValue placeholder="Seleziona sotto-categoria" />
                       </SelectTrigger>
                       <SelectContent>
@@ -766,7 +766,7 @@ export function EventModal({
                       value={form.actionMode}
                       onValueChange={(v) => setForm((f) => ({ ...f, actionMode: v as ActionMode }))}
                     >
-                      <SelectTrigger className="bg-white dark:bg-white border-zinc-200 dark:border-zinc-200 text-zinc-900 dark:text-zinc-900">
+                      <SelectTrigger className="bg-white dark:bg-white border-zinc-200 dark:border-zinc-200 text-zinc-900 dark:text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
                         <SelectValue placeholder="Seleziona modalità" />
                       </SelectTrigger>
                       <SelectContent>
@@ -911,14 +911,14 @@ export function EventModal({
               {/* 7. Colore tag: applicato a evento e sottoeventi in calendario */}
               <div>
                 <Label>Colore tag</Label>
-                <div className="flex flex-wrap gap-2 mt-1.5">
+                <div className="flex flex-wrap gap-2 mt-1.5 pl-1">
                   <button
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, color: null }))}
                     className={`h-8 w-8 rounded-full border-2 shrink-0 transition-all ${
                       form.color === null
-                        ? "border-[var(--calendar-brown)] ring-2 ring-[var(--calendar-brown)] ring-offset-2"
-                        : "border-zinc-300 hover:border-zinc-400 bg-zinc-100"
+                        ? "border-[var(--calendar-brown)]"
+                        : "border-zinc-300 hover:border-zinc-400 bg-zinc-50"
                     }`}
                     title="Nessun tag"
                   >
@@ -931,7 +931,7 @@ export function EventModal({
                       onClick={() => setForm((f) => ({ ...f, color: hex }))}
                       className={`h-8 w-8 rounded-full shrink-0 border-2 transition-all ${
                         form.color === hex
-                          ? "border-zinc-900 ring-2 ring-[var(--calendar-brown)] ring-offset-2"
+                          ? "border-[var(--calendar-brown)] shadow-[0_0_0_1px_rgba(93,64,55,0.45)]"
                           : "border-transparent hover:opacity-90"
                       }`}
                       style={{ backgroundColor: hex }}
