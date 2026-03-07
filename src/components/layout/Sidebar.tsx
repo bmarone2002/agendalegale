@@ -40,13 +40,13 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <>
-      <div className="flex min-h-[72px] w-full items-center justify-center border-b border-[var(--gold)]/30 bg-[var(--navy)] px-3 py-3" style={{ backgroundColor: "var(--navy)" }}>
+      <div className="flex min-h-[72px] w-full items-center justify-center overflow-hidden border-b border-[var(--gold)]/30 bg-[var(--navy)] px-3 py-3" style={{ backgroundColor: "var(--navy)" }}>
         {!logoError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src="/logo-agenda-legale.png"
             alt="Agenda Legale"
-            className="h-14 w-full max-w-[180px] object-contain object-center"
+            className="h-14 w-full max-w-[180px] scale-125 object-contain object-center"
             onError={() => setLogoError(true)}
           />
         ) : (
