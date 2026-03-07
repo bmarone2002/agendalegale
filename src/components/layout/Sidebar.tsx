@@ -42,25 +42,24 @@ export function Sidebar() {
       className="flex w-[220px] shrink-0 flex-col border-r border-[var(--gold)]/20 bg-[var(--navy)]"
       style={{ backgroundColor: "var(--navy)" }}
     >
-      <div className="flex h-14 items-center gap-2 border-b border-[var(--gold)]/30 px-4">
+      {/* Logo completo (bilancia, libro, calendario, Agenda LEGALE) in tutto lo spigolo in alto a sinistra */}
+      <div className="flex min-h-[72px] w-full items-center justify-center border-b border-[var(--gold)]/30 px-3 py-3">
         {!logoError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src="/logo-agenda-legale.png"
-            alt=""
-            width={36}
-            height={36}
-            className="h-9 w-9 object-contain"
+            alt="Agenda Legale"
+            className="h-14 w-full max-w-[180px] object-contain object-center"
             onError={() => setLogoError(true)}
           />
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded bg-[var(--gold)]/20 text-[var(--gold)]">
-            <CalendarIcon className="h-5 w-5" />
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-[var(--gold)]/20 text-[var(--gold)]">
+              <CalendarIcon className="h-6 w-6" />
+            </div>
+            <span className="text-xs font-semibold text-[var(--gold)]">Agenda Legale</span>
           </div>
         )}
-        <span className="text-base font-semibold tracking-tight text-[var(--gold)]">
-          Agenda Legale
-        </span>
       </div>
       <nav className="flex flex-col gap-0.5 p-3">
         {navItems.map(({ href, label, icon: Icon }) => {
