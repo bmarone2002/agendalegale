@@ -43,7 +43,7 @@ export function Sidebar() {
       style={{ backgroundColor: "var(--navy)" }}
     >
       {/* Solo logo (immagine PNG, senza scritte aggiunte) */}
-      <div className="flex min-h-[72px] w-full items-center justify-center border-b border-[var(--gold)]/30 bg-black px-3 py-3">
+      <div className="flex min-h-[72px] w-full items-center justify-center border-b border-[var(--gold)]/30 bg-[var(--navy)] px-3 py-3" style={{ backgroundColor: "var(--navy)" }}>
         {!logoError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
