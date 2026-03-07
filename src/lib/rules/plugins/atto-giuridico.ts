@@ -495,7 +495,7 @@ export const attoGiuridicoRule: RuleDefinition = {
       const scelta = inputs.sceltaTermineImpugnazione as string | undefined;
 
       if (scelta === "BREVE") {
-        const dataNotifica = inputs.dataNotificaSentenzaTributaria as string | undefined;
+        const dataNotifica = (inputs.dataNotificaSentenza ?? inputs.dataNotificaSentenzaTributaria) as string | undefined;
         if (dataNotifica) {
           const notifica = new Date(dataNotifica + "T12:00:00");
           const termine = makeTermine(
@@ -509,7 +509,7 @@ export const attoGiuridicoRule: RuleDefinition = {
           out.push(...addReminders("Appello tributario", termine.dueAt, settings, [-20, -7, -1]));
         }
       } else if (scelta === "LUNGO") {
-        const dataPubb = inputs.dataPubblicazioneSentenzaTributaria as string | undefined;
+        const dataPubb = (inputs.dataPubblicazioneSentenza ?? inputs.dataPubblicazioneSentenzaTributaria) as string | undefined;
         if (dataPubb) {
           const pubb = new Date(dataPubb + "T12:00:00");
           const termine = makeTermine(

@@ -547,14 +547,15 @@ export function AttoGiuridicoPanel({
           </div>
           {(inputs.sceltaTermineImpugnazione as string) !== "LUNGO" && (
             <div>
-              <Label>Data notifica sentenza tributaria</Label>
+              <Label>Data notifica sentenza</Label>
               <DatePicker
                 value={toDateOrNull(
-                  getStr(inputs, "dataNotificaSentenzaTributaria")
+                  getStr(inputs, "dataNotificaSentenza") ||
+                    getStr(inputs, "dataNotificaSentenzaTributaria")
                 )}
                 onChange={(d) =>
                   update(
-                    "dataNotificaSentenzaTributaria",
+                    "dataNotificaSentenza",
                     d ? toDateOnlyString(d) : ""
                   )
                 }
@@ -564,14 +565,15 @@ export function AttoGiuridicoPanel({
           )}
           {(inputs.sceltaTermineImpugnazione as string) === "LUNGO" && (
             <div>
-              <Label>Data pubblicazione sentenza tributaria</Label>
+              <Label>Data pubblicazione sentenza</Label>
               <DatePicker
                 value={toDateOrNull(
-                  getStr(inputs, "dataPubblicazioneSentenzaTributaria")
+                  getStr(inputs, "dataPubblicazioneSentenza") ||
+                    getStr(inputs, "dataPubblicazioneSentenzaTributaria")
                 )}
                 onChange={(d) =>
                   update(
-                    "dataPubblicazioneSentenzaTributaria",
+                    "dataPubblicazioneSentenza",
                     d ? toDateOnlyString(d) : ""
                   )
                 }

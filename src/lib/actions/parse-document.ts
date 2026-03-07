@@ -30,22 +30,60 @@ Dal testo del documento estrai TUTTI i dati utili per un calendario legale, in p
 REGOLA FONDAMENTALE: Cerca sempre nel testo ogni data (udienza, notifica, deposito, scadenza, pubblicazione, ecc.) e inseriscila in "inputs" con la chiave corretta. Le date in Italia sono spesso scritte come gg/mm/aaaa, "il 15 marzo 2024", "udienza del 20/04/2024", "data notifica 10.05.2024". Converti SEMPRE in formato ISO: YYYY-MM-DD (es. 2024-03-15). Se è indicata anche l'ora, usa YYYY-MM-DDTHH:mm:ss.
 
 Restituisci SOLO un JSON valido, senza markdown né testo prima/dopo, con queste chiavi:
-- title: stringa breve che riassume la pratica (es. "Citazione Tizio vs Caio")
+- title: stringa breve che riassume la pratica (es. "Citazione Tizio vs Caio"); se presente nel documento, includi anche l'autorità giudiziaria (es. Tribunale di Napoli, Giudice di pace di Salerno) e il numero di RG (Ruolo Generale)
 - description: stringa opzionale con dettagli o adempimenti
 - type: uno tra "udienza", "notifica", "deposito", "scadenza", "altro"
 - actionType: uno tra "CITAZIONE", "RICORSO_OPPOSIZIONE", "RICORSO_TRIBUTARIO", "APPELLO_CIVILE", "APPELLO_TRIBUTARIO", "RICORSO_CASSAZIONE"
-- actionMode: uno tra "COSTITUZIONE", "DA_NOTIFICARE"
+- actionMode: uno tra "COSTITUZIONE", "DA_NOTIFICARE". Interpreta così: se il documento riguarda la parte CONVENUTO/RESISTENTE (costituzione in giudizio) restituisci "COSTITUZIONE"; se riguarda ATTORE/RICORRENTE (notifica dell'atto) restituisci "DA_NOTIFICARE"
 - inputs: OGGETTO OBBLIGATORIO con le date trovate nel documento. Usa ESATTAMENTE queste chiavi quando applicabile:
   * Per citazione/notifica: dataNotifica, dataNotificaCitazione
-  * Per udienza: dataUdienzaComparizione, dataUdienza, dataUdienzaOpposizione, dataUdienzaRiferimentoMemorie
+  * Per udienza: dataUdienzaComparizione, dataUdienzaRiferimentoMemorie (usa dataUdienzaComparizione per la data dell'udienza/comparizione)
   * Per decreto/opposizione: dataNotificaDecretoIngiuntivo
   * Per ricorso/sentenza: dataNotificaRicorso, dataNotificaSentenza, dataPubblicazioneSentenza, dataNotificaAttoImpugnato
-  * Per appello: dataNotificaAppello, dataNotificaSentenzaTributaria, dataPubblicazioneSentenzaTributaria
-  * Altri: notificaEstero (true/false), giorniOpposizione, giorniIscrizioneRuolo, giorniCostituzione (numero), sceltaTermineImpugnazione ("BREVE" o "LUNGO")
+  * Per appello: dataNotificaAppello, dataNotificaSentenza, dataPubblicazioneSentenza (valgono per qualsiasi sentenza, non solo tributaria)
+  * Altri: giorniOpposizione, giorniIscrizioneRuolo, giorniCostituzione (numero), sceltaTermineImpugnazione ("BREVE" o "LUNGO")
   Ogni data deve essere in formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss). Inserisci in inputs TUTTE le date che trovi nel testo.
 - notes: stringa opzionale con note
 
 Esempio: se nel testo c'è "udienza fissata per il 15/04/2025 alle 9:30" e "data notifica 10 marzo 2025", inputs deve contenere almeno: { "dataUdienzaComparizione": "2025-04-15T09:30:00", "dataNotifica": "2025-03-10" } (e altre chiavi se le riconosci). Il JSON deve essere parsabile.`;
+
+// ── Rinvio (verbale / comunicazione cancelleria) ─────────────────────
+
+const adempimentoEstrattoSchema = z.object({
+  titolo: z.string(),
+  scadenza: z.string(), // ISO date YYYY-MM-DD
+});
+
+const TIPI_UDIENZA_RINVIO = ["TRATTAZIONE", "PRIMA_COMPARIZIONE", "PROVA_TESTIMONIALE", "INTERROGATORIO_FORMALE", "GIURAMENTO_CTU", "CHIARIMENTI_CTU", "PRECISAZIONE_CONCLUSIONI", "DISCUSSIONE_ORALE", "TENTATIVO_CONCILIAZIONE", "COMPARIZIONE_PERSONALE", "ALTRO"] as const;
+
+const parsedRinvioSchema = z.object({
+  dataUdienza: z.string().optional(), // ISO date (YYYY-MM-DD) o datetime
+  tipoUdienza: z.enum(TIPI_UDIENZA_RINVIO).optional(),
+  adempimenti: z.array(adempimentoEstrattoSchema).optional().default([]),
+});
+
+export type ParsedRinvioResult = z.infer<typeof parsedRinvioSchema>;
+
+export type ParseDocumentForRinvioResult =
+  | { success: true; data: ParsedRinvioResult }
+  | { success: false; error: string };
+
+const EXTRACT_RINVIO_PROMPT = `Sei un assistente che estrae dati da verbali di udienza o comunicazioni della cancelleria italiana.
+Dal testo estrai:
+1) La DATA DI RINVIO (nuova data di udienza fissata) – in formato ISO YYYY-MM-DD (es. 2025-05-20). Se è indicata l'ora, usa YYYY-MM-DDTHH:mm:ss.
+2) Il TIPO di udienza, se riconoscibile: uno tra TRATTAZIONE, PRIMA_COMPARIZIONE, PROVA_TESTIMONIALE, INTERROGATORIO_FORMALE, GIURAMENTO_CTU, CHIARIMENTI_CTU, PRECISAZIONE_CONCLUSIONI, DISCUSSIONE_ORALE, TENTATIVO_CONCILIAZIONE, COMPARIZIONE_PERSONALE. Se non chiaro, usa ALTRO.
+3) Gli ADEMPIMENTI con i rispettivi TERMINI: ogni voce del tipo "deposito memorie entro il 15/05/2025", "deposito documenti entro il 20 maggio 2025", "note di trattazione scritta entro il 10/06/2025", ecc. Va estratta come oggetto con "titolo" (es. "Deposito memorie") e "scadenza" in formato ISO YYYY-MM-DD.
+
+Restituisci SOLO un JSON valido, senza markdown né testo prima/dopo:
+{
+  "dataUdienza": "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm:ss",
+  "tipoUdienza": "TRATTAZIONE" | "PRIMA_COMPARIZIONE" | ... | "ALTRO",
+  "adempimenti": [
+    { "titolo": "Deposito memorie", "scadenza": "2025-05-15" },
+    ...
+  ]
+}
+Se non trovi la data di rinvio o gli adempimenti, restituisci comunque il JSON con dataUdienza e adempimenti vuoti o parziali. Le date in Italia sono spesso gg/mm/aaaa: convertile in YYYY-MM-DD.`;
 
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   // pdf-parse@1.1.1: API legacy senza worker (evita errore pdf.worker.mjs su Railway/Next server)
@@ -140,6 +178,95 @@ export async function parseDocumentForEvent(formData: FormData): Promise<ParseDo
       actionMode: parsed.actionMode ?? undefined,
       inputs: parsed.inputs ?? {},
       notes: parsed.notes ?? "",
+    });
+
+    if (!validated.success) {
+      return {
+        success: false,
+        error: "Dati estratti non validi. Verifica e inserisci manualmente se necessario.",
+      };
+    }
+
+    return { success: true, data: validated.data };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Errore durante l'analisi del documento.";
+    return { success: false, error: message };
+  }
+}
+
+export async function parseDocumentForRinvio(formData: FormData): Promise<ParseDocumentForRinvioResult> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey?.trim()) {
+    return { success: false, error: "OPENAI_API_KEY non configurata. Aggiungila in .env.local." };
+  }
+
+  const file = formData.get("file");
+  if (!file || !(file instanceof File)) {
+    return { success: false, error: "Nessun file allegato." };
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const mime = file.type?.toLowerCase() ?? "";
+  const isPdf = mime === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
+  const isImage = /^image\/(jpeg|png|gif|webp)$/.test(mime);
+
+  let textToSend: string;
+  let imagePart: { type: "image_url"; image_url: { url: string } } | null = null;
+
+  if (isPdf) {
+    try {
+      textToSend = await extractTextFromPdf(buffer);
+      if (!textToSend || textToSend === "(Nessun testo estratto dal PDF)") {
+        return { success: false, error: "Impossibile estrarre testo dal PDF. Prova con un PDF con testo selezionabile (non solo scansione)." };
+      }
+    } catch (e) {
+      return {
+        success: false,
+        error: e instanceof Error ? e.message : "Errore durante la lettura del PDF.",
+      };
+    }
+  } else if (isImage) {
+    const base64 = buffer.toString("base64");
+    const dataUrl = `data:${mime};base64,${base64}`;
+    imagePart = { type: "image_url", image_url: { url: dataUrl } };
+    textToSend = "Estrai data di rinvio e adempimenti con termini dal seguente verbale o comunicazione (immagine).";
+  } else {
+    return {
+      success: false,
+      error: "Formato non supportato. Usa un PDF o un'immagine (JPEG, PNG, WebP).",
+    };
+  }
+
+  const openai = new OpenAI({ apiKey });
+
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    { role: "system", content: EXTRACT_RINVIO_PROMPT },
+    {
+      role: "user",
+      content: imagePart
+        ? ([{ type: "text", text: textToSend }, imagePart] as OpenAI.Chat.Completions.ChatCompletionContentPart[])
+        : `Testo del documento:\n\n${textToSend.slice(0, 120000)}`,
+    },
+  ];
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+    });
+
+    const raw = completion.choices[0]?.message?.content?.trim();
+    if (!raw) {
+      return { success: false, error: "L'AI non ha restituito una risposta valida." };
+    }
+
+    const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
+    const validated = parsedRinvioSchema.safeParse({
+      dataUdienza: parsed.dataUdienza ?? undefined,
+      tipoUdienza: parsed.tipoUdienza ?? undefined,
+      adempimenti: Array.isArray(parsed.adempimenti) ? parsed.adempimenti : [],
     });
 
     if (!validated.success) {

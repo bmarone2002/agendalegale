@@ -768,6 +768,14 @@ export function EventModal({
                             const result = await parseDocumentForEvent(formData);
                             if (result.success && result.data) {
                               const d = result.data;
+                              let mergedInputs = (d.inputs ?? {}) as Record<string, unknown>;
+                              if (Object.keys(mergedInputs).length > 0) {
+                                // Rule engine expects dataUdienza in many flows; AI returns only dataUdienzaComparizione
+                                const dataComp = mergedInputs.dataUdienzaComparizione as string | undefined;
+                                if (dataComp && mergedInputs.dataUdienza == null) {
+                                  mergedInputs = { ...mergedInputs, dataUdienza: dataComp.slice(0, 10) };
+                                }
+                              }
                               setForm((f) => ({
                                 ...f,
                                 title: d.title ?? f.title,
@@ -776,7 +784,7 @@ export function EventModal({
                                 notes: d.notes ?? f.notes,
                                 ...(d.actionType && { actionType: d.actionType as ActionType }),
                                 ...(d.actionMode && { actionMode: d.actionMode as ActionMode }),
-                                ...(Object.keys(d.inputs ?? {}).length > 0 && { inputs: d.inputs ?? f.inputs }),
+                                ...(Object.keys(mergedInputs).length > 0 && { inputs: mergedInputs }),
                               }));
                               setError(null);
                             } else if (!result.success) {

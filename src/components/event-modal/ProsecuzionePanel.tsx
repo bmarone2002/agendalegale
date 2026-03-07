@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
@@ -21,6 +21,7 @@ import {
   createRinvio,
   deleteRinvio,
 } from "@/lib/actions/rinvii";
+import { parseDocumentForRinvio } from "@/lib/actions/parse-document";
 import {
   TIPI_UDIENZA,
   TIPO_UDIENZA_LABELS,
@@ -311,6 +312,8 @@ export function ProsecuzionePanel({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [parsingRinvio, setParsingRinvio] = useState(false);
+  const rinvioFileInputRef = useRef<HTMLInputElement>(null);
 
   // New rinvio form state
   const [tipoUdienza, setTipoUdienza] = useState<TipoUdienza | "">("");
@@ -420,12 +423,63 @@ export function ProsecuzionePanel({
     }
   };
 
+  const handleParseRinvioFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setParsingRinvio(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await parseDocumentForRinvio(formData);
+      if (result.success && result.data) {
+        const d = result.data;
+        if (d.dataUdienza) {
+          const dateStr = d.dataUdienza.slice(0, 10);
+          setDataUdienza(new Date(dateStr + "T12:00:00"));
+        }
+        if (d.tipoUdienza) {
+          setTipoUdienza(d.tipoUdienza as TipoUdienza);
+        }
+        if (Array.isArray(d.adempimenti) && d.adempimenti.length > 0) {
+          setAdempimenti(
+            d.adempimenti.map((a) => ({
+              ...emptyAdempimento(),
+              id: generateId(),
+              titolo: a.titolo,
+              scadenza: a.scadenza.slice(0, 10),
+              giorniAlert: DEFAULT_GIORNI_ALERT,
+              note: "",
+            }))
+          );
+        }
+        setShowForm(true);
+      } else if (!result.success) {
+        setError(result.error ?? "Impossibile analizzare il documento.");
+      }
+    } catch {
+      setError("Errore durante l'analisi del documento.");
+    } finally {
+      setParsingRinvio(false);
+      e.target.value = "";
+    }
+  };
+
   if (loading) {
     return <p className="text-sm text-zinc-500 py-4">Caricamento rinvii...</p>;
   }
 
   return (
     <div className="space-y-4">
+      {!readOnly && (
+        <input
+          ref={rinvioFileInputRef}
+          type="file"
+          accept=".pdf,application/pdf,image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleParseRinvioFile}
+        />
+      )}
       <p className="text-sm text-zinc-600">
         Cronologia delle udienze successive all&apos;atto iniziale. Aggiungi i
         rinvii di udienza con i relativi adempimenti e promemoria.
@@ -457,9 +511,21 @@ export function ProsecuzionePanel({
       {/* New rinvio form */}
       {!readOnly && showForm && (
         <div className="space-y-3 rounded-md border border-dashed border-[var(--navy)] bg-zinc-50/50 p-4">
-          <h4 className="text-sm font-medium text-zinc-700">
-            Nuovo rinvio di udienza
-          </h4>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h4 className="text-sm font-medium text-zinc-700">
+              Nuovo rinvio di udienza
+            </h4>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-xs text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
+              disabled={parsingRinvio}
+              onClick={() => rinvioFileInputRef.current?.click()}
+            >
+              {parsingRinvio ? "Analisi…" : "Allega verbale e compila con AI"}
+            </Button>
+          </div>
 
           {/* Tipo udienza */}
           <div>
@@ -580,16 +646,30 @@ export function ProsecuzionePanel({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {/* Add rinvio button */}
+      {/* Add rinvio: file upload + manual button */}
       {!readOnly && !showForm && (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full border-dashed border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
-          onClick={() => setShowForm(true)}
-        >
-          + Aggiungi rinvio di udienza
-        </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1 border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
+              disabled={parsingRinvio}
+              onClick={() => rinvioFileInputRef.current?.click()}
+            >
+              {parsingRinvio ? "Analisi in corso…" : "Allega file e compila con AI"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-dashed border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
+              onClick={() => setShowForm(true)}
+            >
+              + Aggiungi rinvio di udienza
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
