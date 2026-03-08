@@ -582,12 +582,15 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     }
     if (isSub) {
       const borderColor = arg.event.borderColor as string | undefined;
+      const status = arg.event.extendedProps.status as string | undefined;
+      const isDone = status === "done";
+      const arrowColorClass = isDone ? "text-emerald-500" : "text-red-500";
       return (
         <div
           className="fc-event-main-frame flex items-center gap-1 rounded border-l-2 pl-1"
           style={{ borderLeftColor: borderColor ?? undefined }}
         >
-          <span className="text-calendar-sub-event-icon shrink-0 text-[10px] leading-none opacity-80" aria-hidden title="Promemoria">↳</span>
+          <span className={`${arrowColorClass} shrink-0 text-[10px] leading-none opacity-90`} aria-hidden title="Promemoria">↳</span>
           <span className="truncate min-w-0 flex-1 text-[inherit]" style={{ color: "#171717" }}>{arg.event.title}</span>
         </div>
       );
