@@ -7,7 +7,7 @@ export interface AppSettings {
   holidays?: string[];
   /** Per ATTO_GIURIDICO: orario default per scadenze (es. 12:00) */
   defaultTimeForDeadlines: string;
-  /** Promemoria prima di ogni termine hard: es. [-20, -5, -2] */
+  /** Promemoria: giorni prima (positivi, es. [7]); default un solo promemoria a 7 gg */
   defaultReminderOffsetsAtto: number[];
   notificaEsteroDefault: boolean;
   /** Giorni tra notifica citazione e udienza (Italia) */

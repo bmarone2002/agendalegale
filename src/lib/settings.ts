@@ -3,11 +3,11 @@ import { prisma } from "./db";
 
 const DEFAULT_SETTINGS: AppSettings = {
   defaultReminderTime: "09:00",
-  defaultReminderOffsets: [7, 1],
+  defaultReminderOffsets: [7],
   weekendHandling: undefined,
   holidays: undefined,
   defaultTimeForDeadlines: "08:00",
-  defaultReminderOffsetsAtto: [-20, -5, -2],
+  defaultReminderOffsetsAtto: [7],
   notificaEsteroDefault: false,
   termineComparizioneCitazioneItalia: 120,
   termineComparizioneCitazioneEstero: 150,

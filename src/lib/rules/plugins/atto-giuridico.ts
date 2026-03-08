@@ -98,7 +98,8 @@ function addReminders(
 
 function addMemorie171ter(
   udienza: Date,
-  settings: AppSettings
+  settings: AppSettings,
+  reminderOffsets: number[]
 ): SubEventCandidate[] {
   const out: SubEventCandidate[] = [];
   const offsets: Array<{ days: number; label: string }> = [
@@ -115,7 +116,7 @@ function addMemorie171ter(
       `${o.label} – art. 171 ter c.p.c.`
     );
     out.push(termine);
-    out.push(...addReminders(o.label, termine.dueAt, settings, [-5]));
+    out.push(...addReminders(o.label, termine.dueAt, settings, reminderOffsets));
   }
   return out;
 }
@@ -144,7 +145,8 @@ function addMemorieUdienza(
 
 function addMemorieLibere(
   inputs: Record<string, unknown>,
-  settings: AppSettings
+  settings: AppSettings,
+  reminderOffsets: number[]
 ): SubEventCandidate[] {
   const memorieLibere = inputs.memorieLibere as MemoriaLibera[] | undefined;
   if (!Array.isArray(memorieLibere) || memorieLibere.length === 0) return [];
@@ -163,7 +165,7 @@ function addMemorieLibere(
         `Memoria/nota libera: ${m.titolo}`
       )
     );
-    out.push(...addReminders(m.titolo, scadenza, settings, [-5]));
+    out.push(...addReminders(m.titolo, scadenza, settings, reminderOffsets));
   }
   return out;
 }
@@ -188,6 +190,10 @@ export const attoGiuridicoRule: RuleDefinition = {
       | undefined;
 
     if (!actionType || !actionMode) return { subEvents: [] };
+
+    // Promemoria: giorni prima (positivi in UI) → negativi per addReminders; default un solo promemoria a 7 gg
+    const rawOffsets = (inputs.reminderOffsets as number[] | undefined) ?? settings.defaultReminderOffsetsAtto ?? [7];
+    const reminderOffsets = rawOffsets.map((d) => (d > 0 ? -d : d));
 
     const out: SubEventCandidate[] = [];
 
@@ -214,19 +220,19 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Iscrizione a ruolo attore entro 10 giorni dalla notifica della citazione (art. 165 c.p.c.)"
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo attore", iscrizione.dueAt, settings, [-3]));
+        out.push(...addReminders("Iscrizione a ruolo attore", iscrizione.dueAt, settings, reminderOffsets));
       }
 
       // 2) Memorie 171 ter: 40/20/10 gg prima udienza
       if (dataRifMemorie) {
         const rifMemorie = new Date(dataRifMemorie.slice(0, 10) + "T12:00:00");
         if (!isNaN(rifMemorie.getTime())) {
-          out.push(...addMemorie171ter(rifMemorie, settings));
+          out.push(...addMemorie171ter(rifMemorie, settings, reminderOffsets));
         }
       }
 
       // 3) Memorie libere
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "CITAZIONE" && actionMode === "COSTITUZIONE") {
@@ -247,19 +253,19 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Costituzione convenuto almeno 70 giorni prima dell'udienza (art. 166 c.p.c.)"
         );
         out.push(costituzione);
-        out.push(...addReminders("Costituzione convenuto", costituzione.dueAt, settings, [-10]));
+        out.push(...addReminders("Costituzione convenuto", costituzione.dueAt, settings, reminderOffsets));
       }
 
       // 2) Memorie 171 ter
       if (dataRifMemorie) {
         const rifMemorie = new Date(dataRifMemorie.slice(0, 10) + "T12:00:00");
         if (!isNaN(rifMemorie.getTime())) {
-          out.push(...addMemorie171ter(rifMemorie, settings));
+          out.push(...addMemorie171ter(rifMemorie, settings, reminderOffsets));
         }
       }
 
       // 3) Memorie libere
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -284,7 +290,7 @@ export const attoGiuridicoRule: RuleDefinition = {
           `Opposizione entro ${giorniOpp} giorni dalla notifica del decreto`
         );
         out.push(opposizione);
-        out.push(...addReminders("Opposizione", opposizione.dueAt, settings, [-10, -3]));
+        out.push(...addReminders("Opposizione", opposizione.dueAt, settings, reminderOffsets));
       }
 
       if (dataNotifica && giorniIscr) {
@@ -299,10 +305,10 @@ export const attoGiuridicoRule: RuleDefinition = {
           `Iscrizione a ruolo entro ${giorniIscr} giorni dalla notifica`
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, [-10, -3]));
+        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "RICORSO_OPPOSIZIONE" && actionMode === "COSTITUZIONE") {
@@ -322,10 +328,10 @@ export const attoGiuridicoRule: RuleDefinition = {
           `Costituzione opponente entro ${giorniCost} giorni prima dell'udienza`
         );
         out.push(costituzione);
-        out.push(...addReminders("Costituzione opponente", costituzione.dueAt, settings, [-10, -3]));
+        out.push(...addReminders("Costituzione opponente", costituzione.dueAt, settings, reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -350,7 +356,7 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Ricorso entro 60 giorni dalla notifica dell'atto impugnato (art. 21 D.Lgs. 546/1992)"
         );
         out.push(ricorso);
-        out.push(...addReminders("Ricorso tributario", ricorso.dueAt, settings, [-15, -7, -1]));
+        out.push(...addReminders("Ricorso tributario", ricorso.dueAt, settings, reminderOffsets));
       }
 
       if (dataNotificaRicorso) {
@@ -365,16 +371,16 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Iscrizione a ruolo entro 30 giorni dalla notifica del ricorso (art. 22 D.Lgs. 546/1992)"
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, [-10, -5, -2]));
+        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, reminderOffsets));
       }
 
       // 3) Memorie: 20 gg e 10 gg prima udienza
       if (dataUdienza) {
         const udienza = new Date(dataUdienza + "T12:00:00");
-        out.push(...addMemorieUdienza(udienza, settings, [20, 10], [-5, -2]));
+        out.push(...addMemorieUdienza(udienza, settings, [20, 10], reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "RICORSO_TRIBUTARIO" && actionMode === "COSTITUZIONE") {
@@ -400,10 +406,10 @@ export const attoGiuridicoRule: RuleDefinition = {
       // 2) Memorie: 20 gg e 10 gg prima udienza
       if (dataUdienza) {
         const udienza = new Date(dataUdienza + "T12:00:00");
-        out.push(...addMemorieUdienza(udienza, settings, [20, 10], [-5, -2]));
+        out.push(...addMemorieUdienza(udienza, settings, [20, 10], reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -426,7 +432,7 @@ export const attoGiuridicoRule: RuleDefinition = {
             "Termine breve per appello: 30 giorni dalla notificazione della sentenza (art. 325 c.p.c.)"
           );
           out.push(termine);
-          out.push(...addReminders("Appello civile", termine.dueAt, settings, [-20, -7, -3]));
+          out.push(...addReminders("Appello civile", termine.dueAt, settings, reminderOffsets));
         }
       } else if (scelta === "LUNGO") {
         const dataPubb = inputs.dataPubblicazioneSentenza as string | undefined;
@@ -440,7 +446,7 @@ export const attoGiuridicoRule: RuleDefinition = {
             "Termine lungo: 6 mesi dalla pubblicazione (art. 327 c.p.c.)"
           );
           out.push(termine);
-          out.push(...addReminders("Appello civile", termine.dueAt, settings, [-20, -7, -3]));
+          out.push(...addReminders("Appello civile", termine.dueAt, settings, reminderOffsets));
         }
       }
 
@@ -456,11 +462,11 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Iscrizione a ruolo entro 10 giorni dalla notifica dell'appello (art. 347 c.p.c.)"
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo appellante", iscrizione.dueAt, settings, [-3]));
+        out.push(...addReminders("Iscrizione a ruolo appellante", iscrizione.dueAt, settings, reminderOffsets));
       }
 
       // Memorie libere
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "APPELLO_CIVILE" && actionMode === "COSTITUZIONE") {
@@ -479,11 +485,11 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Costituzione appellato almeno 20 giorni prima dell'udienza (art. 347 c.p.c.)"
         );
         out.push(costituzione);
-        out.push(...addReminders("Costituzione appellato", costituzione.dueAt, settings, [-10, -5]));
+        out.push(...addReminders("Costituzione appellato", costituzione.dueAt, settings, reminderOffsets));
       }
 
       // 2) Memorie libere
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -536,17 +542,17 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Iscrizione a ruolo entro 30 giorni dalla notifica dell'appello"
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, [-10, -5, -2]));
+        out.push(...addReminders("Iscrizione a ruolo", iscrizione.dueAt, settings, reminderOffsets));
       }
 
       // Memorie: 20 gg e 10 gg prima udienza
       const dataUdienza = inputs.dataUdienza as string | undefined;
       if (dataUdienza) {
         const udienza = new Date(dataUdienza + "T12:00:00");
-        out.push(...addMemorieUdienza(udienza, settings, [20, 10], [-5, -2]));
+        out.push(...addMemorieUdienza(udienza, settings, [20, 10], reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "APPELLO_TRIBUTARIO" && actionMode === "COSTITUZIONE") {
@@ -566,16 +572,16 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Appellato: controdeduzioni/costituzione entro 60 giorni dalla notifica dell'appello"
         );
         out.push(costituzione);
-        out.push(...addReminders("Costituzione appellato", costituzione.dueAt, settings, [-7, -1]));
+        out.push(...addReminders("Costituzione appellato", costituzione.dueAt, settings, reminderOffsets));
       }
 
       // 2) Memorie: 20 gg e 10 gg prima udienza
       if (dataUdienza) {
         const udienza = new Date(dataUdienza + "T12:00:00");
-        out.push(...addMemorieUdienza(udienza, settings, [20, 10], [-5, -2]));
+        out.push(...addMemorieUdienza(udienza, settings, [20, 10], reminderOffsets));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -628,7 +634,7 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Deposito del ricorso entro 20 giorni dall'ultima notificazione (art. 369 c.p.c.)"
         );
         out.push(iscrizione);
-        out.push(...addReminders("Iscrizione a ruolo Cassazione", iscrizione.dueAt, settings, [-10, -5, -2]));
+        out.push(...addReminders("Iscrizione a ruolo Cassazione", iscrizione.dueAt, settings, reminderOffsets));
       }
 
       // Memorie: 10 gg prima udienza
@@ -638,7 +644,7 @@ export const attoGiuridicoRule: RuleDefinition = {
         out.push(...addMemorieUdienza(udienza, settings, [10], [-10, -5]));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     if (actionType === "RICORSO_CASSAZIONE" && actionMode === "COSTITUZIONE") {
@@ -658,7 +664,7 @@ export const attoGiuridicoRule: RuleDefinition = {
           "Costituzione entro 40 giorni dalla notifica del ricorso (art. 370 c.p.c.)"
         );
         out.push(costituzione);
-        out.push(...addReminders("Costituzione controricorrente", costituzione.dueAt, settings, [-20, -10, -5]));
+        out.push(...addReminders("Costituzione controricorrente", costituzione.dueAt, settings, reminderOffsets));
       }
 
       // 2) Memorie: 10 gg prima udienza
@@ -667,7 +673,7 @@ export const attoGiuridicoRule: RuleDefinition = {
         out.push(...addMemorieUdienza(udienza, settings, [10], [-10, -5]));
       }
 
-      out.push(...addMemorieLibere(inputs, settings));
+      out.push(...addMemorieLibere(inputs, settings, reminderOffsets));
     }
 
     // ── Post-processing: slot orari anti-accavallamento ─────────

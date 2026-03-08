@@ -99,9 +99,9 @@ const defaultEvent = (start?: Date, end?: Date): EventFormState => {
   actionMode: ACTION_MODES[0],
   inputs: {},
   color: null,
-  reminderOffsets: [7, 1],
+  reminderOffsets: [7],
   status: "pending",
-  };
+};
 };
 
 /** Categorie per cui non si mostrano Data/Ora inizio-fine: la data evento è solo quella del pannello "Dati per il calcolo". Estendere qui per future categorie. */
@@ -239,7 +239,7 @@ export function EventModal({
       const savedRuleParams = (e.ruleParams as Record<string, unknown> | null | undefined) ?? {};
       const savedOffsets = Array.isArray(savedRuleParams.reminderOffsets)
         ? (savedRuleParams.reminderOffsets as number[])
-        : [7, 1];
+        : [7];
       setForm({
         title: e.title,
         description: e.description ?? "",
@@ -298,7 +298,7 @@ export function EventModal({
                 macroType: "ATTO_GIURIDICO",
                 actionType: form.actionType,
                 actionMode: form.actionMode,
-                inputs: serializeInputsForServer(form.inputs),
+                inputs: { ...serializeInputsForServer(form.inputs), reminderOffsets: form.reminderOffsets },
               }
             : {
                 inputs: { reminderOffsets: form.reminderOffsets },
@@ -365,7 +365,7 @@ export function EventModal({
               macroType: "ATTO_GIURIDICO",
               actionType: form.actionType,
               actionMode: form.actionMode,
-              inputs: serializeInputsForServer(form.inputs),
+              inputs: { ...serializeInputsForServer(form.inputs), reminderOffsets: form.reminderOffsets },
             }
           : {
               inputs: { reminderOffsets: form.reminderOffsets },
@@ -446,7 +446,7 @@ export function EventModal({
           actionType: form.macroType ? form.actionType : undefined,
           actionMode: form.macroType ? form.actionMode : undefined,
           inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
-          ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
+          ruleParams: { reminderOffsets: form.reminderOffsets },
           color: form.color,
           status: form.status,
         }, targetUserId);
@@ -481,7 +481,7 @@ export function EventModal({
           actionType: form.macroType ? form.actionType : undefined,
           actionMode: form.macroType ? form.actionMode : undefined,
           inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
-          ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
+          ruleParams: { reminderOffsets: form.reminderOffsets },
           color: form.color,
           status: form.status,
         }, targetUserId);
@@ -548,7 +548,7 @@ export function EventModal({
         actionType: form.macroType ? form.actionType : undefined,
         actionMode: form.macroType ? form.actionMode : undefined,
         inputs: form.macroType ? serializeInputsForServer(form.inputs) : undefined,
-        ruleParams: !form.macroType ? { reminderOffsets: form.reminderOffsets } : undefined,
+        ruleParams: { reminderOffsets: form.reminderOffsets },
         color: form.color,
         status: form.status,
       }, targetUserId);
@@ -859,81 +859,79 @@ export function EventModal({
                 </>
               )}
 
-              {/* 4b. Se Pratiche in Corso: promemoria builder */}
-              {form.macroType !== "ATTO_GIURIDICO" && (
-                <div>
-                  <Label>Promemoria</Label>
-                  <div className="space-y-2 mt-1.5">
-                    {form.reminderOffsets.map((days, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm((f) => {
-                              const next = [...f.reminderOffsets];
-                              next[i] = Math.max(1, next[i] - 1);
-                              return { ...f, reminderOffsets: next };
-                            })
-                          }
-                          className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                          aria-label="Diminuisci giorni"
-                        >
-                          −
-                        </button>
-                        <span className="w-10 text-center text-sm font-medium text-zinc-900 select-none">
-                          {days}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm((f) => {
-                              const next = [...f.reminderOffsets];
-                              next[i] = next[i] + 1;
-                              return { ...f, reminderOffsets: next };
-                            })
-                          }
-                          className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                          aria-label="Aumenta giorni"
-                        >
-                          +
-                        </button>
-                        <span className="text-sm text-zinc-600">giorni prima</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm((f) => ({
-                              ...f,
-                              reminderOffsets: f.reminderOffsets.filter((_, idx) => idx !== i),
-                              generateSubEvents: f.reminderOffsets.length > 1,
-                              ruleTemplateId: f.reminderOffsets.length > 1 ? "reminder" : f.ruleTemplateId,
-                            }))
-                          }
-                          className="text-red-500 hover:text-red-700 text-lg leading-none px-1"
-                          aria-label="Rimuovi promemoria"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setForm((f) => ({
-                          ...f,
-                          reminderOffsets: [...f.reminderOffsets, 7],
-                          generateSubEvents: true,
-                          ruleTemplateId: "reminder",
-                        }))
-                      }
-                      className="mt-1 border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-                    >
-                      + Aggiungi promemoria
-                    </Button>
-                  </div>
+              {/* 4b. Promemoria (tutte le sezioni: Pratiche in Corso, Atto Giuridico, future). Default: un solo promemoria a 7 giorni; frecce per i giorni, aggiungi/rimuovi a piacimento. */}
+              <div>
+                <Label>Promemoria</Label>
+                <div className="space-y-2 mt-1.5">
+                  {form.reminderOffsets.map((days, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => {
+                            const next = [...f.reminderOffsets];
+                            next[i] = Math.max(1, next[i] - 1);
+                            return { ...f, reminderOffsets: next };
+                          })
+                        }
+                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
+                        aria-label="Diminuisci giorni"
+                      >
+                        −
+                      </button>
+                      <span className="w-10 text-center text-sm font-medium text-zinc-900 select-none">
+                        {days}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => {
+                            const next = [...f.reminderOffsets];
+                            next[i] = next[i] + 1;
+                            return { ...f, reminderOffsets: next };
+                          })
+                        }
+                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
+                        aria-label="Aumenta giorni"
+                      >
+                        +
+                      </button>
+                      <span className="text-sm text-zinc-600">giorni prima</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            reminderOffsets: f.reminderOffsets.filter((_, idx) => idx !== i),
+                            generateSubEvents: f.reminderOffsets.length > 1,
+                            ruleTemplateId: f.reminderOffsets.length > 1 ? (f.macroType === "ATTO_GIURIDICO" ? "atto-giuridico" : "reminder") : f.ruleTemplateId,
+                          }))
+                        }
+                        className="text-red-500 hover:text-red-700 text-lg leading-none px-1"
+                        aria-label="Rimuovi promemoria"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        reminderOffsets: [...f.reminderOffsets, 7],
+                        generateSubEvents: true,
+                        ruleTemplateId: form.macroType === "ATTO_GIURIDICO" ? "atto-giuridico" : "reminder",
+                      }))
+                    }
+                    className="mt-1 border-zinc-300 text-zinc-700 hover:bg-zinc-50"
+                  >
+                    + Aggiungi promemoria
+                  </Button>
                 </div>
-              )}
+              </div>
 
               {/* 5. Note */}
               <div>

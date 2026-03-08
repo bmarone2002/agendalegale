@@ -52,9 +52,7 @@ async function loadParentContext(parentEventId: string): Promise<ParentContext |
     updatedAt: parent.updatedAt,
   };
 
-  const userSelections = (parent.ruleTemplateId === "atto-giuridico"
-    ? inputsParsed
-    : { ...inputsParsed, ...ruleParamsParsed }) as Record<string, unknown>;
+  const userSelections = { ...inputsParsed, ...ruleParamsParsed } as Record<string, unknown>;
 
   return { parent, eventForRule, userSelections, subEvents: parent.subEvents };
 }
