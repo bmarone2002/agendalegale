@@ -46,7 +46,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <img
             src="/logo-agenda-legale.png"
             alt="Agenda Legale"
-            className="h-14 w-full max-w-[180px] scale-125 object-contain object-center"
+            className="h-14 w-full max-w-[180px] scale-150 object-contain object-center"
             onError={() => setLogoError(true)}
           />
         ) : (

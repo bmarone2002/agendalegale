@@ -126,6 +126,17 @@ body {
 .event-modal-light input { background-color: #fff !important; color: #171717 !important; border-color: #e4e4e7 !important; }
 .event-modal-light [data-radix-select-trigger],
 .event-modal-light [role="combobox"] { background-color: #fff !important; color: #171717 !important; border-color: #e4e4e7 !important; }
+/* Nessun bordo nero/ring al focus nelle caselle della modale evento */
+.event-modal-light input:focus,
+.event-modal-light input:focus-visible,
+.event-modal-light textarea:focus,
+.event-modal-light textarea:focus-visible,
+.event-modal-light [data-radix-select-trigger]:focus,
+.event-modal-light [data-radix-select-trigger]:focus-visible,
+.event-modal-light [role="combobox"]:focus,
+.event-modal-light [role="combobox"]:focus-visible,
+.event-modal-light button:focus,
+.event-modal-light button:focus-visible { outline: none !important; box-shadow: none !important; border-color: #e4e4e7 !important; }
 .event-modal-light label { color: #3f3f46; }
 /* Tab: barra e tab sempre chiare */
 .event-modal-light [role="tablist"] { background-color: #f4f4f5 !important; color: #52525b !important; }
