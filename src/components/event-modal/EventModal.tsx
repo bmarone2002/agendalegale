@@ -50,6 +50,8 @@ interface EventModalProps {
   onDraftCleared?: (draftId: string | null) => void;
   targetUserId?: string;
   readOnly?: boolean;
+  /** Se impostato, apre il tab Regole & Sottoeventi e evidenzia/scrolla a questo sottoevento (es. click su promemoria in calendario). */
+  highlightSubEventId?: string | null;
 }
 
 /** Palette colori per tag evento (evento + sottoeventi). Testo bianco leggibile. */
@@ -186,6 +188,7 @@ export function EventModal({
   onDraftCleared,
   targetUserId,
   readOnly = false,
+  highlightSubEventId: highlightSubEventIdProp = null,
 }: EventModalProps) {
   // Data evento: solo i valori attuali del form contano. initialStart/initialEnd servono solo come default iniziale se apri da click sul calendario; se modifichi data/ora in creazione, resta ciò che hai impostato.
   const [form, setForm] = useState<EventFormState>(() => {
@@ -219,12 +222,15 @@ export function EventModal({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dettagli" | "regole" | "prosecuzione">("dettagli");
+  const [activeTab, setActiveTab] = useState<"dettagli" | "regole" | "prosecuzione">(
+    mode === "edit" && highlightSubEventIdProp ? "regole" : "dettagli"
+  );
   const [calculating, setCalculating] = useState(false);
   const [parsingDocument, setParsingDocument] = useState(false);
   const [popoverContainer, setPopoverContainer] = useState<HTMLElement | null>(null);
   const [selectedSubEventId, setSelectedSubEventId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const highlightRowRef = useRef<HTMLLIElement | null>(null);
   /** Se true, non sovrascrivere la lista preview con l'useEffect (l'utente ha rimosso elementi con ×). Si resetta solo al click su Calcola. */
   const previewEditedByUserRef = useRef(false);
   /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
@@ -259,13 +265,27 @@ export function EventModal({
         status: (e.status === "done" ? "done" : "pending") as "pending" | "done",
       });
       setSubEvents(e.subEvents ?? []);
-      setSelectedSubEventId(null);
+      const subs = e.subEvents ?? [];
+      if (highlightSubEventIdProp && subs.some((se) => se.id === highlightSubEventIdProp)) {
+        setSelectedSubEventId(highlightSubEventIdProp);
+      } else {
+        setSelectedSubEventId(null);
+      }
     }
-  }, [targetUserId]);
+  }, [targetUserId, highlightSubEventIdProp]);
 
   useEffect(() => {
     if (mode === "edit" && eventId) loadEvent(eventId);
   }, [mode, eventId, loadEvent]);
+
+  // Scroll al promemoria evidenziato quando si apre dal calendario (tab Regole già attiva)
+  useEffect(() => {
+    if (activeTab !== "regole" || !(highlightSubEventIdProp ?? selectedSubEventId)) return;
+    const id = setTimeout(() => {
+      highlightRowRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(id);
+  }, [activeTab, highlightSubEventIdProp, selectedSubEventId, subEvents, previewSubEvents]);
 
   useEffect(() => {
     if (!form.generateSubEvents || !form.ruleTemplateId) {
@@ -1028,9 +1048,11 @@ export function EventModal({
                           const isDone = isSavedSub && (s as SubEvent).status === "done";
                           const currentId = (s as { id?: string }).id ?? `sub-${idx}`;
                           const isSelected = isSavedSub && selectedSubEventId === currentId;
+                          const isHighlightRow = currentId === (highlightSubEventIdProp ?? selectedSubEventId);
                           return (
                             <li
                               key={currentId}
+                              ref={isHighlightRow ? (el) => { highlightRowRef.current = el; } : undefined}
                               className={`border-b pb-2 flex items-start gap-2 rounded-md transition-colors ${
                                 isSelected
                                   ? "bg-red-100/70 border-red-300"

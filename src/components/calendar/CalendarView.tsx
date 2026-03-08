@@ -136,7 +136,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const [viewTitle, setViewTitle] = useState<string>("");
   const [modalState, setModalState] = useState<
     | { mode: "create"; start?: Date; end?: Date; draftId?: string | null; initialDraftForm?: any }
-    | { mode: "edit"; eventId: string }
+    | { mode: "edit"; eventId: string; highlightSubEventId?: string }
     | null
   >(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -395,7 +395,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       }
       const isSub = ext.isSubEvent as boolean | undefined;
       const eventId = isSub ? (ext.parentEventId as string) : (arg.event.id as string);
-      setModalState({ mode: "edit", eventId });
+      const highlightSubEventId = isSub ? (arg.event.id as string) : undefined;
+      setModalState({ mode: "edit", eventId, highlightSubEventId });
     },
     [draftEvents]
   );
@@ -870,6 +871,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           draftId={modalState.mode === "create" ? modalState.draftId ?? null : undefined}
           initialDraft={modalState.mode === "create" ? modalState.initialDraftForm : undefined}
           eventId={modalState.mode === "edit" ? modalState.eventId : undefined}
+          highlightSubEventId={modalState.mode === "edit" ? modalState.highlightSubEventId : undefined}
           onClose={handleModalClose}
           onChanged={handleModalChanged}
           onDeleted={handleModalDeleted}
