@@ -631,6 +631,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     if (!isSub && arg.view.type.startsWith("dayGrid")) {
       const evStatus = arg.event.extendedProps.status as string | undefined;
       const isDoneEv = evStatus === "done";
+      const bgColor = arg.event.backgroundColor as string | undefined;
+      const hasTagColor = bgColor && bgColor !== "#ffffff";
+      const dotColor = hasTagColor ? bgColor : "#171717";
       return (
         <div className="fc-event-main-frame flex items-center gap-1">
           {isDoneEv ? (
@@ -640,7 +643,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               </svg>
             </span>
           ) : (
-            <span aria-hidden className="mr-1" style={{ color: "#171717" }}>•</span>
+            <span aria-hidden className="mr-1" style={{ color: dotColor }}>•</span>
           )}
           <span className={`truncate ${isDoneEv ? "line-through text-zinc-400" : ""}`} style={{ color: isDoneEv ? undefined : "#171717" }}>
             {arg.event.title}
