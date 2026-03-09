@@ -14,9 +14,10 @@ import type { Event as AppEvent, SubEvent } from "@/types";
 import { EventModal } from "@/components/event-modal/EventModal";
 import { Button } from "@/components/ui/button";
 
-// Sottoeventi: rosso (pending), verde (done).
+// Sottoeventi: rosso (pending), verde (done), neutro per promemoria futuri (prima del giorno).
 const SUB_EVENT_COLOR_PENDING = "#C62828";
 const SUB_EVENT_COLOR_DONE = "#2E7D32";
+const SUB_EVENT_COLOR_FUTURE = "#e4e4e7"; // nessun colore fino al giorno del promemoria
 
 type SearchSuggestion = {
   eventId: string;
@@ -69,9 +70,19 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
       extendedProps: { type: e.type, tags: e.tags, isSubEvent: false, status: e.status ?? "pending" },
     },
   ];
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
   (e.subEvents ?? []).forEach((se: SubEvent) => {
     const isDone = se.status === "done";
-    const subBg = isDone ? SUB_EVENT_COLOR_DONE : SUB_EVENT_COLOR_PENDING;
+    const isPromemoria = se.kind === "promemoria";
+    const dueDate = new Date(se.dueAt);
+    dueDate.setHours(0, 0, 0, 0);
+    const isFutureReminder = isPromemoria && dueDate > todayStart;
+    const subBg = isFutureReminder
+      ? SUB_EVENT_COLOR_FUTURE
+      : isDone
+        ? SUB_EVENT_COLOR_DONE
+        : SUB_EVENT_COLOR_PENDING;
     out.push({
       id: se.id,
       title: se.title,
@@ -509,12 +520,18 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status = arg.event.extendedProps.status as string | undefined;
       const isDone = status === "done";
       const isReminder = kind === "promemoria";
+      const evStart = arg.event.start;
+      const evDay = evStart ? new Date(typeof evStart === "string" ? evStart : evStart.getTime()) : null;
+      if (evDay) evDay.setHours(0, 0, 0, 0);
+      const todayList = new Date();
+      todayList.setHours(0, 0, 0, 0);
+      const isFutureReminder = isReminder && evDay != null && evDay > todayList;
       return (
         <div
           className="fc-event-main-frame flex items-center gap-2 rounded border-l-4 pl-1"
           style={{ borderLeftColor: borderColor ?? undefined }}
         >
-          {canEdit ? (
+          {canEdit && !isFutureReminder ? (
           <button
             type="button"
             aria-label={isDone ? "Segna come non fatto" : "Segna come fatto"}
@@ -547,7 +564,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </button>
           ) : (
             <span
-              className={`inline-block h-3 w-3 rounded-full shrink-0 ${isDone ? "bg-emerald-500" : "bg-red-500"}`}
+              className={`inline-block h-3 w-3 rounded-full shrink-0 ${isFutureReminder ? "bg-zinc-400" : isDone ? "bg-emerald-500" : "bg-red-500"}`}
             />
           )}
           <span className="fc-list-event-title flex-1 truncate" style={{ color: "#171717" }}>{arg.event.title}</span>
@@ -584,7 +601,18 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const borderColor = arg.event.borderColor as string | undefined;
       const status = arg.event.extendedProps.status as string | undefined;
       const isDone = status === "done";
-      const arrowColorClass = isDone ? "text-emerald-500" : "text-red-500";
+      const isPromemoriaSub = kind === "promemoria";
+      const evStart = arg.event.start;
+      const evDay = evStart ? new Date(typeof evStart === "string" ? evStart : evStart.getTime()) : null;
+      if (evDay) evDay.setHours(0, 0, 0, 0);
+      const todaySub = new Date();
+      todaySub.setHours(0, 0, 0, 0);
+      const isFutureReminderSub = isPromemoriaSub && evDay != null && evDay > todaySub;
+      const arrowColorClass = isFutureReminderSub
+        ? "text-zinc-400"
+        : isDone
+          ? "text-emerald-500"
+          : "text-red-500";
       return (
         <div
           className="fc-event-main-frame flex items-center gap-1 rounded border-l-2 pl-1"
