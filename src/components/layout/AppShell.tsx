@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -70,8 +71,13 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
           </header>
           <div className="border-b border-[var(--gold)]/10 bg-[var(--navy)]/80 px-4 py-1.5 text-center text-xs text-[var(--gold)] sm:px-6">
             Ti suggeriamo di scaricare periodicamente un backup del tuo calendario dalla sezione{" "}
-            <span className="font-semibold">Backup</span> per tenere sempre al sicuro i tuoi eventi e poterli
-            recuperare in ogni momento.
+            <Link
+              href="/backup"
+              className="font-semibold underline underline-offset-2 hover:text-white"
+            >
+              Backup
+            </Link>{" "}
+            per tenere sempre al sicuro i tuoi eventi e poterli recuperare in ogni momento.
           </div>
           <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-5 lg:p-6" style={{ backgroundColor: "var(--surface)" }}>
             {children}
