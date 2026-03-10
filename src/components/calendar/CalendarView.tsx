@@ -567,6 +567,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 arg.event.setExtendedProp("status", newStatus);
                 arg.event.setProp("backgroundColor", newBg);
                 arg.event.setProp("borderColor", newBg);
+                if (newStatus === "done" && !showDone) {
+                  arg.event.remove();
+                }
+                if (newStatus === "pending" && !showPending) {
+                  arg.event.remove();
+                }
               }
             }}
           >
@@ -715,7 +721,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       );
     }
     return true;
-  }, [canEdit, targetUserId]);
+  }, [canEdit, targetUserId, showPending, showDone]);
 
   return (
       <div className="flex h-full min-w-0 flex-col gap-2 sm:gap-3 calendar-theme">
@@ -771,7 +777,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 <Checkbox
                   checked={showPending}
                   onCheckedChange={(v) => setShowPending(Boolean(v))}
-                  className="h-3.5 w-3.5"
+                  className="h-3.5 w-3.5 pointer-events-none"
                 />
                 <span className="inline-flex items-center gap-1">
                   <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
@@ -786,7 +792,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 <Checkbox
                   checked={showDone}
                   onCheckedChange={(v) => setShowDone(Boolean(v))}
-                  className="h-3.5 w-3.5"
+                  className="h-3.5 w-3.5 pointer-events-none"
                 />
                 <span className="inline-flex items-center gap-1">
                   <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
