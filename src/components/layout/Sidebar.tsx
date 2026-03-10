@@ -8,6 +8,7 @@ const navItems = [
   { href: "/", label: "Calendario", icon: CalendarIcon },
   { href: "/shared", label: "Condivisioni", icon: ShareIcon },
   { href: "/backup", label: "Backup", icon: BackupIcon },
+  { href: "/guida", label: "Guida", icon: GuideIcon },
 ];
 
 function CalendarIcon({ className }: { className?: string }) {
@@ -48,6 +49,24 @@ function BackupIcon({ className }: { className?: string }) {
       <polyline points="14 2 14 8 10 8 10 2" />
       <path d="M9 20h10a1 1 0 0 0 1-1v-3" />
       <polyline points="7 16 3 20 7 20" />
+    </svg>
+  );
+}
+
+function GuideIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
     </svg>
   );
 }
