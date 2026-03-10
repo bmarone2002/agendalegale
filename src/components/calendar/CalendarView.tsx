@@ -13,6 +13,7 @@ import { regenerateSubEvents, updateSubEvent, deleteSubEvent } from "@/lib/actio
 import type { Event as AppEvent, SubEvent } from "@/types";
 import { EventModal } from "@/components/event-modal/EventModal";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Sottoeventi: rosso (pending), verde (done), neutro per promemoria futuri (prima del giorno).
 const SUB_EVENT_COLOR_PENDING = "#C62828";
@@ -167,6 +168,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     return window.localStorage.getItem("calendar:hideSubEvents") === "true";
   });
   const [draftEvents, setDraftEvents] = useState<DraftEvent[]>([]);
+  const [showPending, setShowPending] = useState<boolean>(true);
+  const [showDone, setShowDone] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -232,6 +235,15 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               } as Record<string, unknown>;
             });
             events = events.concat(draftFcEvents);
+            // Filtro stato: rossi (da fare) / verdi (completati)
+            events = events.filter((ev) => {
+              const ext = ev.extendedProps as { status?: string } | undefined;
+              const status = ext?.status === "done" ? "done" : "pending";
+              if (status === "done") {
+                return showDone;
+              }
+              return showPending;
+            });
             // Filtro "Solo eventi principali": nasconde promemoria e sottoeventi
             if (hideSubEvents) {
               events = events.filter((ev) => !(ev.extendedProps as { isSubEvent?: boolean }).isSubEvent);
@@ -255,7 +267,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           )
         );
     },
-    [isSearchActive, searchFilterEventId, hideSubEvents, draftEvents, targetUserId]
+    [isSearchActive, searchFilterEventId, hideSubEvents, draftEvents, showPending, showDone, targetUserId]
   );
 
   const applySuggestionSelection = useCallback(
@@ -726,7 +738,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             </Button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Toggle promemoria */}
             <button
               type="button"
@@ -748,6 +760,40 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 />
               </span>
             </button>
+            {/* Filtro stato eventi */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-zinc-600 whitespace-nowrap">Stato</span>
+              <button
+                type="button"
+                onClick={() => setShowPending((v) => !v)}
+                className="flex items-center gap-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-[11px] sm:text-xs text-zinc-700 hover:bg-zinc-50"
+              >
+                <Checkbox
+                  checked={showPending}
+                  onCheckedChange={(v) => setShowPending(Boolean(v))}
+                  className="h-3.5 w-3.5"
+                />
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
+                  <span>Da fare</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDone((v) => !v)}
+                className="flex items-center gap-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-[11px] sm:text-xs text-zinc-700 hover:bg-zinc-50"
+              >
+                <Checkbox
+                  checked={showDone}
+                  onCheckedChange={(v) => setShowDone(Boolean(v))}
+                  className="h-3.5 w-3.5"
+                />
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span>Completati</span>
+                </span>
+              </button>
+            </div>
             {/* Ricerca */}
             <div className="relative">
               <input
