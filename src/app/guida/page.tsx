@@ -35,91 +35,58 @@ export default function GuidaPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Hero */}
-        <section className="mb-10 rounded-2xl border border-[var(--gold)]/25 bg-gradient-to-r from-[var(--navy)] to-[var(--navy-light)] px-5 py-7 text-white shadow-sm sm:px-8 sm:py-9">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
-            <div className="flex-1">
-              <h1 className="text-2xl font-semibold sm:text-3xl">
-                Tutto quello che puoi fare con{" "}
-                <span className="text-[var(--gold)]">Agenda Legale</span>
-              </h1>
-              <p className="mt-3 text-sm text-zinc-100/90 sm:text-base">
-                Questa guida ti mostra, passo dopo passo, come usare il calendario, i promemoria, il
-                calcolo dei termini e i backup per gestire il tuo studio legale in modo più
-                organizzato.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-                <SignedIn>
-                  <Link
-                    href="/"
-                    className="inline-flex items-center rounded-md bg-[var(--gold)] px-4 py-2 font-semibold text-[var(--navy)] shadow-sm hover:bg-[var(--gold-light)]"
-                  >
-                    Vai al tuo calendario
-                  </Link>
-                </SignedIn>
-                <SignedOut>
-                  <SignInButton mode="redirect">
-                    <button
-                      type="button"
-                      className="inline-flex items-center rounded-md bg-[var(--gold)] px-4 py-2 font-semibold text-[var(--navy)] shadow-sm hover:bg-[var(--gold-light)]"
-                    >
-                      Accedi per usare il calendario
-                    </button>
-                  </SignInButton>
-                </SignedOut>
-                <Link
-                  href="#calendario"
-                  className="text-[var(--gold)] underline-offset-4 hover:underline"
+        {/* Intro semplice */}
+        <section className="mb-8">
+          <h1 className="text-2xl font-semibold text-[var(--navy)] sm:text-3xl">
+            Tutto quello che puoi fare con <span className="text-[var(--gold)]">Agenda Legale</span>
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm text-zinc-700 sm:text-base">
+            Questa guida ti accompagna nell&apos;uso del calendario, dei promemoria, del calcolo dei
+            termini e dei backup, così puoi gestire il tuo studio legale in modo ordinato e
+            sicuro.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+            <SignedIn>
+              <Link
+                href="/"
+                className="inline-flex items-center rounded-md bg-[var(--gold)] px-4 py-2 font-semibold text-[var(--navy)] shadow-sm hover:bg-[var(--gold-light)]"
+              >
+                Vai al tuo calendario
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="redirect">
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-md bg-[var(--gold)] px-4 py-2 font-semibold text-[var(--navy)] shadow-sm hover:bg-[var(--gold-light)]"
                 >
-                  Vai subito al calendario
-                </Link>
-                <Link
-                  href="#backup"
-                  className="text-[var(--gold)] underline-offset-4 hover:underline"
-                >
-                  Scopri come fare il backup
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex-1">
-              <div className="rounded-xl border border-[var(--gold)]/40 bg-black/15 p-4 backdrop-blur-sm">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--gold)]">
-                  Panoramica rapida
-                </p>
-                <ul className="space-y-2 text-xs text-zinc-100/90 sm:text-sm">
-                  <li>
-                    • <span className="font-medium">Calendario avanzato</span> – vedi tutti gli
-                    impegni con viste Giorno, Settimana, Mese e Agenda.
-                  </li>
-                  <li>
-                    • <span className="font-medium">Promemoria intelligenti</span> – non ti scordi
-                    più udienze, appuntamenti o scadenze.
-                  </li>
-                  <li>
-                    • <span className="font-medium">Calcolo termini</span> – calcola
-                    automaticamente le scadenze processuali.
-                  </li>
-                  <li>
-                    • <span className="font-medium">Backup</span> – scarica una copia completa del
-                    calendario quando vuoi.
-                  </li>
-                </ul>
-              </div>
-            </div>
+                  Accedi per usare il calendario
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <Link
+              href="#calendario"
+              className="text-[var(--navy)] underline-offset-4 hover:underline"
+            >
+              Vai subito alla sezione Calendario
+            </Link>
+            <Link
+              href="#backup"
+              className="text-[var(--navy)] underline-offset-4 hover:underline"
+            >
+              Scopri come fare il backup
+            </Link>
           </div>
         </section>
 
         {/* Sezione 1 – Calendario */}
         <section id="calendario" className="mb-10 scroll-mt-20">
-          <div className="mb-4 flex items-baseline justify-between gap-3">
-            <h2 className="text-xl font-semibold text-[var(--navy)]">
-              1. Il calendario: il cuore di Agenda Legale
-            </h2>
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--gold)]">
-              Vista Calendario
-            </span>
-          </div>
+          <h2 className="mb-1 text-xl font-semibold text-[var(--navy)]">
+            1. Il calendario: il cuore di Agenda Legale
+          </h2>
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-[var(--gold)]">
+            Vista calendario
+          </p>
           <p className="mb-4 text-sm text-zinc-700">
             Dal menu laterale clicca su <span className="font-medium">Calendario</span>. Qui trovi
             tutte le udienze, gli appuntamenti e le scadenze del tuo studio con viste{" "}

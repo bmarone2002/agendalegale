@@ -71,10 +71,10 @@ function LandingPage() {
 
       {/* Hero */}
       <main>
-        <section className="border-b border-[var(--gold)]/15 bg-gradient-to-b from-[var(--navy)] via-[var(--navy)] to-[var(--surface)]">
+        <section className="border-b border-zinc-200 bg-gradient-to-b from-[#f5f0e6] via-[#f8f4ec] to-[var(--surface)]">
           <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:flex-row lg:items-center lg:py-18">
             {/* Text column */}
-            <div className="max-w-xl text-left text-white">
+            <div className="max-w-xl text-left text-[var(--navy)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">
                 Software per studi legali
               </p>
@@ -82,7 +82,7 @@ function LandingPage() {
                 Organizza il tuo lavoro legale{" "}
                 <span className="text-[var(--gold)]">in modo intelligente</span>
               </h1>
-              <p className="mb-6 text-sm text-zinc-100/85 sm:text-base">
+              <p className="mb-6 text-sm text-zinc-700 sm:text-base">
                 Agenda Legale è il calendario pensato per avvocati e studi legali: gestisci udienze,
                 scadenze, promemoria e termini in un&apos;unica interfaccia chiara e sempre
                 sincronizzata.
@@ -117,7 +117,7 @@ function LandingPage() {
                 <SignInButton mode="redirect">
                   <button
                     type="button"
-                    className="rounded-md border border-white/40 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
+                    className="rounded-md border border-[var(--navy)]/15 px-4 py-2 text-sm font-medium text-[var(--navy)] hover:bg-[var(--navy)] hover:text-white"
                   >
                     Ho già un account
                   </button>
@@ -301,13 +301,13 @@ function LandingPage() {
 function FeatureBullet(props: { title: string; children: React.ReactNode }) {
   const { title, children } = props;
   return (
-    <div className="flex gap-3 rounded-lg bg-black/10 p-3 backdrop-blur-sm">
+    <div className="flex gap-3 rounded-lg bg-white/90 p-3 shadow-sm">
       <div className="mt-1 h-6 w-6 shrink-0 rounded-full border border-[var(--gold)]/70 bg-[var(--gold)]/15 text-center text-[13px] font-semibold text-[var(--gold)]">
         ·
       </div>
       <div>
-        <p className="text-sm font-semibold text-white">{title}</p>
-        <p className="mt-1 text-xs text-zinc-100/80">{children}</p>
+        <p className="text-sm font-semibold text-[var(--navy)]">{title}</p>
+        <p className="mt-1 text-xs text-zinc-700">{children}</p>
       </div>
     </div>
   );
