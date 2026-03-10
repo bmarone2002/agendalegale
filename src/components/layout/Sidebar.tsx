@@ -81,12 +81,14 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex min-h-[72px] w-full items-center justify-center overflow-hidden border-b border-[var(--gold)]/30 bg-[var(--navy)] px-3 py-3" style={{ backgroundColor: "var(--navy)" }}>
         {!logoError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src="/logo-agenda-legale.png"
-            alt="Agenda Legale"
-            className="h-14 w-full max-w-[180px] scale-150 object-contain object-center"
-            onError={() => setLogoError(true)}
-          />
+          <div className="flex items-center justify-center">
+            <img
+              src="/logo-agenda-legale.png"
+              alt="Agenda Legale"
+              className="h-16 w-auto max-w-[220px] object-contain"
+              onError={() => setLogoError(true)}
+            />
+          </div>
         ) : (
           <div className="flex h-10 w-10 items-center justify-center rounded bg-[var(--gold)]/20 text-[var(--gold)]">
             <CalendarIcon className="h-6 w-6" />
