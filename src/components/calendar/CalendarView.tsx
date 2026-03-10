@@ -726,25 +726,82 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   return (
       <div className="flex h-full min-w-0 flex-col gap-2 sm:gap-3 calendar-theme">
       <div className="flex flex-col gap-2 sm:gap-3 mb-1">
-        {/* Riga 1: Nuovo evento + ricerca */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3">
-          <div className="flex items-center gap-2">
-            {canEdit && (
-            <Button
-              type="button"
-              size="sm"
-              className="h-9 rounded-md px-4 text-sm font-medium bg-[var(--navy)] text-white hover:bg-[var(--navy-light)] border-0 shadow-sm transition-colors"
-              onClick={() => {
-                const slot = findNextAvailableSlot(new Date(), allEvents);
-                setModalState({ mode: "create", start: slot.start, end: slot.end });
-              }}
-            >
-              <span className="mr-1">Nuovo evento</span>
-              <span className="text-xs">▾</span>
-            </Button>
-            )}
+        {/* Riga 1: Nuovo evento + ricerca + filtri (layout ottimizzato per mobile) */}
+        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Nuovo evento + ricerca */}
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex items-center">
+              {canEdit && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-9 rounded-md px-4 text-sm font-medium bg-[var(--navy)] text-white hover:bg-[var(--navy-light)] border-0 shadow-sm transition-colors"
+                  onClick={() => {
+                    const slot = findNextAvailableSlot(new Date(), allEvents);
+                    setModalState({ mode: "create", start: slot.start, end: slot.end });
+                  }}
+                >
+                  <span className="mr-1">Nuovo evento</span>
+                  <span className="text-xs">▾</span>
+                </Button>
+              )}
+            </div>
+            {/* Ricerca (a destra del bottone su mobile, come campo full-width) */}
+            <div className="relative w-full sm:w-auto sm:min-w-[200px]">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Cerca per titolo o promemoria…"
+                className={`h-8 w-full sm:w-64 rounded-md border bg-white px-2 pr-7 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-[var(--navy)] focus:border-[var(--navy)] ${
+                  isSearchActive ? "border-[var(--navy)] ring-1 ring-[var(--navy)]" : "border-zinc-300"
+                }`}
+              />
+              {(isSearchActive || searchQuery.length > 0) && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-5 w-5 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                  title="Annulla ricerca"
+                  aria-label="Annulla ricerca"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
+                    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              )}
+              {searchSuggestions.length > 0 && (
+                <div className="absolute z-20 mt-1 w-full sm:w-72 rounded-lg border border-zinc-200 bg-white shadow-md max-h-60 overflow-auto text-xs sm:text-sm">
+                  {searchSuggestions.map((s) => (
+                    <button
+                      key={`${s.eventId}-${s.label}-${s.matchType}`}
+                      type="button"
+                      className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--surface)] transition-colors"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSuggestionClick(s);
+                      }}
+                    >
+                      <span className="font-medium text-zinc-800 truncate">
+                        {s.label}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+                        {s.matchType === "titolo" ? "Titolo evento" : "Promemoria"}
+                      </span>
+                      {s.detail && (
+                        <span className="text-[11px] text-zinc-500 truncate">
+                          Evento: {s.detail}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          {/* Filtri Promemoria + Stato */}
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
             {/* Toggle promemoria */}
             <button
               type="button"
@@ -799,59 +856,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   <span>Completati</span>
                 </span>
               </button>
-            </div>
-            {/* Ricerca */}
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-                placeholder="Cerca per titolo o promemoria…"
-                className={`h-8 w-52 sm:w-64 rounded-md border bg-white px-2 pr-7 text-xs sm:text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-[var(--navy)] focus:border-[var(--navy)] ${
-                  isSearchActive ? "border-[var(--navy)] ring-1 ring-[var(--navy)]" : "border-zinc-300"
-                }`}
-              />
-              {(isSearchActive || searchQuery.length > 0) && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-5 w-5 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
-                  title="Annulla ricerca"
-                  aria-label="Annulla ricerca"
-                >
-                  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
-                    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              )}
-              {searchSuggestions.length > 0 && (
-                <div className="absolute z-20 mt-1 w-64 sm:w-72 rounded-lg border border-zinc-200 bg-white shadow-md max-h-60 overflow-auto text-xs sm:text-sm">
-                  {searchSuggestions.map((s) => (
-                    <button
-                      key={`${s.eventId}-${s.label}-${s.matchType}`}
-                      type="button"
-                      className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--surface)] transition-colors"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleSuggestionClick(s);
-                      }}
-                    >
-                      <span className="font-medium text-zinc-800 truncate">
-                        {s.label}
-                      </span>
-                      <span className="text-[10px] uppercase tracking-wide text-zinc-500">
-                        {s.matchType === "titolo" ? "Titolo evento" : "Promemoria"}
-                      </span>
-                      {s.detail && (
-                        <span className="text-[11px] text-zinc-500 truncate">
-                          Evento: {s.detail}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
