@@ -92,6 +92,10 @@ export function MacroAreaPanel({
   const isNotificaCitazioneConDueDate =
     procedimento === "CITAZIONE_CIVILE" && eventoCode === "NOTIFICA_CITAZIONE";
 
+  /** Per Citazione civile: Data prima udienza serve fino a Memoria 3 (ordine 7) per creare Prima udienza e Memorie 1,2,3. */
+  const showDataPrimaUdienza =
+    procedimento === "CITAZIONE_CIVILE" && selectedEvento && selectedEvento.ordine <= 7;
+
   const currentDate = selectedEvento
     ? toDateOrNull(inputs[selectedEvento.inputKey])
     : null;
@@ -189,20 +193,37 @@ export function MacroAreaPanel({
         </div>
       )}
 
-      {/* Livello 5: Data (una o due date se Notifica citazione) */}
+      {/* Livello 5: Data (una o due date se Notifica citazione; Data prima udienza fino a Memoria 3) */}
       {selectedEvento && !isNotificaCitazioneConDueDate && (
-        <div className="pt-2 border-t border-zinc-200">
-          <Label className="text-sm font-semibold text-zinc-700">
-            Data – {selectedEvento.label}
-          </Label>
-          <DatePicker
-            value={currentDate}
-            onChange={handleDateChange(selectedEvento.inputKey)}
-            placeholder={`Inserisci data ${selectedEvento.label.toLowerCase()}`}
-          />
-          <p className="text-xs text-zinc-500 mt-1">
-            Questa è la data base da cui verranno calcolati i termini collegati all&apos;evento selezionato.
-          </p>
+        <div className="pt-2 border-t border-zinc-200 space-y-4">
+          <div>
+            <Label className="text-sm font-semibold text-zinc-700">
+              Data – {selectedEvento.label}
+            </Label>
+            <DatePicker
+              value={currentDate}
+              onChange={handleDateChange(selectedEvento.inputKey)}
+              placeholder={`Inserisci data ${selectedEvento.label.toLowerCase()}`}
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Questa è la data base da cui verranno calcolati i termini collegati all&apos;evento selezionato.
+            </p>
+          </div>
+          {showDataPrimaUdienza && (
+            <div>
+              <Label className="text-sm font-semibold text-zinc-700">
+                Data prima udienza
+              </Label>
+              <DatePicker
+                value={dataPrimaUdienza}
+                onChange={handleDateChange("dataPrimaUdienza")}
+                placeholder="Inserisci data prima udienza"
+              />
+              <p className="text-xs text-zinc-500 mt-1">
+                Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171 ter n.1, n.2, n.3.
+              </p>
+            </div>
+          )}
         </div>
       )}
       {selectedEvento && isNotificaCitazioneConDueDate && (

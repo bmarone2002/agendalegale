@@ -398,19 +398,36 @@ export function EventModal({
     if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
       const isNotificaCitazione =
         form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE";
+      const eventiConDataPrimaUdienza = new Set([
+        "NOTIFICA_CITAZIONE", "ISCRIZIONE_RUOLO", "COSTITUZIONE_CONVENUTO",
+        "SLITTAMENTO_UDIENZA", "MEMORIA_171TER_1", "MEMORIA_171TER_2", "MEMORIA_171TER_3",
+      ]);
+      const richiedeDataPrimaUdienza =
+        form.procedimento === "CITAZIONE_CIVILE" &&
+        form.eventoCode &&
+        eventiConDataPrimaUdienza.has(form.eventoCode);
+      const hasDataPrimaUdienza =
+        typeof form.inputs?.dataPrimaUdienza === "string" &&
+        String(form.inputs.dataPrimaUdienza).trim().length > 0;
       const hasBaseDate = isNotificaCitazione
         ? typeof form.inputs?.dataPrimaNotificaCitazione === "string" &&
           String(form.inputs.dataPrimaNotificaCitazione).trim().length > 0 &&
-          typeof form.inputs?.dataPrimaUdienza === "string" &&
-          String(form.inputs.dataPrimaUdienza).trim().length > 0
-        : Object.values(form.inputs ?? {}).some(
-            (v) => typeof v === "string" && v.trim().length > 0,
-          );
+          hasDataPrimaUdienza
+        : richiedeDataPrimaUdienza
+          ? hasDataPrimaUdienza &&
+            Object.entries(form.inputs ?? {}).some(
+              ([k, v]) => k !== "dataPrimaUdienza" && typeof v === "string" && v.trim().length > 0
+            )
+          : Object.values(form.inputs ?? {}).some(
+              (v) => typeof v === "string" && v.trim().length > 0,
+            );
       if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
         setError(
           isNotificaCitazione
             ? "Inserisci entrambe le date: Notifica atto di citazione e Data prima udienza, poi clicca Calcola."
-            : "Seleziona macro area, procedimento, parte, evento e inserisci la data base (es. data udienza) prima di calcolare. Calcola genera tutte le fasi future dalla fase scelta."
+            : richiedeDataPrimaUdienza
+              ? "Inserisci la data dell'evento e la Data prima udienza, poi clicca Calcola."
+              : "Seleziona macro area, procedimento, parte, evento e inserisci la data base (es. data udienza) prima di calcolare. Calcola genera tutte le fasi future dalla fase scelta."
         );
         return;
       }
