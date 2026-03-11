@@ -48,6 +48,7 @@ async function loadParentContext(parentEventId: string): Promise<ParentContext |
     macroArea: parent.macroArea ?? null,
     procedimento: parent.procedimento ?? null,
     parteProcessuale: parent.parteProcessuale ?? null,
+    eventoCode: (parent as { eventoCode?: string | null }).eventoCode ?? null,
     actionType: parent.actionType ?? undefined,
     actionMode: parent.actionMode ?? undefined,
     inputs: inputsParsed,
@@ -55,7 +56,13 @@ async function loadParentContext(parentEventId: string): Promise<ParentContext |
     updatedAt: parent.updatedAt,
   };
 
-  const userSelections = { ...inputsParsed, ...ruleParamsParsed } as Record<string, unknown>;
+  const userSelections = {
+    ...inputsParsed,
+    ...ruleParamsParsed,
+    ...((parent as { eventoCode?: string | null }).eventoCode
+      ? { eventoCode: (parent as { eventoCode?: string | null }).eventoCode }
+      : {}),
+  } as Record<string, unknown>;
 
   return { parent, eventForRule, userSelections, subEvents: parent.subEvents };
 }
@@ -113,6 +120,7 @@ export interface PreviewSubEventInput {
   macroArea?: string | null;
   procedimento?: string | null;
   parteProcessuale?: string | null;
+  eventoCode?: string | null;
   actionType?: string | null;
   actionMode?: string | null;
   inputs?: Record<string, unknown> | null;
@@ -153,6 +161,7 @@ export async function getSubEventsPreview(
       macroArea: input.macroArea ?? null,
       procedimento: input.procedimento ?? null,
       parteProcessuale: input.parteProcessuale ?? null,
+      eventoCode: input.eventoCode ?? null,
       actionType: input.actionType ?? undefined,
       actionMode: input.actionMode ?? undefined,
       inputs: input.inputs ?? undefined,
@@ -162,7 +171,7 @@ export async function getSubEventsPreview(
     const candidates = runRulesForEvent(input.ruleTemplateId, {
       event: eventForRule,
       settings,
-      userSelections: input.inputs ?? {},
+      userSelections: { ...(input.inputs ?? {}), eventoCode: input.eventoCode },
     });
     return {
       success: true,

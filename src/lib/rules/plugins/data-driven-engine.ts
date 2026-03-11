@@ -151,7 +151,28 @@ function processRule(
     return { subEvents: out, chainedInput };
   }
 
-  // Caso 2: riga senza calcolo → solo promemoria legati alla data base.
+  // Caso 2: riga senza calcolo → evento alla data base + promemoria legati a quella data.
+  const eventAt = applyDeadlineTime(baseDate, settings);
+  out.push({
+    title: rule.eventoLabel,
+    kind: "attivita",
+    dueAt: eventAt,
+    status: "pending",
+    priority: rule.ordine,
+    ruleId: "data-driven",
+    ruleParams: {
+      macroArea: rule.macroArea,
+      procedimento: rule.procedimento,
+      parteProcessuale: rule.parteProcessuale,
+      eventoBaseKey: rule.eventoBaseKey ?? selectedEventoInputKey,
+      tipoTermine: rule.tipoTermine,
+      norma: rule.norma,
+    },
+    explanation: rule.norma ? `${rule.eventoLabel} – ${rule.norma}` : rule.eventoLabel,
+    createdBy: "automatico",
+    isPlaceholder: false,
+  });
+
   for (const daysBefore of reminderOffsets) {
     const offset = daysBefore > 0 ? -daysBefore : daysBefore;
     const reminderRaw = addDays(baseDate, offset);
