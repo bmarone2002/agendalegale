@@ -162,6 +162,8 @@ function normalizeDisplayError(err: unknown): string {
 function getPrimaryDateFromInputs(inputs: Record<string, unknown>): Date | null {
   const dateKeys = [
     "dataNotifica",
+    "dataPrimaNotificaCitazione",
+    "dataPrimaUdienza",
     "dataUdienzaComparizione",
     "dataUdienzaRiferimentoMemorie",
     "dataNotificaCitazione",
@@ -1153,7 +1155,7 @@ export function EventModal({
               {form.generateSubEvents ? (
                 <>
                   <p className="text-sm text-zinc-600">
-                    Dalla fase scelta in Dettagli e dalla data base inserita, il sistema calcola in automatico tutte le fasi successive della tabella (scadenze e promemoria). Qui vedi la preview; puoi rimuovere singole voci con × prima di salvare. In modifica usa &quot;Rigenera sottoeventi&quot; per ricalcolare.
+                    La data che inserisci è il riferimento: non si fanno calcoli a ritroso. Il sistema crea la fase selezionata a quella data e solo le scadenze direttamente calcolabili (es. da Notifica citazione → Iscrizione a ruolo). Le altre fasi (Memorie 171 ter, udienze successive) si generano con i rinvii. Qui vedi la preview; puoi rimuovere singole voci con × prima di salvare.
                   </p>
                   {(previewSubEvents.length > 0 || subEvents.length > 0) && (
                     <ScrollArea className="h-[280px] rounded-md border p-4">

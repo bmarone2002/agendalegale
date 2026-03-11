@@ -197,8 +197,10 @@ function processRule(
 }
 
 /**
- * Valuta tutte le righe della tabella a partire dalla fase selezionata (ordine >= startOrdine),
- * propagando le date tramite providesInputKey e generando sottoeventi per ogni riga calcolabile.
+ * Valuta le righe della tabella per la creazione pratica:
+ * - La fase selezionata dall'utente: si crea come "attività" alla data manuale inserita (nessun calcolo a ritroso, es. -120 gg).
+ * - Solo le righe successive direttamente calcolabili dalla stessa data: es. da "Notifica citazione" + data → solo "Iscrizione a ruolo" (+10 gg).
+ * Nessuna catena: i rinvii successivi genereranno le altre fasi (Memorie 1/2/3, ecc.) con una nuova data.
  */
 function evaluateMultiRowFromEventoCode(
   macroArea: MacroAreaCode,
@@ -224,8 +226,65 @@ function evaluateMultiRowFromEventoCode(
 
   const out: SubEventCandidate[] = [];
   const inputsCorrenti = { ...inputs } as Record<string, unknown>;
+  const initialInputKeys = new Set(
+    Object.entries(inputs).filter(([, v]) => typeof v === "string" && String(v).trim()).map(([k]) => k)
+  );
 
   for (const rule of rulesFromPhase) {
+    if (rule.ordine === startOrdine) {
+      // Fase selezionata: usa la data manuale come riferimento, crea solo attività (no -120 gg).
+      const baseValue = inputsCorrenti[selectedEventoInputKey] as string | undefined;
+      if (baseValue && typeof baseValue === "string" && baseValue.trim()) {
+        const baseDate = new Date(
+          baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue
+        );
+        if (!isNaN(baseDate.getTime())) {
+          const eventAt = applyDeadlineTime(baseDate, settings);
+          out.push({
+            title: rule.eventoLabel,
+            kind: "attivita",
+            dueAt: eventAt,
+            status: "pending",
+            priority: rule.ordine,
+            ruleId: "data-driven",
+            ruleParams: {
+              macroArea: rule.macroArea,
+              procedimento: rule.procedimento,
+              parteProcessuale: rule.parteProcessuale,
+              eventoBaseKey: selectedEventoInputKey,
+              tipoTermine: rule.tipoTermine,
+              norma: rule.norma,
+            },
+            explanation: rule.norma ? `${rule.eventoLabel} – ${rule.norma}` : rule.eventoLabel,
+            createdBy: "automatico",
+            isPlaceholder: false,
+          });
+          for (const daysBefore of reminderOffsets) {
+            const offset = daysBefore > 0 ? -daysBefore : daysBefore;
+            const reminderRaw = addDays(baseDate, offset);
+            const reminderAdjusted = adjustToNextBusinessDay(reminderRaw, settings);
+            const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
+            out.push({
+              title: `${rule.eventoLabel} – Promemoria (${Math.abs(offset)} gg prima)`,
+              kind: "promemoria",
+              dueAt: reminderAt,
+              status: "pending",
+              priority: 0,
+              ruleId: "data-driven",
+              ruleParams: { daysBefore: offset },
+              explanation: `Promemoria ${Math.abs(offset)} giorni prima dell'evento`,
+              createdBy: "automatico",
+              isPlaceholder: false,
+            });
+          }
+        }
+      }
+      continue;
+    }
+
+    // ordine > startOrdine: solo righe la cui data base è già negli input (nessuna catena).
+    if (!rule.eventoBaseKey || !initialInputKeys.has(rule.eventoBaseKey)) continue;
+
     const result = processRule(
       rule,
       inputsCorrenti,
@@ -234,34 +293,6 @@ function evaluateMultiRowFromEventoCode(
       selectedEventoInputKey,
     );
     out.push(...result.subEvents);
-
-    // Propaga la data calcolata come input per le righe successive (chaining).
-    if (
-      rule.providesInputKey &&
-      rule.direzioneCalcolo != null &&
-      rule.numero != null &&
-      rule.unita != null
-    ) {
-      const baseKey = rule.eventoBaseKey ?? selectedEventoInputKey;
-      const baseVal = inputsCorrenti[baseKey] as string | undefined;
-      if (baseVal && typeof baseVal === "string" && baseVal.trim()) {
-        const baseDate = new Date(
-          baseVal.length === 10 ? baseVal + "T12:00:00" : baseVal
-        );
-        if (!isNaN(baseDate.getTime())) {
-          let computed = computeDate(
-            baseDate,
-            rule.direzioneCalcolo,
-            rule.numero,
-            rule.unita
-          );
-          if (rule.isPromemoriaFestivi) {
-            computed = adjustToNextBusinessDay(computed, settings);
-          }
-          inputsCorrenti[rule.providesInputKey] = toDateOnlyString(computed);
-        }
-      }
-    }
   }
 
   const withDates = out.filter((s) => s.dueAt != null);
