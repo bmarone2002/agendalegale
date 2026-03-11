@@ -312,7 +312,7 @@ export interface EventRule {
   norma: string | null;
   /** Note operative (col N) */
   noteOperative: string | null;
-  /** Ordine di visualizzazione nella timeline */
+  /** Ordine di visualizzazione nella timeline (cronologico: dalla prima all'ultima fase) */
   ordine: number;
   /**
    * Se valorizzato, indica che la data calcolata da questa regola deve essere salvata anche
@@ -321,6 +321,8 @@ export interface EventRule {
    * così che la successiva riga "Iscrizione a ruolo" usi quella data come eventoBaseKey.
    */
   providesInputKey?: string | null;
+  /** Codice evento (da Excel/dropdown) per mappatura 1:1 con EventoDisponibile; opzionale se regole sono hand-written. */
+  eventoCode?: string | null;
 }
 
 // ── Registry delle regole (data-driven) ─────────────────────────────

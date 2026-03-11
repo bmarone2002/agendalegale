@@ -99,6 +99,7 @@ export function fromExcelJson(rows: ExcelRuleRow[]): ExcelImportResult {
       noteOperative: row.noteOperative,
       ordine: row.ordine,
       providesInputKey: row.providesInputKey ?? null,
+      eventoCode: row.eventoCode ?? null,
     });
 
     if (row.selectableInDropdown !== false) {

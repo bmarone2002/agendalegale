@@ -398,7 +398,7 @@ export function EventModal({
         (v) => typeof v === "string" && v.trim().length > 0,
       );
       if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
-        setError("Seleziona macro area, procedimento, parte, evento e inserisci la data base prima di calcolare.");
+        setError("Seleziona macro area, procedimento, parte, evento e inserisci la data base (es. data udienza) prima di calcolare. Calcola genera tutte le fasi future dalla fase scelta.");
         return;
       }
     }
@@ -467,7 +467,7 @@ export function EventModal({
           (form.ruleTemplateId === "atto-giuridico" || form.ruleTemplateId === "data-driven") &&
           form.macroType === "ATTO_GIURIDICO"
         ) {
-          setError("Inserire tutte le date e i campi necessari per effettuare il calcolo.");
+          setError("Inserire la data base per la fase selezionata (es. data prima udienza) per calcolare le fasi successive dalla tabella.");
         } else {
           setError(
             !result.success
@@ -1153,7 +1153,7 @@ export function EventModal({
               {form.generateSubEvents ? (
                 <>
                   <p className="text-sm text-zinc-600">
-                    Sotto-eventi generati (preview). Per ogni voce: data e calcolo/audit.
+                    Dalla fase scelta in Dettagli e dalla data base inserita, il sistema calcola in automatico tutte le fasi successive della tabella (scadenze e promemoria). Qui vedi la preview; puoi rimuovere singole voci con × prima di salvare. In modifica usa &quot;Rigenera sottoeventi&quot; per ricalcolare.
                   </p>
                   {(previewSubEvents.length > 0 || subEvents.length > 0) && (
                     <ScrollArea className="h-[280px] rounded-md border p-4">
@@ -1257,6 +1257,9 @@ export function EventModal({
                 eventId={eventId}
                 targetUserId={targetUserId}
                 readOnly={readOnly}
+                macroArea={form.macroArea}
+                procedimento={form.procedimento}
+                parteProcessuale={form.parteProcessuale}
                 onSubEventsChanged={async () => {
                   if (eventId) {
                     const result = await getEventById(eventId, targetUserId);

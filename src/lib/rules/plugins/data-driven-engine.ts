@@ -1,14 +1,13 @@
 /**
  * Data-driven rule engine: genera sotto-eventi a partire da EventRule[].
- * Sostituisce la logica if/else hardcoded di atto-giuridico.ts per la nuova gerarchia.
  *
- * Modalità attuale (atto giuridico data-driven):
- * - viene sempre selezionato un singolo "Evento" (riga Excel) dal form
- * - il motore genera i sotto-eventi SOLO per quella riga (singola scadenza/attività + promemoria)
+ * Modalità multi-riga (default per atto giuridico):
+ * - L'utente seleziona una fase/evento dalla tabella e inserisce la data base.
+ * - Il motore genera tutte le fasi FUTURE calcolabili (righe con ordine >= fase selezionata),
+ *   in cascata: usa eventoBaseKey / providesInputKey per propagare le date tra le righe.
  *
- * Le proprietà `eventoBaseKey` / `providesInputKey` restano supportate a livello di dati
- * ma non viene più usato il chaining iterativo multi-riga: ogni invocazione lavora
- * su una sola EventRule filtrata dal code dell'evento selezionato.
+ * Righe con tipoTermine "manuale" o "da_parametrizzare" senza formula vengono saltate
+ * o gestite come attività alla data base quando hanno una data disponibile.
  */
 
 import type { RuleDefinition, SubEventCandidate, AppSettings } from "../types";
@@ -197,6 +196,80 @@ function processRule(
   return { subEvents: out };
 }
 
+/**
+ * Valuta tutte le righe della tabella a partire dalla fase selezionata (ordine >= startOrdine),
+ * propagando le date tramite providesInputKey e generando sottoeventi per ogni riga calcolabile.
+ */
+function evaluateMultiRowFromEventoCode(
+  macroArea: MacroAreaCode,
+  procedimento: ProcedimentoCode,
+  parteProcessuale: ParteProcessuale,
+  eventoCode: string,
+  inputs: Record<string, unknown>,
+  settings: AppSettings,
+): SubEventCandidate[] {
+  const ev = getEventoByCode(procedimento, eventoCode);
+  if (!ev) return [];
+
+  const startOrdine = ev.ordine;
+  const selectedEventoInputKey = ev.inputKey;
+  const allRules = getEventRulesFor(macroArea, procedimento, parteProcessuale);
+  const rulesFromPhase = allRules.filter((r) => r.ordine >= startOrdine);
+  if (rulesFromPhase.length === 0) return [];
+
+  const rawOffsets = (inputs.reminderOffsets as number[] | undefined)
+    ?? settings.defaultReminderOffsetsAtto
+    ?? [7];
+  const reminderOffsets = rawOffsets.map((d) => (d > 0 ? -d : d));
+
+  const out: SubEventCandidate[] = [];
+  const inputsCorrenti = { ...inputs } as Record<string, unknown>;
+
+  for (const rule of rulesFromPhase) {
+    const result = processRule(
+      rule,
+      inputsCorrenti,
+      settings,
+      reminderOffsets,
+      selectedEventoInputKey,
+    );
+    out.push(...result.subEvents);
+
+    // Propaga la data calcolata come input per le righe successive (chaining).
+    if (
+      rule.providesInputKey &&
+      rule.direzioneCalcolo != null &&
+      rule.numero != null &&
+      rule.unita != null
+    ) {
+      const baseKey = rule.eventoBaseKey ?? selectedEventoInputKey;
+      const baseVal = inputsCorrenti[baseKey] as string | undefined;
+      if (baseVal && typeof baseVal === "string" && baseVal.trim()) {
+        const baseDate = new Date(
+          baseVal.length === 10 ? baseVal + "T12:00:00" : baseVal
+        );
+        if (!isNaN(baseDate.getTime())) {
+          let computed = computeDate(
+            baseDate,
+            rule.direzioneCalcolo,
+            rule.numero,
+            rule.unita
+          );
+          if (rule.isPromemoriaFestivi) {
+            computed = adjustToNextBusinessDay(computed, settings);
+          }
+          inputsCorrenti[rule.providesInputKey] = toDateOnlyString(computed);
+        }
+      }
+    }
+  }
+
+  const withDates = out.filter((s) => s.dueAt != null);
+  const placeholders = out.filter((s) => s.dueAt == null);
+  const scheduled = assignTimeSlots(withDates, settings);
+  return [...scheduled, ...placeholders];
+}
+
 export const dataDrivenRule: RuleDefinition = {
   id: "data-driven",
   label: "Regole data-driven (nuova gerarchia)",
@@ -213,9 +286,6 @@ export const dataDrivenRule: RuleDefinition = {
       return { subEvents: [] };
     }
 
-    // In modalità data-driven attuale è obbligatorio che il form (o l'AI)
-    // abbiano selezionato un singolo evento (eventoCode): se manca, non
-    // generiamo nulla per evitare combinazioni ambigue multi-riga.
     const eventoCode =
       (event as { eventoCode?: string | null }).eventoCode ??
       (inputs.eventoCode as string | undefined);
@@ -223,43 +293,14 @@ export const dataDrivenRule: RuleDefinition = {
       return { subEvents: [] };
     }
 
-    const ev = getEventoByCode(procedimento, eventoCode);
-    if (!ev) {
-      return { subEvents: [] };
-    }
-
-    const selectedEventoInputKey = ev.inputKey;
-
-    // Recupera tutte le regole per la combinazione (macroArea, procedimento, parte)
-    // e poi filtra per etichetta esatta dell'evento selezionato (una singola riga).
-    const allRules = getEventRulesFor(macroArea, procedimento, parteProcessuale);
-    const rules = allRules.filter((r) => r.eventoLabel === ev.label);
-    if (rules.length === 0) {
-      return { subEvents: [] };
-    }
-
-    const rawOffsets = (inputs.reminderOffsets as number[] | undefined)
-      ?? settings.defaultReminderOffsetsAtto
-      ?? [7];
-    const reminderOffsets = rawOffsets.map((d) => (d > 0 ? -d : d));
-
-    const out: SubEventCandidate[] = [];
-
-    for (const rule of rules) {
-      const result = processRule(
-        rule,
-        inputs,
-        settings,
-        reminderOffsets,
-        selectedEventoInputKey,
-      );
-      out.push(...result.subEvents);
-    }
-
-    const withDates = out.filter((s) => s.dueAt != null);
-    const placeholders = out.filter((s) => s.dueAt == null);
-    const scheduled = assignTimeSlots(withDates, settings);
-
-    return { subEvents: [...scheduled, ...placeholders] };
+    const subEvents = evaluateMultiRowFromEventoCode(
+      macroArea,
+      procedimento,
+      parteProcessuale,
+      eventoCode,
+      inputs,
+      settings,
+    );
+    return { subEvents };
   },
 };
