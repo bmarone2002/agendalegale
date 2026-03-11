@@ -215,10 +215,20 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
 
     // COMUNE (eventi condivisi tra le parti)
     { code: "SLITTAMENTO_UDIENZA", label: "Eventuale slittamento prima udienza", inputKey: "dataSlittamentoUdienza", parteProcessuale: "COMUNE", ordine: 4 },
-    { code: "UDIENZA_ISTRUTTORIA", label: "Udienza istruttoria", inputKey: "dataUdienzaIstruttoria", parteProcessuale: "COMUNE", ordine: 5 },
-    { code: "UDIENZA_CONCLUSIONI", label: "Udienza conclusioni", inputKey: "dataUdienzaConclusioni", parteProcessuale: "COMUNE", ordine: 6 },
-    { code: "SENTENZA", label: "Sentenza", inputKey: "dataPubblicazioneSentenza", parteProcessuale: "COMUNE", ordine: 7 },
-    { code: "NOTIFICA_SENTENZA", label: "Notifica sentenza", inputKey: "dataNotificaSentenza", parteProcessuale: "COMUNE", ordine: 8 },
+
+    // Memorie 171-ter: usano come base la data prima udienza (eventoBaseKey = "dataPrimaUdienza")
+    { code: "MEMORIA_171TER_1", label: "Memoria 171 ter n.1", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 5 },
+    { code: "MEMORIA_171TER_2", label: "Memoria 171 ter n.2", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 6 },
+    { code: "MEMORIA_171TER_3", label: "Memoria 171 ter n.3", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 7 },
+
+    // Eventi successivi manuali / da parametrizzare
+    { code: "UDIENZA_ISTRUTTORIA", label: "Udienza istruttoria", inputKey: "dataUdienzaIstruttoria", parteProcessuale: "COMUNE", ordine: 8 },
+    { code: "UDIENZA_CONCLUSIONI", label: "Udienza conclusioni", inputKey: "dataUdienzaConclusioni", parteProcessuale: "COMUNE", ordine: 9 },
+    { code: "NOTE_PRECISAZIONE_CONCLUSIONI", label: "Note precisazione conclusioni", inputKey: "dataNotePrecisazioneConclusioni", parteProcessuale: "COMUNE", ordine: 10 },
+    { code: "COMPARSA_CONCLUSIONALE", label: "Comparsa conclusionale", inputKey: "dataComparsaConclusionale", parteProcessuale: "COMUNE", ordine: 11 },
+    { code: "MEMORIA_REPLICA", label: "Memoria di replica", inputKey: "dataMemoriaReplica", parteProcessuale: "COMUNE", ordine: 12 },
+    { code: "SENTENZA", label: "Sentenza", inputKey: "dataPubblicazioneSentenza", parteProcessuale: "COMUNE", ordine: 13 },
+    { code: "NOTIFICA_SENTENZA", label: "Notifica sentenza", inputKey: "dataNotificaSentenza", parteProcessuale: "COMUNE", ordine: 14 },
   ],
 };
 
