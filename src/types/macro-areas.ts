@@ -257,6 +257,12 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
   ],
 };
 
+/** Ordine minimo per eventi in Prosecuzione (solo fasi successive alle memorie 171-ter n.1/2/3). */
+export const ORDINE_MIN_PROSECUZIONE: Partial<Record<ProcedimentoCode, number>> = {
+  CITAZIONE_CIVILE: 8,
+  RICORSO_RITO_SEMPLIFICATO: 8,
+};
+
 /** Restituisce gli eventi disponibili nel dropdown, filtrati per parte + COMUNE, ordinati. */
 export function getEventiDisponibili(
   _macroArea: MacroAreaCode,
@@ -266,6 +272,24 @@ export function getEventiDisponibili(
   const all = EVENTI_PER_PROCEDIMENTO[procedimento] ?? [];
   return all
     .filter((e) => e.parteProcessuale === parteProcessuale || e.parteProcessuale === "COMUNE")
+    .sort((a, b) => a.ordine - b.ordine);
+}
+
+/** Restituisce gli eventi disponibili per la Prosecuzione (solo fasi successive a Memoria 3, es. Udienza istruttoria, conclusioni, sentenza). */
+export function getEventiDisponibiliPerProsecuzione(
+  macroArea: MacroAreaCode,
+  procedimento: ProcedimentoCode,
+  parteProcessuale: ParteProcessuale,
+): EventoDisponibile[] {
+  const minOrdine = ORDINE_MIN_PROSECUZIONE[procedimento];
+  if (minOrdine == null) return getEventiDisponibili(macroArea, procedimento, parteProcessuale);
+  const all = EVENTI_PER_PROCEDIMENTO[procedimento] ?? [];
+  return all
+    .filter(
+      (e) =>
+        (e.parteProcessuale === parteProcessuale || e.parteProcessuale === "COMUNE") &&
+        e.ordine >= minOrdine
+    )
     .sort((a, b) => a.ordine - b.ordine);
 }
 

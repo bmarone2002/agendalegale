@@ -396,11 +396,22 @@ export function EventModal({
     setError(null);
 
     if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
-      const hasBaseDate = Object.values(form.inputs).some(
-        (v) => typeof v === "string" && v.trim().length > 0,
-      );
+      const isNotificaCitazione =
+        form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE";
+      const hasBaseDate = isNotificaCitazione
+        ? typeof form.inputs?.dataPrimaNotificaCitazione === "string" &&
+          String(form.inputs.dataPrimaNotificaCitazione).trim().length > 0 &&
+          typeof form.inputs?.dataPrimaUdienza === "string" &&
+          String(form.inputs.dataPrimaUdienza).trim().length > 0
+        : Object.values(form.inputs ?? {}).some(
+            (v) => typeof v === "string" && v.trim().length > 0,
+          );
       if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
-        setError("Seleziona macro area, procedimento, parte, evento e inserisci la data base (es. data udienza) prima di calcolare. Calcola genera tutte le fasi future dalla fase scelta.");
+        setError(
+          isNotificaCitazione
+            ? "Inserisci entrambe le date: Notifica atto di citazione e Data prima udienza, poi clicca Calcola."
+            : "Seleziona macro area, procedimento, parte, evento e inserisci la data base (es. data udienza) prima di calcolare. Calcola genera tutte le fasi future dalla fase scelta."
+        );
         return;
       }
     }
@@ -469,7 +480,11 @@ export function EventModal({
           (form.ruleTemplateId === "atto-giuridico" || form.ruleTemplateId === "data-driven") &&
           form.macroType === "ATTO_GIURIDICO"
         ) {
-          setError("Inserire la data base per la fase selezionata (es. data prima udienza) per calcolare le fasi successive dalla tabella.");
+          setError(
+            form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE"
+              ? "Inserisci entrambe le date (Notifica citazione e Data prima udienza) e clicca Calcola."
+              : "Inserire la data base per la fase selezionata (es. data prima udienza) per calcolare le fasi successive dalla tabella."
+          );
         } else {
           setError(
             !result.success

@@ -41,7 +41,7 @@ import type {
   ParteProcessuale,
   EventoDisponibile,
 } from "@/types/macro-areas";
-import { getEventiDisponibili } from "@/types/macro-areas";
+import { getEventiDisponibiliPerProsecuzione } from "@/types/macro-areas";
 
 interface ProsecuzionePanelProps {
   eventId: string;
@@ -353,7 +353,7 @@ export function ProsecuzionePanel({
   useEffect(() => {
     if (macroArea && procedimento && parteProcessuale) {
       setAvailableEventi(
-        getEventiDisponibili(macroArea, procedimento, parteProcessuale),
+        getEventiDisponibiliPerProsecuzione(macroArea, procedimento, parteProcessuale),
       );
     } else {
       setAvailableEventi([]);

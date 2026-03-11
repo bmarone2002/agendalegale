@@ -84,15 +84,19 @@ export function MacroAreaPanel({
       ? getEventoByCode(procedimento, eventoCode)
       : undefined;
 
-  const handleDateChange = (d: Date | null) => {
-    if (!selectedEvento) return;
+  const handleDateChange = (key: string) => (d: Date | null) => {
     const value = d ? toDateOnlyString(d) : "";
-    onInputsChange({ ...inputs, [selectedEvento.inputKey]: value });
+    onInputsChange({ ...inputs, [key]: value });
   };
+
+  const isNotificaCitazioneConDueDate =
+    procedimento === "CITAZIONE_CIVILE" && eventoCode === "NOTIFICA_CITAZIONE";
 
   const currentDate = selectedEvento
     ? toDateOrNull(inputs[selectedEvento.inputKey])
     : null;
+  const dataNotificaCitazione = toDateOrNull(inputs["dataPrimaNotificaCitazione"]);
+  const dataPrimaUdienza = toDateOrNull(inputs["dataPrimaUdienza"]);
 
   return (
     <div className="space-y-4">
@@ -185,20 +189,50 @@ export function MacroAreaPanel({
         </div>
       )}
 
-      {/* Livello 5: Data */}
-      {selectedEvento && (
+      {/* Livello 5: Data (una o due date se Notifica citazione) */}
+      {selectedEvento && !isNotificaCitazioneConDueDate && (
         <div className="pt-2 border-t border-zinc-200">
           <Label className="text-sm font-semibold text-zinc-700">
             Data – {selectedEvento.label}
           </Label>
           <DatePicker
             value={currentDate}
-            onChange={handleDateChange}
+            onChange={handleDateChange(selectedEvento.inputKey)}
             placeholder={`Inserisci data ${selectedEvento.label.toLowerCase()}`}
           />
           <p className="text-xs text-zinc-500 mt-1">
             Questa è la data base da cui verranno calcolati i termini collegati all&apos;evento selezionato.
           </p>
+        </div>
+      )}
+      {selectedEvento && isNotificaCitazioneConDueDate && (
+        <div className="pt-2 border-t border-zinc-200 space-y-4">
+          <div>
+            <Label className="text-sm font-semibold text-zinc-700">
+              Data notifica atto di citazione
+            </Label>
+            <DatePicker
+              value={dataNotificaCitazione}
+              onChange={handleDateChange("dataPrimaNotificaCitazione")}
+              placeholder="Inserisci data notifica citazione"
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Usata per l&apos;evento Notifica atto di citazione e per il calcolo di Iscrizione a ruolo (+10 gg).
+            </p>
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-zinc-700">
+              Data prima udienza
+            </Label>
+            <DatePicker
+              value={dataPrimaUdienza}
+              onChange={handleDateChange("dataPrimaUdienza")}
+              placeholder="Inserisci data prima udienza"
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171 ter n.1, n.2, n.3.
+            </p>
+          </div>
         </div>
       )}
     </div>

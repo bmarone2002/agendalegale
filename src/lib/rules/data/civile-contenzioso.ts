@@ -71,7 +71,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     macroArea: "CIVILE_CONTENZIOSO",
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
-    eventoBaseKey: null,
+    eventoBaseKey: "dataPrimaUdienza",
     eventoLabel: "Eventuale slittamento prima udienza",
     direzioneCalcolo: null,
     numero: null,
