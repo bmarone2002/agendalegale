@@ -242,9 +242,13 @@ export interface EventRule {
   macroArea: MacroAreaCode;
   procedimento: ProcedimentoCode;
   parteProcessuale: ParteProcessuale;
-  /** Chiave dell'input base da cui si calcola (col D Excel). Se null, è un evento manuale senza formula. */
+  /**
+   * Chiave dell'input base da cui si calcola (colonna Excel "EVENTO BASE INSERITO DALL'UTENTE").
+   * È il campo data di partenza per il calcolo (inserito dall'utente o derivato da providesInputKey di un'altra regola).
+   * Se null, la riga non ha formula e l'evento viene gestito come manuale/placeholder.
+   */
   eventoBaseKey: string | null;
-  /** Titolo del sotto-evento generato (col E Excel) */
+  /** Titolo del sotto-evento generato (colonna Excel "EVENTO / SCADENZE"). */
   eventoLabel: string;
   /** Direzione calcolo: "+" avanti, "-" a ritroso, null per eventi manuali */
   direzioneCalcolo: "+" | "-" | null;
@@ -266,7 +270,12 @@ export interface EventRule {
   noteOperative: string | null;
   /** Ordine di visualizzazione nella timeline */
   ordine: number;
-  /** Se la regola, una volta calcolata, fornisce un input per altre regole (chaining) */
+  /**
+   * Se valorizzato, indica che la data calcolata da questa regola deve essere salvata anche
+   * come nuovo input (colonna implicita in Excel: data che diventa EVENTO BASE per altre righe).
+   * Esempio: la regola "Notifica atto di citazione" può valorizzare providesInputKey="dataPrimaNotificaCitazione"
+   * così che la successiva riga "Iscrizione a ruolo" usi quella data come eventoBaseKey.
+   */
   providesInputKey?: string | null;
 }
 

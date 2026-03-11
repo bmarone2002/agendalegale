@@ -392,6 +392,17 @@ export function EventModal({
 
   const handleCalcola = useCallback(async () => {
     setError(null);
+
+    if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
+      const hasBaseDate = Object.values(form.inputs).some(
+        (v) => typeof v === "string" && v.trim().length > 0,
+      );
+      if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
+        setError("Seleziona macro area, procedimento, parte, evento e inserisci la data base prima di calcolare.");
+        return;
+      }
+    }
+
     setCalculating(true);
     try {
       let startAt = form.startAt;
@@ -895,7 +906,7 @@ export function EventModal({
                     </div>
                   )}
 
-                  {/* Gerarchia: Macro Area -> Procedimento -> Parte -> Evento -> Data */}
+                  {/* Gerarchia: Macro Area -> Procedimento -> Parte processuale -> Evento -> Data */}
                   <MacroAreaPanel
                     macroArea={form.macroArea}
                     procedimento={form.procedimento}
@@ -932,7 +943,7 @@ export function EventModal({
                   />
 
                   {/* Legacy: pannello vecchio (visibile solo se evento caricato con vecchio actionType senza macroArea) */}
-                  {!form.macroArea && form.actionType && (
+                  {mode === "edit" && !form.macroArea && form.actionType && (
                     <>
                       <div className="pt-2 border-t border-zinc-200">
                         <p className="text-xs text-amber-600 mb-2">Evento creato con la struttura precedente. Seleziona una Macro Area sopra per migrarlo.</p>

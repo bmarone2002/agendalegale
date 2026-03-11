@@ -196,6 +196,9 @@ export function MacroAreaPanel({
             onChange={handleDateChange}
             placeholder={`Inserisci data ${selectedEvento.label.toLowerCase()}`}
           />
+          <p className="text-xs text-zinc-500 mt-1">
+            Questa è la data base da cui verranno calcolati i termini collegati all&apos;evento selezionato.
+          </p>
         </div>
       )}
     </div>
