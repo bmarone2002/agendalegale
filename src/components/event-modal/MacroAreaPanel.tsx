@@ -172,7 +172,7 @@ export function MacroAreaPanel({
             onValueChange={(v) => onEventoChange(v)}
           >
             <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
-              <SelectValue placeholder="Seleziona evento" />
+              <SelectValue placeholder="*Evento non individuato (seleziona)*" />
             </SelectTrigger>
             <SelectContent>
               {eventiDisponibili.map((ev) => (

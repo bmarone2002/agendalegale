@@ -59,14 +59,53 @@ function processRule(
   inputs: Record<string, unknown>,
   settings: AppSettings,
   reminderOffsets: number[],
+  selectedEventoInputKey?: string,
 ): ProcessResult {
   const out: SubEventCandidate[] = [];
 
-  if (rule.tipoTermine === "manuale" || rule.tipoTermine === "da_parametrizzare") {
+  // Determina la data base per questa riga.
+  let baseValue: string | undefined;
+
+  if (rule.eventoBaseKey) {
+    baseValue = inputs[rule.eventoBaseKey] as string | undefined;
+  } else if (selectedEventoInputKey) {
+    baseValue = inputs[selectedEventoInputKey] as string | undefined;
+  }
+
+  if (!baseValue || typeof baseValue !== "string" || !baseValue.trim()) {
+    return { subEvents: out };
+  }
+
+  const baseDate = new Date(
+    baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue
+  );
+  if (isNaN(baseDate.getTime())) return { subEvents: out };
+
+  // Caso 1: riga con calcolo completo → crea scadenza + promemoria.
+  if (
+    rule.direzioneCalcolo != null &&
+    rule.numero != null &&
+    rule.unita != null
+  ) {
+    let dueDate = computeDate(baseDate, rule.direzioneCalcolo, rule.numero, rule.unita);
+
+    if (rule.isPromemoriaFestivi) {
+      dueDate = adjustToNextBusinessDay(dueDate, settings);
+    }
+
+    const dueAt = applyDeadlineTime(dueDate, settings);
+
+    const explanation = [
+      rule.eventoLabel,
+      `${rule.direzioneCalcolo === "+" ? "+" : "−"}${rule.numero} ${rule.unita} da ${rule.eventoBaseKey ?? selectedEventoInputKey ?? "data evento"}`,
+      rule.norma ? `(${rule.norma})` : null,
+      rule.isSospensioneFeriale ? "[sosp. feriale]" : null,
+    ].filter(Boolean).join(" – ");
+
     out.push({
       title: rule.eventoLabel,
       kind: "termine",
-      dueAt: null,
+      dueAt,
       status: "pending",
       priority: rule.ordine,
       ruleId: "data-driven",
@@ -74,70 +113,48 @@ function processRule(
         macroArea: rule.macroArea,
         procedimento: rule.procedimento,
         parteProcessuale: rule.parteProcessuale,
+        eventoBaseKey: rule.eventoBaseKey ?? selectedEventoInputKey,
+        direzione: rule.direzioneCalcolo,
+        numero: rule.numero,
+        unita: rule.unita,
         tipoTermine: rule.tipoTermine,
+        norma: rule.norma,
       },
-      explanation: rule.tipoTermine === "manuale"
-        ? `Evento manuale: inserire la data quando disponibile${rule.norma ? ` (${rule.norma})` : ""}`
-        : `Da parametrizzare in futuro${rule.norma ? ` (${rule.norma})` : ""}`,
+      explanation,
       createdBy: "automatico",
-      isPlaceholder: true,
+      isPlaceholder: false,
     });
-    return { subEvents: out };
+
+    for (const daysBefore of reminderOffsets) {
+      const offset = daysBefore > 0 ? -daysBefore : daysBefore;
+      const reminderRaw = addDays(dueDate, offset);
+      const reminderAdjusted = adjustToNextBusinessDay(reminderRaw, settings);
+      const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
+      out.push({
+        title: `${rule.eventoLabel} – Promemoria (${Math.abs(offset)} gg prima)`,
+        kind: "promemoria",
+        dueAt: reminderAt,
+        status: "pending",
+        priority: 0,
+        ruleId: "data-driven",
+        ruleParams: { daysBefore: offset },
+        explanation: `Promemoria ${Math.abs(offset)} giorni prima della scadenza`,
+        createdBy: "automatico",
+        isPlaceholder: false,
+      });
+    }
+
+    const chainedInput = rule.providesInputKey
+      ? { key: rule.providesInputKey, value: toDateOnlyString(dueDate) }
+      : undefined;
+
+    return { subEvents: out, chainedInput };
   }
 
-  if (!rule.eventoBaseKey || rule.direzioneCalcolo == null || rule.numero == null || rule.unita == null) {
-    return { subEvents: out };
-  }
-
-  const baseValue = inputs[rule.eventoBaseKey] as string | undefined;
-  if (!baseValue) return { subEvents: out };
-
-  const baseDate = new Date(
-    baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue
-  );
-  if (isNaN(baseDate.getTime())) return { subEvents: out };
-
-  let dueDate = computeDate(baseDate, rule.direzioneCalcolo, rule.numero, rule.unita);
-
-  if (rule.isPromemoriaFestivi) {
-    dueDate = adjustToNextBusinessDay(dueDate, settings);
-  }
-
-  const dueAt = applyDeadlineTime(dueDate, settings);
-
-  const explanation = [
-    rule.eventoLabel,
-    `${rule.direzioneCalcolo === "+" ? "+" : "−"}${rule.numero} ${rule.unita} da ${rule.eventoBaseKey}`,
-    rule.norma ? `(${rule.norma})` : null,
-    rule.isSospensioneFeriale ? "[sosp. feriale]" : null,
-  ].filter(Boolean).join(" – ");
-
-  out.push({
-    title: rule.eventoLabel,
-    kind: "termine",
-    dueAt,
-    status: "pending",
-    priority: rule.ordine,
-    ruleId: "data-driven",
-    ruleParams: {
-      macroArea: rule.macroArea,
-      procedimento: rule.procedimento,
-      parteProcessuale: rule.parteProcessuale,
-      eventoBaseKey: rule.eventoBaseKey,
-      direzione: rule.direzioneCalcolo,
-      numero: rule.numero,
-      unita: rule.unita,
-      tipoTermine: rule.tipoTermine,
-      norma: rule.norma,
-    },
-    explanation,
-    createdBy: "automatico",
-    isPlaceholder: false,
-  });
-
+  // Caso 2: riga senza calcolo → solo promemoria legati alla data base.
   for (const daysBefore of reminderOffsets) {
     const offset = daysBefore > 0 ? -daysBefore : daysBefore;
-    const reminderRaw = addDays(dueDate, offset);
+    const reminderRaw = addDays(baseDate, offset);
     const reminderAdjusted = adjustToNextBusinessDay(reminderRaw, settings);
     const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
     out.push({
@@ -148,17 +165,13 @@ function processRule(
       priority: 0,
       ruleId: "data-driven",
       ruleParams: { daysBefore: offset },
-      explanation: `Promemoria ${Math.abs(offset)} giorni prima della scadenza`,
+      explanation: `Promemoria ${Math.abs(offset)} giorni prima dell'evento`,
       createdBy: "automatico",
       isPlaceholder: false,
     });
   }
 
-  const chainedInput = rule.providesInputKey
-    ? { key: rule.providesInputKey, value: toDateOnlyString(dueDate) }
-    : undefined;
-
-  return { subEvents: out, chainedInput };
+  return { subEvents: out };
 }
 
 export const dataDrivenRule: RuleDefinition = {
@@ -181,12 +194,15 @@ export const dataDrivenRule: RuleDefinition = {
     if (rules.length === 0) return { subEvents: [] };
 
     // Se è stato selezionato un Evento specifico nel form (eventoCode),
-    // limita la generazione dei sotto-eventi SOLO alle regole collegate a quell'evento.
+    // limita la generazione dei sotto-eventi SOLO alle regole collegate a quell'evento
+    // e usa la sua inputKey come data evento quando la riga non ha eventoBaseKey.
     const eventoCode = (event as { eventoCode?: string | null }).eventoCode ?? (inputs.eventoCode as string | undefined);
+    let selectedEventoInputKey: string | undefined;
     if (eventoCode) {
       const ev = getEventoByCode(procedimento, eventoCode);
       if (ev) {
         rules = rules.filter((r) => r.eventoLabel === ev.label);
+        selectedEventoInputKey = ev.inputKey;
       }
     }
 
@@ -210,7 +226,7 @@ export const dataDrivenRule: RuleDefinition = {
 
         if (!isManual && !hasBase) continue;
 
-        const result = processRule(rule, inputs, settings, reminderOffsets);
+        const result = processRule(rule, inputs, settings, reminderOffsets, selectedEventoInputKey);
         out.push(...result.subEvents);
         processed.add(i);
 
