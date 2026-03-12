@@ -285,9 +285,7 @@ function EventSummaryPanel({
                       }`}
                       onClick={() => {
                         if (isSavedSub) {
-                          setSelectedSubEventId(
-                            (prev) => (prev === currentId ? null : currentId)
-                          );
+                          setSelectedSubEventId(isSelected ? null : currentId);
                         }
                       }}
                     >
@@ -426,6 +424,7 @@ export function EventModal({
   const [selectedSubEventId, setSelectedSubEventId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const highlightRowRef = useRef<HTMLLIElement | null>(null);
+  const [showEventsPanel, setShowEventsPanel] = useState(false);
   /** Se true, non sovrascrivere la lista preview con l'useEffect (l'utente ha rimosso elementi con ×). Si resetta solo al click su Calcola. */
   const previewEditedByUserRef = useRef(false);
   /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
@@ -698,7 +697,6 @@ export function EventModal({
           );
         }
       }
-      setActiveTab("regole");
     } finally {
       setCalculating(false);
     }
@@ -1376,6 +1374,7 @@ export function EventModal({
                   ))}
                 </div>
               </div>
+            </div>
             </TabsContent>
             <TabsContent value="prosecuzione" className="flex-1 overflow-auto mt-2">
               {mode === "edit" && eventId ? (
