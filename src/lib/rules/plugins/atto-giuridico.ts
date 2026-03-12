@@ -179,10 +179,11 @@ export const attoGiuridicoRule: RuleDefinition = {
   run(input) {
     const event = input.event;
     const settings = input.settings;
-    const inputs = (event.inputs ?? input.userSelections ?? {}) as Record<
-      string,
-      unknown
-    >;
+    // Unifica inputs dell'evento e selezioni utente dando precedenza a queste ultime
+    const inputs = {
+      ...(input.userSelections ?? {}),
+      ...(event.inputs ?? {}),
+    } as Record<string, unknown>;
     const actionType = (event.actionType ?? inputs.actionType) as
       | string
       | undefined;
@@ -192,8 +193,13 @@ export const attoGiuridicoRule: RuleDefinition = {
 
     if (!actionType || !actionMode) return { subEvents: [] };
 
-    // Promemoria: giorni prima (positivi in UI) → negativi per addReminders; default un solo promemoria a 7 gg
-    const rawOffsets = (inputs.reminderOffsets as number[] | undefined) ?? settings.defaultReminderOffsetsAtto ?? [7];
+    // Promemoria: giorni prima (positivi in UI) → negativi per addReminders.
+    // Se l'utente non imposta nulla (reminderOffsets mancante o []), NON vogliamo default automatici.
+    const inputOffsets = inputs.reminderOffsets as number[] | undefined;
+    const rawOffsets =
+      inputOffsets !== undefined
+        ? inputOffsets
+        : settings.defaultReminderOffsetsAtto ?? [7];
     const reminderOffsets = rawOffsets.map((d) => (d > 0 ? -d : d));
 
     const out: SubEventCandidate[] = [];

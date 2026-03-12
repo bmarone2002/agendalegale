@@ -96,27 +96,28 @@ const defaultEvent = (start?: Date, end?: Date): EventFormState => {
   const defaultEnd = new Date(defaultStart);
   defaultEnd.setHours(9, 0, 0, 0);
   return {
-  title: "",
-  description: "",
-  startAt: start ?? defaultStart,
-  endAt: end ?? defaultEnd,
-  type: "altro",
-  tags: [],
-  notes: "",
-  generateSubEvents: true,
-  ruleTemplateId: "data-driven",
-  macroType: "ATTO_GIURIDICO",
-  macroArea: null,
+    title: "",
+    description: "",
+    startAt: start ?? defaultStart,
+    endAt: end ?? defaultEnd,
+    type: "altro",
+    tags: [],
+    notes: "",
+    generateSubEvents: true,
+    ruleTemplateId: "data-driven",
+    macroType: "ATTO_GIURIDICO",
+    macroArea: null,
     procedimento: null,
     parteProcessuale: null,
     eventoCode: null,
     actionType: ACTION_TYPES[0],
-  actionMode: ACTION_MODES[0],
-  inputs: {},
-  color: null,
-  reminderOffsets: [7],
-  status: "pending",
-};
+    actionMode: ACTION_MODES[0],
+    inputs: {},
+    color: null,
+    // Nessun promemoria di default: l'utente li aggiunge esplicitamente.
+    reminderOffsets: [],
+    status: "pending",
+  };
 };
 
 /** Categorie per cui non si mostrano Data/Ora inizio-fine: la data evento è solo quella del pannello "Dati per il calcolo". Estendere qui per future categorie. */
@@ -437,7 +438,7 @@ export function EventModal({
       const savedRuleParams = (e.ruleParams as Record<string, unknown> | null | undefined) ?? {};
       const savedOffsets = Array.isArray(savedRuleParams.reminderOffsets)
         ? (savedRuleParams.reminderOffsets as number[])
-        : [7];
+        : [];
       setForm({
         title: e.title,
         description: e.description ?? "",
@@ -1442,7 +1443,7 @@ export function EventModal({
         {/* Bottom sheet Eventi & Scadenze (mobile) */}
         {showEventsPanel && (
           <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40 lg:hidden">
-            <div className="bg-white rounded-t-2xl shadow-xl max-h-[80vh] flex flex-col">
+            <div className="bg-white rounded-t-2xl shadow-xl w-full max-h-[80vh] flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-zinc-200">
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold uppercase text-zinc-500">
@@ -1460,7 +1461,7 @@ export function EventModal({
                   Chiudi
                 </button>
               </div>
-              <div className="flex-1 min-h-0 p-3">
+              <div className="flex-1 min-h-0 p-3 overflow-y-auto">
                 <ScrollArea className="h-full">
                   <EventSummaryPanel
                     mode={mode}

@@ -219,9 +219,13 @@ function evaluateMultiRowFromEventoCode(
   const rulesFromPhase = allRules.filter((r) => r.ordine >= startOrdine);
   if (rulesFromPhase.length === 0) return [];
 
-  const rawOffsets = (inputs.reminderOffsets as number[] | undefined)
-    ?? settings.defaultReminderOffsetsAtto
-    ?? [7];
+  // Promemoria: se l'utente ha impostato reminderOffsets (anche []), usiamo quelli.
+  // Solo in assenza totale del campo cadiamo sui default di configurazione.
+  const inputOffsets = inputs.reminderOffsets as number[] | undefined;
+  const rawOffsets =
+    inputOffsets !== undefined
+      ? inputOffsets
+      : settings.defaultReminderOffsetsAtto ?? [7];
   const reminderOffsets = rawOffsets.map((d) => (d > 0 ? -d : d));
 
   const out: SubEventCandidate[] = [];
@@ -321,7 +325,11 @@ export const dataDrivenRule: RuleDefinition = {
   run(input) {
     const event = input.event;
     const settings = input.settings;
-    const inputs = { ...((event.inputs ?? input.userSelections ?? {}) as Record<string, unknown>) };
+    // Unifica inputs evento e selezioni utente (inclusi reminderOffsets), dando priorità a queste ultime.
+    const inputs = {
+      ...(input.userSelections ?? {}),
+      ...(event.inputs ?? {}),
+    } as Record<string, unknown>;
 
     const macroArea = (event.macroArea ?? inputs.macroArea) as MacroAreaCode | undefined;
     const procedimento = (event.procedimento ?? inputs.procedimento) as ProcedimentoCode | undefined;
