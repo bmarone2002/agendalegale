@@ -214,7 +214,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     { code: "COSTITUZIONE_CONVENUTO", label: "Costituzione convenuto", inputKey: "dataPrimaUdienza", parteProcessuale: "CONVENUTO", ordine: 3 },
 
     // COMUNE (eventi condivisi tra le parti)
-    { code: "SLITTAMENTO_UDIENZA", label: "Eventuale slittamento prima udienza", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 4 },
+    { code: "SLITTAMENTO_UDIENZA", label: "Prima udienza", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 4 },
 
     // Memorie 171-ter: usano come base la data prima udienza (eventoBaseKey = "dataPrimaUdienza")
     { code: "MEMORIA_171TER_1", label: "Memoria 171 ter n.1", inputKey: "dataPrimaUdienza", parteProcessuale: "COMUNE", ordine: 5 },
