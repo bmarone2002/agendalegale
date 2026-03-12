@@ -39,6 +39,8 @@ import { formatDateTime } from "@/lib/utils";
 
 type ModalMode = "create" | "edit";
 
+type ActiveTab = "dettagli" | "prosecuzione";
+
 interface EventModalProps {
   mode: ModalMode;
   eventId?: string;
@@ -187,6 +189,187 @@ function getPrimaryDateFromInputs(inputs: Record<string, unknown>): Date | null 
   return null;
 }
 
+interface EventSummaryPanelProps {
+  mode: ModalMode;
+  form: EventFormState;
+  subEvents: SubEvent[];
+  previewSubEvents: Array<{
+    id: string;
+    title: string;
+    dueAt: Date | null;
+    explanation: string;
+    ruleId: string;
+    ruleParams?: Record<string, unknown> | null;
+    kind: string;
+    priority?: number;
+    isPlaceholder?: boolean;
+  }>;
+  selectedSubEventId: string | null;
+  setSelectedSubEventId: (id: string | null) => void;
+  highlightSubEventId: string | null;
+  highlightRowRef: React.RefObject<HTMLLIElement | null>;
+  handleRemovePreviewSubEvent: (id: string) => void;
+  onRigeneraSubEvents: () => void;
+  onDeleteSelectedSubEvent: () => void;
+  saving: boolean;
+  readOnly: boolean;
+}
+
+function EventSummaryPanel({
+  mode,
+  form,
+  subEvents,
+  previewSubEvents,
+  selectedSubEventId,
+  setSelectedSubEventId,
+  highlightSubEventId,
+  highlightRowRef,
+  handleRemovePreviewSubEvent,
+  onRigeneraSubEvents,
+  onDeleteSelectedSubEvent,
+  saving,
+  readOnly,
+}: EventSummaryPanelProps) {
+  const eventsToShow =
+    mode === "edit" && subEvents.length > 0 ? subEvents : previewSubEvents;
+
+  const mainDate =
+    usesCalculationDateOnly(form.macroType) && getPrimaryDateFromInputs(form.inputs)
+      ? getPrimaryDateFromInputs(form.inputs)
+      : form.startAt;
+
+  return (
+    <div className="hidden lg:flex lg:flex-col lg:w-80 lg:border-l lg:border-zinc-200 lg:pl-4 lg:ml-4 lg:pt-1">
+      <div className="rounded-lg bg-[var(--navy)] text-white flex flex-col h-full">
+        <div className="px-4 pt-3 pb-2 border-b border-white/10">
+          <p className="text-xs font-semibold tracking-wide uppercase text-white/70">
+            Eventi &amp; Scadenze
+          </p>
+          <p className="mt-1 text-sm font-medium line-clamp-2">
+            {form.title?.trim() || "Pratica senza titolo"}
+          </p>
+          <div className="mt-1 text-xs text-white/70">
+            {mainDate ? formatDateTime(mainDate) : "Data da definire"}
+          </div>
+          {form.reminderOffsets.length > 0 && (
+            <div className="mt-1 text-[11px] text-white/60">
+              Promemoria:{" "}
+              {form.reminderOffsets
+                .map((d) => `${d} gg prima`)
+                .join(" · ")}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-h-0 px-1 py-2">
+          {eventsToShow.length > 0 ? (
+            <ScrollArea className="h-full pr-2">
+              <ul className="space-y-2">
+                {eventsToShow.map((s, idx) => {
+                  const isSavedSub = mode === "edit" && subEvents.length > 0;
+                  const currentId = (s as { id?: string }).id ?? `sub-${idx}`;
+                  const isSelected = isSavedSub && selectedSubEventId === currentId;
+                  const isHighlightRow = currentId === highlightSubEventId;
+                  const isPlaceholder =
+                    (s as { isPlaceholder?: boolean }).isPlaceholder || !s.dueAt ||
+                    (s.dueAt instanceof Date && s.dueAt.getTime() === 0);
+
+                  return (
+                    <li
+                      key={currentId}
+                      ref={isHighlightRow ? (el) => { highlightRowRef.current = el; } : undefined}
+                      className={`rounded-md border border-white/10 px-3 py-2 text-xs bg-white/5 backdrop-blur-sm transition-colors ${
+                        isSelected
+                          ? "bg-amber-200/20 border-amber-300 text-amber-50"
+                          : "hover:bg-white/10"
+                      }`}
+                      onClick={() => {
+                        if (isSavedSub) {
+                          setSelectedSubEventId(
+                            (prev) => (prev === currentId ? null : currentId)
+                          );
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">{s.title}</p>
+                          <p className="mt-0.5 text-[11px] text-white/75">
+                            {isPlaceholder ? (
+                              <span className="italic text-amber-200">
+                                Da schedulare
+                              </span>
+                            ) : (
+                              formatDateTime(s.dueAt as Date)
+                            )}
+                          </p>
+                          {(s as { explanation?: string | null }).explanation && (
+                            <p className="mt-0.5 text-[11px] text-white/65 line-clamp-2">
+                              {(s as { explanation?: string | null }).explanation}
+                            </p>
+                          )}
+                        </div>
+                        {!isSavedSub && (
+                          <button
+                            type="button"
+                            className="ml-1 text-[13px] text-red-200 hover:text-red-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePreviewSubEvent(currentId);
+                            }}
+                            aria-label="Rimuovi sottoevento"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </ScrollArea>
+          ) : (
+            <div className="h-full flex items-center justify-center px-4 text-center">
+              <p className="text-xs text-white/70">
+                Nessun evento calcolato. Compila i dettagli e, se previsto, usa
+                il pulsante <span className="font-semibold">Calcola</span> per
+                generare scadenze e promemoria.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {!readOnly && (
+          <div className="px-4 pb-3 pt-2 border-t border-white/10 flex flex-col gap-2">
+            {mode === "edit" && subEvents.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 border-white/40 text-white hover:bg-white/10"
+                onClick={onRigeneraSubEvents}
+                disabled={saving}
+              >
+                Rigenera sottoeventi
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 border-red-300 text-red-100 hover:bg-red-500/20"
+              onClick={onDeleteSelectedSubEvent}
+              disabled={saving || !selectedSubEventId}
+            >
+              Rimuovi evento
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EventModal({
   mode,
   eventId,
@@ -236,9 +419,7 @@ export function EventModal({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dettagli" | "regole" | "prosecuzione">(
-    mode === "edit" && highlightSubEventIdProp ? "regole" : "dettagli"
-  );
+  const [activeTab, setActiveTab] = useState<ActiveTab>("dettagli");
   const [calculating, setCalculating] = useState(false);
   const [parsingDocument, setParsingDocument] = useState(false);
   const [popoverContainer, setPopoverContainer] = useState<HTMLElement | null>(null);
@@ -298,12 +479,12 @@ export function EventModal({
 
   // Scroll al promemoria evidenziato quando si apre dal calendario (tab Regole già attiva)
   useEffect(() => {
-    if (activeTab !== "regole" || !(highlightSubEventIdProp ?? selectedSubEventId)) return;
+    if (!(highlightSubEventIdProp ?? selectedSubEventId)) return;
     const id = setTimeout(() => {
       highlightRowRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }, 100);
     return () => clearTimeout(id);
-  }, [activeTab, highlightSubEventIdProp, selectedSubEventId, subEvents, previewSubEvents]);
+  }, [highlightSubEventIdProp, selectedSubEventId, subEvents, previewSubEvents]);
 
   useEffect(() => {
     if (!form.generateSubEvents || !form.ruleTemplateId) {
@@ -752,7 +933,7 @@ export function EventModal({
     >
       <DialogContent
         ref={setPopoverContainer}
-        className="max-w-2xl max-h-[90vh] flex flex-col bg-white event-modal-light"
+        className="max-w-4xl max-h-[90vh] flex flex-col bg-white event-modal-light"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
@@ -765,15 +946,27 @@ export function EventModal({
             <p className="text-xs font-semibold text-red-600 mt-1">BOZZA (non ancora salvato)</p>
           )}
         </DialogHeader>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "dettagli" | "regole" | "prosecuzione")} className="flex-1 min-h-0 flex flex-col">
-          <TabsList className="bg-zinc-100 dark:bg-zinc-100 dark:text-zinc-600 p-1">
-            <TabsTrigger value="dettagli" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Dettagli</TabsTrigger>
-            <TabsTrigger value="regole" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Regole & Sottoeventi</TabsTrigger>
-            {mode === "edit" && eventId && (
-              <TabsTrigger value="prosecuzione" className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm">Prosecuzione</TabsTrigger>
-            )}
-          </TabsList>
-          <TabsContent value="dettagli" className="flex-1 overflow-auto mt-2">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as ActiveTab)}
+          className="flex-1 min-h-0 flex flex-col lg:flex-row lg:gap-4"
+        >
+          <div className="flex-1 min-w-0 flex flex-col">
+            <TabsList className="bg-zinc-100 dark:bg-zinc-100 dark:text-zinc-600 p-1">
+              <TabsTrigger
+                value="dettagli"
+                className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm"
+              >
+                Dettagli
+              </TabsTrigger>
+              <TabsTrigger
+                value="prosecuzione"
+                className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm"
+              >
+                Prosecuzione
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="dettagli" className="flex-1 overflow-auto mt-2">
             <div className="space-y-4">
               {/* 1. Titolo */}
               <div>
@@ -1183,155 +1376,123 @@ export function EventModal({
                   ))}
                 </div>
               </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="regole" className="flex-1 overflow-auto mt-2">
-            <div className="space-y-4">
-              {form.generateSubEvents ? (
-                <>
-                  <p className="text-sm text-zinc-600">
-                    La data che inserisci è il riferimento: non si fanno calcoli a ritroso. Il sistema crea la fase selezionata a quella data e solo le scadenze direttamente calcolabili (es. da Notifica citazione → Iscrizione a ruolo). Le altre fasi (Memorie 171 ter, udienze successive) si generano con i rinvii. Qui vedi la preview; puoi rimuovere singole voci con × prima di salvare.
-                  </p>
-                  {(previewSubEvents.length > 0 || subEvents.length > 0) && (
-                    <ScrollArea className="h-[280px] rounded-md border p-4">
-                      <ul className="space-y-3">
-                        {(mode === "edit" && subEvents.length > 0 ? subEvents : previewSubEvents).map(
-                          (s, idx) => {
-                          const isSavedSub = mode === "edit" && subEvents.length > 0;
-                          const isDone = isSavedSub && (s as SubEvent).status === "done";
-                          const currentId = (s as { id?: string }).id ?? `sub-${idx}`;
-                          const isSelected = isSavedSub && selectedSubEventId === currentId;
-                          const isHighlightRow = currentId === (highlightSubEventIdProp ?? selectedSubEventId);
-                          return (
-                            <li
-                              key={currentId}
-                              ref={isHighlightRow ? (el) => { highlightRowRef.current = el; } : undefined}
-                              className={`border-b pb-2 flex items-start gap-2 rounded-md transition-colors ${
-                                isSelected
-                                  ? "bg-red-100/70 border-red-300"
-                                  : "hover:bg-zinc-50"
-                              }`}
-                              onClick={() => {
-                                if (isSavedSub) {
-                                  setSelectedSubEventId((prev) =>
-                                    prev === currentId ? null : currentId
-                                  );
-                                }
-                              }}
-                            >
-                              {isSavedSub && (
-                                <div className="flex items-center gap-2 shrink-0 pt-0.5">
-                                  <Checkbox
-                                    id={`sub-done-${(s as SubEvent).id}`}
-                                    checked={isDone}
-                                    disabled={readOnly}
-                                    onCheckedChange={async (checked) => {
-                                      const id = (s as SubEvent).id;
-                                      const result = await updateSubEvent(id, { status: checked ? "done" : "pending" }, targetUserId);
-                                      if (result.success && result.data) {
-                                        setSubEvents((prev) => prev.map((se) => (se.id === id ? { ...se, status: result.data!.status } : se)));
-                                      }
-                                    }}
-                                  />
-                                  <Label htmlFor={`sub-done-${(s as SubEvent).id}`} className="text-xs text-zinc-600 cursor-pointer">
-                                    Completato
-                                  </Label>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium">{s.title}</div>
-                                <div className="text-sm text-zinc-500">
-                                  {(s as { isPlaceholder?: boolean }).isPlaceholder || !s.dueAt || (s.dueAt instanceof Date && s.dueAt.getTime() === 0)
-                                    ? <span className="italic text-amber-600">Data da inserire</span>
-                                    : formatDateTime(s.dueAt)
-                                  }
-                                </div>
-                                <div className="text-xs text-zinc-500 mt-1">
-                                  Calcolo: {(s as { explanation?: string | null }).explanation ?? ""}
-                                </div>
-                              </div>
-                              {!isSavedSub && (
-                                <button
-                                  type="button"
-                                  className="ml-2 text-xs text-red-600 hover:text-red-800 shrink-0"
-                                  onClick={() =>
-                                    handleRemovePreviewSubEvent(
-                                      (s as { id: string | undefined }).id ?? `sub-${idx}`
-                                    )
-                                  }
-                                  aria-label="Rimuovi sottoevento"
-                                >
-                                  ×
-                                </button>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </ScrollArea>
-                  )}
-                  {mode === "edit" && eventId && (
-                    <Button
-                      variant="outline"
-                      className="border-[var(--navy)] text-[var(--navy)] bg-white hover:bg-[var(--calendar-brown-pale)] dark:bg-white dark:border-[var(--navy)] dark:text-[var(--navy)] dark:hover:bg-[var(--calendar-brown-pale)]"
-                      onClick={handleRigenera}
-                      disabled={saving}
-                    >
-                      Rigenera sottoeventi
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm text-zinc-500">
-                  Attiva &quot;Genera sottoeventi automaticamente&quot; nella tab Dettagli per vedere preview e sottoeventi.
-                </p>
-              )}
-            </div>
-          </TabsContent>
-          {mode === "edit" && eventId && (
-            <TabsContent value="prosecuzione" className="flex-1 overflow-auto mt-2">
-              <ProsecuzionePanel
-                eventId={eventId}
-                targetUserId={targetUserId}
-                readOnly={readOnly}
-                macroArea={form.macroArea}
-                procedimento={form.procedimento}
-                parteProcessuale={form.parteProcessuale}
-                onSubEventsChanged={async () => {
-                  if (eventId) {
-                    const result = await getEventById(eventId, targetUserId);
-                    if (result.success && result.data) {
-                      setSubEvents(result.data.subEvents ?? []);
-                    }
-                  }
-                  onChanged?.();
-                }}
-              />
             </TabsContent>
-          )}
+            <TabsContent value="prosecuzione" className="flex-1 overflow-auto mt-2">
+              {mode === "edit" && eventId ? (
+                <ProsecuzionePanel
+                  eventId={eventId}
+                  targetUserId={targetUserId}
+                  readOnly={readOnly}
+                  macroArea={form.macroArea}
+                  procedimento={form.procedimento}
+                  parteProcessuale={form.parteProcessuale}
+                  onSubEventsChanged={async () => {
+                    if (eventId) {
+                      const result = await getEventById(eventId, targetUserId);
+                      if (result.success && result.data) {
+                        setSubEvents(result.data.subEvents ?? []);
+                      }
+                    }
+                    onChanged?.();
+                  }}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center px-4 py-8">
+                  <p className="text-sm text-zinc-500 text-center max-w-xs">
+                    Potrai aggiungere rinvii, udienze e adempimenti dopo aver creato
+                    e salvato la pratica principale.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Pulsante per aprire Eventi & Scadenze su mobile */}
+            <div className="mt-3 block lg:hidden">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
+                onClick={() => setShowEventsPanel(true)}
+              >
+                Mostra Eventi &amp; Scadenze
+              </Button>
+            </div>
+          </div>
+
+          {/* Colonna Eventi & Scadenze desktop */}
+          <EventSummaryPanel
+            mode={mode}
+            form={form}
+            subEvents={subEvents}
+            previewSubEvents={previewSubEvents}
+            selectedSubEventId={selectedSubEventId}
+            setSelectedSubEventId={setSelectedSubEventId}
+            highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
+            highlightRowRef={highlightRowRef}
+            handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
+            onRigeneraSubEvents={handleRigenera}
+            onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
+            saving={saving}
+            readOnly={readOnly}
+          />
         </Tabs>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        {/* Bottom sheet Eventi & Scadenze (mobile) */}
+        {showEventsPanel && (
+          <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40 lg:hidden">
+            <div className="bg-white rounded-t-2xl shadow-xl max-h-[80vh] flex flex-col">
+              <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-zinc-200">
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase text-zinc-500">
+                    Eventi &amp; Scadenze
+                  </span>
+                  <span className="text-sm font-medium text-zinc-800 line-clamp-1">
+                    {form.title?.trim() || "Pratica senza titolo"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="text-sm text-zinc-500 hover:text-zinc-800"
+                  onClick={() => setShowEventsPanel(false)}
+                >
+                  Chiudi
+                </button>
+              </div>
+              <div className="flex-1 min-h-0 p-3">
+                <ScrollArea className="h-full">
+                  <EventSummaryPanel
+                    mode={mode}
+                    form={form}
+                    subEvents={subEvents}
+                    previewSubEvents={previewSubEvents}
+                    selectedSubEventId={selectedSubEventId}
+                    setSelectedSubEventId={setSelectedSubEventId}
+                    highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
+                    highlightRowRef={highlightRowRef}
+                    handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
+                    onRigeneraSubEvents={handleRigenera}
+                    onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
+                    saving={saving}
+                    readOnly={readOnly}
+                  />
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
         <DialogFooter className="dialog-footer-light flex-row justify-between">
           <div className="flex gap-2">
             {!readOnly && mode === "edit" && eventId && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleDeleteSelectedSubEvent}
-                  disabled={saving || !selectedSubEventId}
-                >
-                  Rimuovi evento
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={saving}
-                >
-                  Rimuovi tutto
-                </Button>
-              </>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={saving}
+              >
+                Rimuovi pratica
+              </Button>
             )}
           </div>
           <div className="flex gap-2">

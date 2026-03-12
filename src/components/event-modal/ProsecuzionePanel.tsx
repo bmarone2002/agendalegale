@@ -565,9 +565,9 @@ export function ProsecuzionePanel({
             </Button>
           </div>
 
-          {/* Evento/fase dalla tabella (filtrato per macroArea/procedimento/parte dell'evento madre) */}
+          {/* Fase dalla tabella (filtrato per macroArea/procedimento/parte dell'evento madre) */}
           <div>
-            <Label className="text-xs">Evento / fase del giudizio</Label>
+            <Label className="text-xs">Fase del giudizio</Label>
             <Select
               value={selectedEventoCode || "__empty"}
               onValueChange={(v) => {

@@ -180,16 +180,16 @@ export function MacroAreaPanel({
         </div>
       )}
 
-      {/* Livello 4: Evento */}
+      {/* Livello 4: Fase */}
       {eventiDisponibili.length > 0 && (
         <div>
-          <Label>Evento</Label>
+          <Label>Fase</Label>
           <Select
             value={eventoCode ?? ""}
             onValueChange={(v) => onEventoChange(v)}
           >
             <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
-              <SelectValue placeholder="*Evento non individuato (seleziona)*" />
+              <SelectValue placeholder="*Fase non individuata (seleziona)*" />
             </SelectTrigger>
             <SelectContent>
               {eventiDisponibili.map((ev) => (
