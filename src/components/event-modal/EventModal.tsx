@@ -278,10 +278,10 @@ function EventSummaryPanel({
                     <li
                       key={currentId}
                       ref={isHighlightRow ? (el) => { highlightRowRef.current = el; } : undefined}
-                      className={`rounded-md border border-white/10 px-3 py-2 text-xs bg-white/5 backdrop-blur-sm transition-colors ${
+                      className={`rounded-md border px-3 py-2 text-xs bg-white/5 backdrop-blur-sm transition-colors cursor-pointer ${
                         isSelected
-                          ? "bg-amber-200/20 border-amber-300 text-amber-50"
-                          : "hover:bg-white/10"
+                          ? "bg-white text-[var(--navy)] border-white shadow-sm"
+                          : "border-white/10 hover:bg-white/10"
                       }`}
                       onClick={() => {
                         if (isSavedSub) {
@@ -425,8 +425,6 @@ export function EventModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const highlightRowRef = useRef<HTMLLIElement | null>(null);
   const [showEventsPanel, setShowEventsPanel] = useState(false);
-  /** Se true, non sovrascrivere la lista preview con l'useEffect (l'utente ha rimosso elementi con ×). Si resetta solo al click su Calcola. */
-  const previewEditedByUserRef = useRef(false);
   /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
   const userHasClickedCalcolaRef = useRef(false);
 
@@ -488,10 +486,8 @@ export function EventModal({
   useEffect(() => {
     if (!form.generateSubEvents || !form.ruleTemplateId) {
       setPreviewSubEvents([]);
-      previewEditedByUserRef.current = false;
       return;
     }
-    if (previewEditedByUserRef.current) return;
     let cancelled = false;
     const timer = setTimeout(() => {
       (async () => {
@@ -668,7 +664,6 @@ export function EventModal({
             }),
       };
       const result = await getSubEventsPreview(payload);
-      previewEditedByUserRef.current = false;
       if (result.success && result.data && result.data.length > 0) {
         userHasClickedCalcolaRef.current = true;
         setPreviewSubEvents(
@@ -712,7 +707,6 @@ export function EventModal({
   }, [form]);
 
   const handleRemovePreviewSubEvent = (id: string) => {
-    previewEditedByUserRef.current = true;
     setPreviewSubEvents((prev) => prev.filter((s) => s.id !== id));
   };
 
