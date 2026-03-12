@@ -575,12 +575,17 @@ export function EventModal({
   const handleCalcola = useCallback(async () => {
     setError(null);
 
-    if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
+      if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
       const isNotificaCitazione =
         form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE";
       const eventiConDataPrimaUdienza = new Set([
-        "NOTIFICA_CITAZIONE", "ISCRIZIONE_RUOLO", "COSTITUZIONE_CONVENUTO",
-        "SLITTAMENTO_UDIENZA", "MEMORIA_171TER_1", "MEMORIA_171TER_2", "MEMORIA_171TER_3",
+        "NOTIFICA_CITAZIONE",
+        "ISCRIZIONE_RUOLO",
+        "COSTITUZIONE_CONVENUTO",
+        "SLITTAMENTO_UDIENZA",
+        "MEMORIA_171TER_1",
+        "MEMORIA_171TER_2",
+        "MEMORIA_171TER_3",
       ]);
       const richiedeDataPrimaUdienza =
         form.procedimento === "CITAZIONE_CIVILE" &&
@@ -590,7 +595,11 @@ export function EventModal({
         typeof form.inputs?.dataPrimaUdienza === "string" &&
         String(form.inputs.dataPrimaUdienza).trim().length > 0;
       const soloDataPrimaUdienza = new Set([
-        "ISCRIZIONE_RUOLO", "MEMORIA_171TER_1", "MEMORIA_171TER_2", "MEMORIA_171TER_3",
+        "ISCRIZIONE_RUOLO",
+        "SLITTAMENTO_UDIENZA",
+        "MEMORIA_171TER_1",
+        "MEMORIA_171TER_2",
+        "MEMORIA_171TER_3",
       ]).has(form.eventoCode ?? "");
       const hasBaseDate = isNotificaCitazione
         ? typeof form.inputs?.dataPrimaNotificaCitazione === "string" &&

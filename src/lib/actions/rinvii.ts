@@ -227,10 +227,18 @@ async function generateSubEventsForRinvio(
         const eventoDef = getEventoByCode(procedimento, effectiveCode);
         if (eventoDef) {
           const baseDateStr = toDateOnlyString(udienzaInfo.dataUdienza);
+
+          const originalInputs = (ctx.eventForRule.inputs ?? {}) as Record<string, unknown>;
+          const { reminderOffsets: _ignoredReminderOffsets, ...inputsWithoutReminders } =
+            originalInputs;
+
           const inputsForRinvio = {
-            ...(ctx.eventForRule.inputs ?? {}),
+            ...inputsWithoutReminders,
             [eventoDef.inputKey]: baseDateStr,
-            ...(reminderOffsets.length > 0 ? { reminderOffsets } : {}),
+            // Per i rinvii: se l'utente non imposta promemoria, non vogliamo default automatici.
+            // Passiamo sempre reminderOffsets (anche []), così il motore data-driven non
+            // ricade sui valori di default delle impostazioni.
+            reminderOffsets,
           } as Record<string, unknown>;
 
           const userSelections = {
@@ -253,6 +261,17 @@ async function generateSubEventsForRinvio(
 
           for (const c of candidates) {
             if (!c.dueAt) continue;
+
+            const params = (c.ruleParams ?? {}) as Record<string, unknown>;
+            const isBasePhaseActivityFromRinvio =
+              c.ruleId === "data-driven" &&
+              c.kind === "attivita" &&
+              params.eventoBaseKey === eventoDef.inputKey &&
+              params.tipoTermine === "manuale";
+            if (isBasePhaseActivityFromRinvio) {
+              continue;
+            }
+
             batch.push({
               parentEventId,
               title: c.title,
