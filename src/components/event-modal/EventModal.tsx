@@ -934,7 +934,7 @@ export function EventModal({
     >
       <DialogContent
         ref={setPopoverContainer}
-        className="max-w-4xl max-h-[90vh] flex flex-col bg-white event-modal-light"
+        className="max-w-4xl max-h-[90vh] flex flex-col bg-white event-modal-light overflow-y-auto sm:overflow-visible"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
