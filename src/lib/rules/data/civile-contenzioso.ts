@@ -323,7 +323,7 @@ const RICORSO_RITO_SEMPLIFICATO_ROWS: ExcelRuleRow[] = [
     parteProcessuale: "COMUNE",
     eventoLabel: "Prima udienza",
     eventoCode: "PRIMA_UDIENZA_RICORSO",
-    eventoBaseKey: null,
+    eventoBaseKey: "dataPrimaUdienzaRicorso",
     direzioneCalcolo: null,
     numero: null,
     unita: null,
