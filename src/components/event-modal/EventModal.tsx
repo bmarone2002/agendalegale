@@ -1012,7 +1012,10 @@ export function EventModal({
                 Prosecuzione
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="dettagli" className="flex-1 min-h-0 overflow-auto mt-2 data-[state=inactive]:hidden">
+            <TabsContent
+              value="dettagli"
+              className="flex-1 min-h-0 overflow-auto event-modal-scroll mt-2 data-[state=inactive]:hidden"
+            >
             <div className="space-y-4 pb-2">
               {/* 1. Titolo */}
               <div>
@@ -1424,7 +1427,10 @@ export function EventModal({
               </div>
             </div>
             </TabsContent>
-            <TabsContent value="prosecuzione" className="flex-1 min-h-0 overflow-auto mt-2 data-[state=inactive]:hidden">
+            <TabsContent
+              value="prosecuzione"
+              className="flex-1 min-h-0 overflow-auto event-modal-scroll mt-2 data-[state=inactive]:hidden"
+            >
               {mode === "edit" && eventId ? (
                 <ProsecuzionePanel
                   eventId={eventId}
