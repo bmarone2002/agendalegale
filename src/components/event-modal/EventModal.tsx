@@ -963,7 +963,7 @@ export function EventModal({
     >
       <DialogContent
         ref={setPopoverContainer}
-        className="max-w-4xl max-h-[min(90vh,90dvh)] flex flex-col bg-white event-modal-light overflow-hidden p-4 sm:p-6"
+        className="max-w-4xl max-h-[min(90vh,90dvh)] max-lg:h-[min(90vh,90dvh)] flex flex-col bg-white event-modal-light overflow-hidden p-4 sm:p-6"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         showClose={false}
@@ -1014,9 +1014,11 @@ export function EventModal({
             </TabsList>
             <TabsContent
               value="dettagli"
-              className="flex-1 min-h-0 overflow-auto event-modal-scroll mt-2 data-[state=inactive]:hidden"
+              className="flex-1 min-h-0 flex flex-col overflow-hidden mt-2 data-[state=inactive]:hidden"
             >
-            <div className="space-y-4 pb-2">
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <ScrollArea className="h-full event-modal-scroll">
+                  <div className="space-y-4 pb-2 pr-2">
               {/* 1. Titolo */}
               <div>
                 <Label>PRATICA</Label>
@@ -1426,11 +1428,16 @@ export function EventModal({
                 </div>
               </div>
             </div>
+                </ScrollArea>
+              </div>
             </TabsContent>
             <TabsContent
               value="prosecuzione"
-              className="flex-1 min-h-0 overflow-auto event-modal-scroll mt-2 data-[state=inactive]:hidden"
+              className="flex-1 min-h-0 flex flex-col overflow-hidden mt-2 data-[state=inactive]:hidden"
             >
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                <ScrollArea className="h-full event-modal-scroll">
+                  <div className="pr-2">
               {mode === "edit" && eventId ? (
                 <ProsecuzionePanel
                   eventId={eventId}
@@ -1457,6 +1464,9 @@ export function EventModal({
                   </p>
                 </div>
               )}
+                  </div>
+                </ScrollArea>
+              </div>
             </TabsContent>
           </div>
 

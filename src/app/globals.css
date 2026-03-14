@@ -167,9 +167,12 @@ body {
 /* Pulsanti outline nella modale (es. Aggiungi tag): sempre bianco */
 .event-modal-light button[type="button"].bg-white { background-color: #fff !important; color: #171717 !important; border-color: #e4e4e7 !important; }
 .event-modal-light button[type="button"].bg-white:hover { background-color: var(--calendar-brown-pale) !important; }
-/* Modal eventi: pannelli interni scrollabili anche su Safari/iPhone */
+/* Modal eventi: pannelli interni scrollabili (come pannello Eventi e Scadenze) */
 .event-modal-scroll {
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.event-modal-scroll [data-radix-scroll-area-viewport] {
   -webkit-overflow-scrolling: touch;
 }
 /* Safe-area su mobile (Safari/iPhone) per footer e contenuto */
