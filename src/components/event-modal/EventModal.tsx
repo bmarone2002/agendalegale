@@ -1384,9 +1384,10 @@ export function EventModal({
                           return;
                         }
                         const e = result.data;
+                        const nextStatus = e.status === "done" ? "done" : "pending";
                         setForm((f) => ({
                           ...f,
-                          status: e.status,
+                          status: nextStatus,
                         }));
                         setSubEvents(e.subEvents ?? []);
                         setSelectedSubEventId(null);
