@@ -371,7 +371,7 @@ function EventSummaryPanel({
               onClick={onDeleteSelectedSubEvent}
               disabled={saving || !selectedSubEventId}
             >
-              Rimuovi evento
+              Rimuovi singolo evento
             </Button>
           </div>
         )}
@@ -1395,7 +1395,7 @@ export function EventModal({
                         setSaving(false);
                       }
                     } else {
-                      setForm((f) => ({ ...f, status: "done" }));
+                      setForm((f) => ({ ...f, status: f.status === "done" ? "pending" : "done" }));
                     }
                   }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
@@ -1403,8 +1403,12 @@ export function EventModal({
                       ? "bg-green-100 border-green-400 text-green-800 hover:bg-green-200"
                       : "bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50"
                   }`}
-                  aria-label="Segna la pratica come completata"
-                  disabled={saving || readOnly || form.status === "done"}
+                  aria-label={
+                    form.status === "done"
+                      ? "Segna la pratica come da fare"
+                      : "Segna la pratica come completata"
+                  }
+                  disabled={saving || readOnly}
                 >
                   <span
                     className={`inline-block w-4 h-4 rounded-full border-2 flex-shrink-0 ${
@@ -1419,7 +1423,7 @@ export function EventModal({
                       </svg>
                     )}
                   </span>
-                  {form.status === "done" ? "Completato" : "Segna la pratica come completata"}
+                  {form.status === "done" ? "Segna la pratica come da fare" : "Segna la pratica come completata"}
                 </button>
               </div>
 
@@ -1580,11 +1584,12 @@ export function EventModal({
 
         {error && <p className="text-sm text-red-600 mt-2 shrink-0">{error}</p>}
         <DialogFooter className="dialog-footer-light flex-row justify-between shrink-0 pt-2 border-t border-zinc-200 bg-white">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {!readOnly && mode === "edit" && eventId && (
               <Button
                 type="button"
                 variant="destructive"
+                className="bg-red-600 hover:bg-red-700 text-white"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={saving}
               >
