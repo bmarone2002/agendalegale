@@ -611,6 +611,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               onClick={async (e) => {
                 e.stopPropagation();
                 const id = arg.event.id as string;
+                const parentTitleSafe = parentTitle || "questa pratica";
+                const titleSafe = arg.event.title || "questo promemoria";
+                const confirmed = window.confirm(
+                  `Stai per eliminare il promemoria “${titleSafe}” collegato alla pratica “${parentTitleSafe}”. Vuoi continuare?`
+                );
+                if (!confirmed) return;
                 const result = await deleteSubEvent(id, targetUserId);
                 if (result.success) {
                   arg.event.remove();
@@ -653,6 +659,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     if (isListView) {
       const evStatus = arg.event.extendedProps.status as string | undefined;
       const isDoneEv = evStatus === "done";
+        const titleSafe = arg.event.title || "questa pratica";
       return (
         <div className="fc-event-main-frame flex items-center gap-2">
           {isDoneEv && (
@@ -677,6 +684,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               onClick={async (e) => {
                 e.stopPropagation();
                 const id = arg.event.id as string;
+                  const confirmed = window.confirm(
+                    `Stai per eliminare la pratica “${titleSafe}” e tutti i promemoria collegati. Vuoi continuare?`
+                  );
+                  if (!confirmed) return;
                 const result = await deleteEvent(id, targetUserId);
                 if (result.success) {
                   const api = calendarRef.current?.getApi();
@@ -926,6 +937,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         </div>
       </div>
       <div className="w-full min-w-0 max-w-full overflow-x-auto calendar-month-container">
+        {currentView === "listFromToday" && (
+          <div className="mb-1 px-1 sm:hidden">
+            <p className="text-[11px] text-zinc-500 flex items-center gap-1">
+              <span className="inline-block h-1 w-8 rounded-full bg-zinc-300" />
+              Schermata ampia: scorri in orizzontale per vedere tutti i dettagli.
+            </p>
+          </div>
+        )}
         {initialView && (
         <FullCalendar
           ref={calendarRef}
