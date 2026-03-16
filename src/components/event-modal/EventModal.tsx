@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { createEvent, updateEvent, getEventById, deleteEvent } from "@/lib/actions/events";
+import { createEvent, updateEvent, getEventById, deleteEvent, completeEventWithSubEvents } from "@/lib/actions/events";
 import { parseDocumentForEvent } from "@/lib/actions/parse-document";
 import {
   regenerateSubEvents,
@@ -1367,15 +1367,43 @@ export function EventModal({
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() =>
-                    setForm((f) => ({ ...f, status: f.status === "done" ? "pending" : "done" }))
-                  }
+                  onClick={async () => {
+                    if (readOnly) return;
+                    // In creazione aggiorniamo solo lo stato locale; in modifica persistiamo anche su server + sottoeventi
+                    if (mode === "edit" && eventId) {
+                      setError(null);
+                      setSaving(true);
+                      try {
+                        const result = await completeEventWithSubEvents(eventId, targetUserId);
+                        if (!result.success || !result.data) {
+                          setError(
+                            !result.success
+                              ? normalizeDisplayError(result.error)
+                              : "Impossibile completare la pratica"
+                          );
+                          return;
+                        }
+                        const e = result.data;
+                        setForm((f) => ({
+                          ...f,
+                          status: e.status,
+                        }));
+                        setSubEvents(e.subEvents ?? []);
+                        setSelectedSubEventId(null);
+                      } finally {
+                        setSaving(false);
+                      }
+                    } else {
+                      setForm((f) => ({ ...f, status: "done" }));
+                    }
+                  }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
                     form.status === "done"
                       ? "bg-green-100 border-green-400 text-green-800 hover:bg-green-200"
                       : "bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50"
                   }`}
-                  aria-label="Segna come completato"
+                  aria-label="Segna la pratica come completata"
+                  disabled={saving || readOnly || form.status === "done"}
                 >
                   <span
                     className={`inline-block w-4 h-4 rounded-full border-2 flex-shrink-0 ${
@@ -1390,7 +1418,7 @@ export function EventModal({
                       </svg>
                     )}
                   </span>
-                  {form.status === "done" ? "Completato" : "Segna come completato"}
+                  {form.status === "done" ? "Completato" : "Segna la pratica come completata"}
                 </button>
               </div>
 

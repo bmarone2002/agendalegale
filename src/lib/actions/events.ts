@@ -295,3 +295,44 @@ export async function getEventById(id: string, targetUserId?: string): Promise<A
     };
   }
 }
+
+export async function completeEventWithSubEvents(
+  id: string,
+  targetUserId?: string
+): Promise<ActionResult<Event>> {
+  try {
+    const existing = await prisma.event.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+    if (!existing) {
+      return { success: false, error: "Evento non trovato" };
+    }
+    await resolveCalendarUser(targetUserId ?? existing.userId, "FULL");
+
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.subEvent.updateMany({
+        where: { parentEventId: id },
+        data: { status: "done" },
+      });
+
+      return tx.event.update({
+        where: { id },
+        data: { status: "done" },
+        include: {
+          subEvents: {
+            orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { priority: "asc" }],
+          },
+        },
+      });
+    });
+
+    return { success: true, data: toEvent(updated as any) };
+  } catch (e) {
+    return {
+      success: false,
+      error:
+        e instanceof Error ? e.message : "Errore nel completare la pratica e i sottoeventi",
+    };
+  }
+}
