@@ -131,4 +131,8 @@ export const RULE_TEMPLATES = [
   { id: "generic-deadline", label: "Scadenza generica" },
   { id: "checklist", label: "Checklist" },
   { id: "atto-giuridico", label: "Atto giuridico (termini e promemoria)" },
+  {
+    id: "data-driven",
+    label: "Atto giuridico – nuove tabelle (macro area / procedimento / parte)",
+  },
 ] as const;
