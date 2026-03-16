@@ -169,7 +169,7 @@ export const PARTI_LABELS: Record<MacroAreaCode, Record<ParteProcessuale, string
     COMUNE: "Comune (entrambe le parti)",
   },
   TRIBUTARIO: {
-    ATTORE: "Ricorrente",
+    ATTORE: "Ricorrente / Appellante",
     CONVENUTO: "Ente impositore",
     COMUNE: "Comune (entrambe le parti)",
   },
@@ -294,7 +294,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     {
       code: "DEPOSITO_RICORSO_TRIBUTARIO",
       label: "Deposito ricorso",
-      inputKey: "dataProposizioneRicorsoTrib",
+      inputKey: "dataNotificaRicorsoTrib",
       parteProcessuale: "ATTORE",
       ordine: 2,
     },
@@ -312,7 +312,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     {
       code: "UDIENZA_SOSPENSIVA_TRIBUTARIO",
       label: "Udienza sospensiva",
-      inputKey: "dataIstanzaCautelareTrib",
+      inputKey: "dataUdienzaCautelareTrib",
       parteProcessuale: "COMUNE",
       ordine: 4,
     },
@@ -339,14 +339,14 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     },
     {
       code: "SENTENZA_RICORSO_TRIBUTARIO",
-      label: "Sentenza (per calcolare termini appello/Ric Cassazione)",
+      label: "Sentenza (per calcolare termine lungo Appello)",
       inputKey: "dataPubblicazioneSentenzaTrib",
       parteProcessuale: "COMUNE",
       ordine: 8,
     },
     {
       code: "NOTIFICA_SENTENZA_RICORSO_TRIBUTARIO",
-      label: "Notifica sentenza (per calcolare termini appello/Ric Cassazione)",
+      label: "Notifica Sentenza (per calcolare termine breve appello/Ric Cassazione)",
       inputKey: "dataNotificaSentenzaTrib",
       parteProcessuale: "COMUNE",
       ordine: 9,
@@ -356,21 +356,21 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     // APPELLANTE
     {
       code: "NOTIFICA_APPELLO_TRIB_BREVE",
-      label: "Notifica ricorso/appello (termine breve)",
+      label: "Notifica appello (termine breve)",
       inputKey: "dataNotificaSentenzaPrimoTrib",
       parteProcessuale: "ATTORE",
       ordine: 1,
     },
     {
       code: "NOTIFICA_APPELLO_TRIB_LUNGO",
-      label: "Notifica ricorso/appello (termine lungo 6 mesi)",
+      label: "Notifica appello (termine lungo 6 mesi)",
       inputKey: "dataDepositoSentenzaPrimoTrib",
       parteProcessuale: "ATTORE",
       ordine: 2,
     },
     {
       code: "DEPOSITO_APPELLO_TRIBUTARIO",
-      label: "Deposito ricorso/appello",
+      label: "Deposito appello",
       inputKey: "dataProposizioneAppelloTrib",
       parteProcessuale: "ATTORE",
       ordine: 3,
@@ -378,18 +378,11 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
 
     // ENTE RESISTENTE / APPELLATO
     {
-      code: "COSTITUZIONE_ENTE_APPELLO_TRIB",
-      label: "Costituzione ente resistente",
-      inputKey: "dataNotificaAppelloTrib",
-      parteProcessuale: "CONVENUTO",
-      ordine: 4,
-    },
-    {
       code: "COSTITUZIONE_APPELLATO_TRIB",
       label: "Costituzione appellato",
       inputKey: "dataNotificaAppelloTrib",
       parteProcessuale: "CONVENUTO",
-      ordine: 5,
+      ordine: 4,
     },
 
     // COMUNE (eventi condivisi)
@@ -423,14 +416,14 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     },
     {
       code: "SENTENZA_APPELLO_TRIB",
-      label: "Sentenza (per calcolare termini Ricorso Cassazione)",
+      label: "Sentenza (per calcolare termine lungo per Ricorso in Cassazione)",
       inputKey: "dataPubblicazioneSentenzaAppelloTrib",
       parteProcessuale: "COMUNE",
       ordine: 10,
     },
     {
       code: "NOTIFICA_SENTENZA_APPELLO_TRIB",
-      label: "Notifica sentenza (per calcolare termini Ricorso Cassazione)",
+      label: "Notifica Sentenza (per calcolare termine breve per Ricorso in Cassazione)",
       inputKey: "dataNotificaSentenzaAppelloTrib",
       parteProcessuale: "COMUNE",
       ordine: 11,
