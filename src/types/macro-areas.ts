@@ -282,6 +282,76 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     { code: "SENTENZA_OPPOSIZIONE", label: "Sentenza (per calcolare termini appello/Ric Cassazione)", inputKey: "dataPubblicazioneSentenzaOpposizione", parteProcessuale: "COMUNE", ordine: 12 },
     { code: "NOTIFICA_SENTENZA_OPPOSIZIONE", label: "Notifica Sentenza (per calcolare termini appello/Ric Cassazione)", inputKey: "dataNotificaSentenzaOpposizione", parteProcessuale: "COMUNE", ordine: 13 },
   ],
+  RICORSO_TRIBUTARIO: [
+    // RICORRENTE
+    {
+      code: "NOTIFICA_RICORSO_TRIBUTARIO",
+      label: "Notifica ricorso",
+      inputKey: "dataNotificaAttoImpugnatoTrib",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "DEPOSITO_RICORSO_TRIBUTARIO",
+      label: "Deposito ricorso",
+      inputKey: "dataProposizioneRicorsoTrib",
+      parteProcessuale: "ATTORE",
+      ordine: 2,
+    },
+
+    // ENTE RESISTENTE
+    {
+      code: "COSTITUZIONE_ENTE_TRIBUTARIO",
+      label: "Costituzione ente resistente",
+      inputKey: "dataRicezioneRicorsoEnteTrib",
+      parteProcessuale: "CONVENUTO",
+      ordine: 3,
+    },
+
+    // COMUNE (eventi condivisi)
+    {
+      code: "UDIENZA_SOSPENSIVA_TRIBUTARIO",
+      label: "Udienza sospensiva",
+      inputKey: "dataIstanzaCautelareTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 4,
+    },
+    {
+      code: "UDIENZA_TRATTAZIONE_TRIBUTARIO",
+      label: "Udienza trattazione",
+      inputKey: "dataUdienzaTrattazioneTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 5,
+    },
+    {
+      code: "DEPOSITO_MEMORIE_20_TRIBUTARIO",
+      label: "Deposito memorie 20 gg prima trattazione",
+      inputKey: "dataUdienzaTrattazioneTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 6,
+    },
+    {
+      code: "DEPOSITO_MEMORIE_10_TRIBUTARIO",
+      label: "Deposito memorie 10 gg prima trattazione",
+      inputKey: "dataUdienzaTrattazioneTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+    {
+      code: "SENTENZA_RICORSO_TRIBUTARIO",
+      label: "Sentenza (per calcolare termini appello/Ric Cassazione)",
+      inputKey: "dataPubblicazioneSentenzaTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 8,
+    },
+    {
+      code: "NOTIFICA_SENTENZA_RICORSO_TRIBUTARIO",
+      label: "Notifica sentenza (per calcolare termini appello/Ric Cassazione)",
+      inputKey: "dataNotificaSentenzaTrib",
+      parteProcessuale: "COMUNE",
+      ordine: 9,
+    },
+  ],
   APPELLO_CIVILE: [
     // ATTORE / APPELLANTE
     {

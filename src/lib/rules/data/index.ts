@@ -5,3 +5,4 @@
  */
 
 import "./civile-contenzioso";
+import "./tributario";
