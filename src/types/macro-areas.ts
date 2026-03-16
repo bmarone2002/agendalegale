@@ -506,6 +506,89 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
       ordine: 10,
     },
   ],
+  RICORSO_CASSAZIONE: [
+    // RICORRENTE
+    {
+      code: "NOTIFICA_RICORSO_CASS_BREVE",
+      label: "Notifica Ricorso per Cassazione",
+      inputKey: "dataNotificaSentenzaImpugnareCass",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "NOTIFICA_RICORSO_CASS_LUNGO",
+      label: "Notifica Ricorso per Cassazione",
+      inputKey: "dataPubblicazioneSentenzaImpugnareCass",
+      parteProcessuale: "ATTORE",
+      ordine: 2,
+    },
+    {
+      code: "DEPOSITO_RICORSO_CASS",
+      label: "Deposito Ricorso",
+      inputKey: "dataUltimaNotificaRicorsoCass",
+      parteProcessuale: "ATTORE",
+      ordine: 3,
+    },
+    {
+      code: "PROPOSTA_380BIS",
+      label: "Proposta 380 bis",
+      inputKey: "dataComunicazioneProposta380bis",
+      parteProcessuale: "COMUNE",
+      ordine: 4,
+    },
+    {
+      code: "ISTANZA_DECISIONE_380BIS",
+      label: "Istanza per Decisione 380 bis c. 2",
+      inputKey: "dataComunicazioneProposta380bis",
+      parteProcessuale: "ATTORE",
+      ordine: 5,
+    },
+    {
+      code: "UDIENZA_CASS",
+      label: "Udienza",
+      inputKey: "dataUdienzaCass",
+      parteProcessuale: "COMUNE",
+      ordine: 6,
+    },
+    {
+      code: "MEMORIE_378",
+      label: "Memorie ex art. 378",
+      inputKey: "dataUdienzaCass",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+  ],
+  CONTRORICORSO: [
+    // CONTRORICORRENTE
+    {
+      code: "DEPOSITO_CONTRORICORSO",
+      label: "Deposito Controricorso",
+      inputKey: "dataNotificaRicorsoCass",
+      parteProcessuale: "CONVENUTO",
+      ordine: 1,
+    },
+    {
+      code: "PROPOSTA_380BIS",
+      label: "Proposta 380 bis",
+      inputKey: "dataComunicazioneProposta380bis",
+      parteProcessuale: "COMUNE",
+      ordine: 2,
+    },
+    {
+      code: "UDIENZA_CASS",
+      label: "Udienza",
+      inputKey: "dataUdienzaCass",
+      parteProcessuale: "COMUNE",
+      ordine: 3,
+    },
+    {
+      code: "MEMORIE_378",
+      label: "Memorie ex art. 378",
+      inputKey: "dataUdienzaCass",
+      parteProcessuale: "COMUNE",
+      ordine: 4,
+    },
+  ],
 };
 
 /** Ordine minimo per eventi in Prosecuzione (solo fasi successive alle memorie 171-ter n.1/2/3). */
