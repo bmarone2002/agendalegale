@@ -371,7 +371,7 @@ function EventSummaryPanel({
               onClick={onDeleteSelectedSubEvent}
               disabled={saving || !selectedSubEventId}
             >
-              Rimuovi evento
+              Rimuovi singolo evento
             </Button>
           </div>
         )}
@@ -1017,9 +1017,8 @@ export function EventModal({
               value="dettagli"
               className="flex-1 min-h-0 flex flex-col overflow-hidden mt-2 data-[state=inactive]:hidden"
             >
-              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-                <ScrollArea className="h-full event-modal-scroll">
-                  <div className="space-y-4 pb-2 pr-2">
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto pr-2 pb-2">
+                  <div className="space-y-4">
               {/* 1. Titolo */}
               <div>
                 <Label>PRATICA</Label>
@@ -1363,67 +1362,7 @@ export function EventModal({
                 />
               </div>
 
-              {/* 6. Stato completamento evento */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (readOnly) return;
-                    // In creazione aggiorniamo solo lo stato locale; in modifica persistiamo anche su server + sottoeventi
-                    if (mode === "edit" && eventId) {
-                      setError(null);
-                      setSaving(true);
-                      try {
-                        const result = await completeEventWithSubEvents(eventId, targetUserId);
-                        if (!result.success || !result.data) {
-                          setError(
-                            !result.success
-                              ? normalizeDisplayError(result.error)
-                              : "Impossibile completare la pratica"
-                          );
-                          return;
-                        }
-                        const e = result.data;
-                        const nextStatus = e.status === "done" ? "done" : "pending";
-                        setForm((f) => ({
-                          ...f,
-                          status: nextStatus,
-                        }));
-                        setSubEvents(e.subEvents ?? []);
-                        setSelectedSubEventId(null);
-                      } finally {
-                        setSaving(false);
-                      }
-                    } else {
-                      setForm((f) => ({ ...f, status: "done" }));
-                    }
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                    form.status === "done"
-                      ? "bg-green-100 border-green-400 text-green-800 hover:bg-green-200"
-                      : "bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50"
-                  }`}
-                  aria-label="Segna la pratica come completata"
-                  disabled={saving || readOnly || form.status === "done"}
-                >
-                  <span
-                    className={`inline-block w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                      form.status === "done"
-                        ? "bg-green-500 border-green-500"
-                        : "border-zinc-400"
-                    }`}
-                  >
-                    {form.status === "done" && (
-                      <svg viewBox="0 0 16 16" fill="none" className="w-full h-full">
-                        <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  {form.status === "done" ? "Completato" : "Segna la pratica come completata"}
-                </button>
-              </div>
-
-              {/* 7. Colore tag: applicato a evento e sottoeventi in calendario */}
+              {/* 6. Colore tag: applicato a evento e sottoeventi in calendario */}
               <div>
                 <Label>Colore tag</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5 pl-1">
@@ -1458,8 +1397,6 @@ export function EventModal({
                 </div>
               </div>
             </div>
-                </ScrollArea>
-              </div>
             </TabsContent>
             <TabsContent
               value="prosecuzione"
@@ -1580,11 +1517,12 @@ export function EventModal({
 
         {error && <p className="text-sm text-red-600 mt-2 shrink-0">{error}</p>}
         <DialogFooter className="dialog-footer-light flex-row justify-between shrink-0 pt-2 border-t border-zinc-200 bg-white">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {!readOnly && mode === "edit" && eventId && (
               <Button
                 type="button"
                 variant="destructive"
+                className="bg-red-600 hover:bg-red-700 text-white"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={saving}
               >
@@ -1607,6 +1545,61 @@ export function EventModal({
             </Button>
             {!readOnly && (
               <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={async () => {
+                    if (readOnly) return;
+                    if (mode === "edit" && eventId) {
+                      setError(null);
+                      setSaving(true);
+                      try {
+                        const result = await completeEventWithSubEvents(eventId, targetUserId);
+                        if (!result.success || !result.data) {
+                          setError(
+                            !result.success
+                              ? normalizeDisplayError(result.error)
+                              : "Impossibile aggiornare lo stato della pratica"
+                          );
+                          return;
+                        }
+                        const e = result.data;
+                        const nextStatus = e.status === "done" ? "done" : "pending";
+                        setForm((f) => ({
+                          ...f,
+                          status: nextStatus,
+                        }));
+                        setSubEvents(e.subEvents ?? []);
+                        setSelectedSubEventId(null);
+                      } finally {
+                        setSaving(false);
+                      }
+                    } else {
+                      setForm((f) => ({
+                        ...f,
+                        status: f.status === "done" ? "pending" : "done",
+                      }));
+                    }
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                  aria-label={
+                    form.status === "done"
+                      ? "Segna la pratica come da fare"
+                      : "Segna la pratica come completata"
+                  }
+                  disabled={saving}
+                >
+                  <span
+                    className={`inline-block w-3 h-3 rounded-full border flex-shrink-0 ${
+                      form.status === "done"
+                        ? "bg-green-500 border-green-600"
+                        : "bg-red-500 border-red-600"
+                    }`}
+                  />
+                  {form.status === "done"
+                    ? "Segna la pratica come da fare"
+                    : "Segna la pratica come completata"}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"

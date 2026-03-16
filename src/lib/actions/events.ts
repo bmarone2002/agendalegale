@@ -303,22 +303,24 @@ export async function completeEventWithSubEvents(
   try {
     const existing = await prisma.event.findUnique({
       where: { id },
-      select: { userId: true },
+      select: { userId: true, status: true },
     });
     if (!existing) {
       return { success: false, error: "Evento non trovato" };
     }
     await resolveCalendarUser(targetUserId ?? existing.userId, "FULL");
 
+    const nextStatus = existing.status === "done" ? "pending" : "done";
+
     const updated = await prisma.$transaction(async (tx) => {
       await tx.subEvent.updateMany({
         where: { parentEventId: id },
-        data: { status: "done" },
+        data: { status: nextStatus },
       });
 
       return tx.event.update({
         where: { id },
-        data: { status: "done" },
+        data: { status: nextStatus },
         include: {
           subEvents: {
             orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { priority: "asc" }],

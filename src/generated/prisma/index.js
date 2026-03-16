@@ -211,7 +211,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Benedetto.Marone\\OneDrive - Archiva Group\\Desktop\\Legal Calendar\\legal-calendar\\src\\generated\\prisma",
+      "value": "C:\\Users\\Benedetto.Marone\\OneDrive - Archiva Group\\Desktop\\Legal Calendar\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -225,12 +225,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Benedetto.Marone\\OneDrive - Archiva Group\\Desktop\\Legal Calendar\\legal-calendar\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Benedetto.Marone\\OneDrive - Archiva Group\\Desktop\\Legal Calendar\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "5.22.0",
