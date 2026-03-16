@@ -169,7 +169,7 @@ export const PARTI_LABELS: Record<MacroAreaCode, Record<ParteProcessuale, string
     COMUNE: "Comune (entrambe le parti)",
   },
   TRIBUTARIO: {
-    ATTORE: "Ricorrente / Appellante",
+    ATTORE: "Appellante",
     CONVENUTO: "Ente impositore",
     COMUNE: "Comune (entrambe le parti)",
   },
