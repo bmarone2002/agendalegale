@@ -15,9 +15,6 @@ import {
 
 const OPENAI_MODEL = "gpt-4o-mini";
 
-const ACTION_TYPE_VALUES = ["CITAZIONE", "RICORSO_OPPOSIZIONE", "RICORSO_TRIBUTARIO", "APPELLO_CIVILE", "APPELLO_TRIBUTARIO", "RICORSO_CASSAZIONE"] as const;
-const ACTION_MODE_VALUES = ["COSTITUZIONE", "DA_NOTIFICARE"] as const;
-
 /** Risposta strutturata dall'AI per precompilare il form Atto Giuridico */
 const parsedDocumentSchema = z.object({
   title: z.string().optional().default(""),
@@ -27,8 +24,9 @@ const parsedDocumentSchema = z.object({
   procedimento: z.custom<ProcedimentoCode>().optional(),
   parteProcessuale: z.custom<ParteProcessuale>().optional(),
   eventoCode: z.string().optional(),
-  actionType: z.enum(ACTION_TYPE_VALUES).optional(),
-  actionMode: z.enum(ACTION_MODE_VALUES).optional(),
+  // Campi legacy: accetta qualsiasi stringa, per evitare che valori leggermente diversi blocchino tutto
+  actionType: z.string().optional(),
+  actionMode: z.string().optional(),
   inputs: z.record(z.unknown()).optional().default({}),
   notes: z.string().optional().default(""),
 });
