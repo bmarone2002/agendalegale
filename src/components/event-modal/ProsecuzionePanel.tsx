@@ -321,6 +321,8 @@ export function ProsecuzionePanel({
   procedimento,
   parteProcessuale,
 }: ProsecuzionePanelProps) {
+  const MANUALE_CODE = "__MANUALE__";
+
   const [rinvii, setRinvii] = useState<Rinvio[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -337,6 +339,7 @@ export function ProsecuzionePanel({
   const [adempimenti, setAdempimenti] = useState<AdempimentoForm[]>([]);
   const [availableEventi, setAvailableEventi] = useState<EventoDisponibile[]>([]);
   const [selectedEventoCode, setSelectedEventoCode] = useState<string>("");
+  const [faseManuale, setFaseManuale] = useState<string>("");
   const [reminderOffsets, setReminderOffsets] = useState<number[]>([]);
 
   const loadRinvii = useCallback(async () => {
@@ -369,6 +372,7 @@ export function ProsecuzionePanel({
     setNote("");
     setAdempimenti([]);
     setSelectedEventoCode("");
+    setFaseManuale("");
     setReminderOffsets([]);
     setShowForm(false);
     setError(null);
@@ -389,14 +393,15 @@ export function ProsecuzionePanel({
   const handleSaveRinvio = async () => {
     setError(null);
 
-    if (!macroArea || !procedimento || !parteProcessuale) {
+    const effectiveEventoCode =
+      selectedEventoCode === MANUALE_CODE ? faseManuale.trim() : selectedEventoCode.trim();
+
+    if (!effectiveEventoCode) {
       setError(
-        "La prosecuzione è disponibile solo per pratiche con Macro Area, Procedimento e Parte processuale impostati.",
+        selectedEventoCode === MANUALE_CODE
+          ? "Inserire la fase manuale"
+          : "Selezionare l'evento/fase dalla tabella o inserire una fase manuale."
       );
-      return;
-    }
-    if (!selectedEventoCode) {
-      setError("Selezionare l'evento/fase dalla tabella.");
       return;
     }
     if (!dataUdienza) {
@@ -417,8 +422,8 @@ export function ProsecuzionePanel({
         12, 0, 0
       );
 
-      const evento = availableEventi.find((e) => e.code === selectedEventoCode);
-      const labelEvento = evento?.label ?? selectedEventoCode;
+      const evento = availableEventi.find((e) => e.code === effectiveEventoCode);
+      const labelEvento = evento?.label ?? effectiveEventoCode;
 
       const result = await createRinvio({
         parentEventId: eventId,
@@ -429,7 +434,7 @@ export function ProsecuzionePanel({
         tipoUdienzaCustom: labelEvento,
         note: note || null,
         adempimenti: validAdempimenti,
-        eventoCode: selectedEventoCode,
+        eventoCode: effectiveEventoCode,
         reminderOffsets,
       }, targetUserId);
 
@@ -573,6 +578,9 @@ export function ProsecuzionePanel({
               onValueChange={(v) => {
                 const val = v === "__empty" ? "" : v;
                 setSelectedEventoCode(val);
+                if (val !== MANUALE_CODE) {
+                  setFaseManuale("");
+                }
               }}
             >
               <SelectTrigger className="bg-white text-sm">
@@ -587,9 +595,23 @@ export function ProsecuzionePanel({
                     {ev.label}
                   </SelectItem>
                 ))}
+                <SelectItem value={MANUALE_CODE}>Altro (scrivi fase manualmente)</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Input fase manuale (utile quando non ci sono fasi predefinite o la pratica non mappa correttamente) */}
+          {selectedEventoCode === MANUALE_CODE && (
+            <div>
+              <Label className="text-xs">Fase manuale</Label>
+              <Input
+                value={faseManuale}
+                onChange={(e) => setFaseManuale(e.target.value)}
+                placeholder="Es. Udienza successiva / Termine di deposito..."
+                className="h-8 text-sm"
+              />
+            </div>
+          )}
 
           {/* Data udienza */}
           <div>

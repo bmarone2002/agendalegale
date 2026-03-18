@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { DatePicker } from "./DatePicker";
 import {
   Select,
@@ -113,6 +114,8 @@ export function MacroAreaPanel({
   onEventoChange,
   onInputsChange,
 }: MacroAreaPanelProps) {
+  const MANUALE_CODE = "__MANUALE__";
+
   const procedimenti = macroArea
     ? (PROCEDIMENTI_PER_MACRO_AREA[macroArea] as readonly string[])
     : [];
@@ -166,6 +169,9 @@ export function MacroAreaPanel({
   const currentDateLabel = selectedEvento
     ? getInputLabelFromKey(selectedEvento.inputKey, selectedEvento.label)
     : "";
+
+  const isEventoCodeKnown =
+    !!eventoCode && eventiDisponibili.some((ev) => ev.code === eventoCode);
   const dataNotificaCitazione = toDateOrNull(inputs["dataPrimaNotificaCitazione"]);
   const dataPrimaUdienza = toDateOrNull(inputs["dataPrimaUdienza"]);
   const dataUdienzaComparizione = toDateOrNull(inputs["dataUdienzaComparizione"]);
@@ -240,7 +246,7 @@ export function MacroAreaPanel({
       )}
 
       {/* Livello 4: Fase */}
-      {eventiDisponibili.length > 0 && (
+      {(macroArea && procedimento && parteProcessuale) && (
         <div>
           <Label>Fase</Label>
           <Select
@@ -256,8 +262,32 @@ export function MacroAreaPanel({
                   {ev.label}
                 </SelectItem>
               ))}
+              {/* Opzione libera: serve per casi in cui per quella macro/procedimento/parte non esistono fasi predefinite */}
+              <SelectItem value={MANUALE_CODE}>Altro (scrivi fase manualmente)</SelectItem>
+              {/* Se l'utente ha salvato una fase manuale (valore non presente in lista), mostriamola anche nel dropdown */}
+              {!!eventoCode && !isEventoCodeKnown && eventoCode !== MANUALE_CODE && (
+                <SelectItem value={eventoCode}>
+                  Fase manuale: {eventoCode}
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
+
+          {/* Campo libero: mostrato se l'utente ha selezionato la modalità manuale oppure se ha già inserito un valore non trovato in lista */}
+          {(eventoCode === MANUALE_CODE ||
+            (!!eventoCode && !isEventoCodeKnown)) && (
+            <div className="pt-2">
+              <Label className="text-sm font-medium text-zinc-700">
+                Fase manuale
+              </Label>
+              <Input
+                value={eventoCode === MANUALE_CODE ? "" : eventoCode ?? ""}
+                onChange={(e) => onEventoChange(e.target.value || MANUALE_CODE)}
+                placeholder="Es. Udienza successiva / Termine di deposito..."
+                className="mt-1"
+              />
+            </div>
+          )}
         </div>
       )}
 
