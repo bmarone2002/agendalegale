@@ -1247,8 +1247,13 @@ export function EventModal({
                     onParteProcessualeChange={(p) =>
                       setForm((f) => ({ ...f, parteProcessuale: p, eventoCode: null, inputs: {} }))
                     }
-                    onEventoChange={(code) =>
-                      setForm((f) => ({ ...f, eventoCode: code, inputs: {} }))
+                    onEventoChange={(code, options) =>
+                      setForm((f) => ({
+                        ...f,
+                        eventoCode: code,
+                        // Per la fase custom vogliamo evitare di resettare gli input digitati (es. "Data base fase").
+                        inputs: options?.resetInputs === false ? f.inputs : {},
+                      }))
                     }
                     onInputsChange={(inputs) => setForm((f) => ({ ...f, inputs }))}
                   />

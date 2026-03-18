@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { DatePicker } from "./DatePicker";
 import {
   Select,
@@ -35,7 +36,7 @@ interface MacroAreaPanelProps {
   onMacroAreaChange: (v: MacroAreaCode) => void;
   onProcedimentoChange: (v: ProcedimentoCode) => void;
   onParteProcessualeChange: (v: ParteProcessuale) => void;
-  onEventoChange: (code: string) => void;
+  onEventoChange: (code: string, options?: { resetInputs?: boolean }) => void;
   onInputsChange: (inputs: Record<string, unknown>) => void;
 }
 
@@ -113,6 +114,7 @@ export function MacroAreaPanel({
   onEventoChange,
   onInputsChange,
 }: MacroAreaPanelProps) {
+  const CUSTOM_PHASE_SENTINEL = "__custom__";
   const procedimenti = macroArea
     ? (PROCEDIMENTI_PER_MACRO_AREA[macroArea] as readonly string[])
     : [];
@@ -132,6 +134,13 @@ export function MacroAreaPanel({
     procedimento && eventoCode
       ? getEventoByCode(procedimento, eventoCode)
       : undefined;
+
+  const isCustomPhase =
+    Boolean(eventoCode) &&
+    eventoCode !== CUSTOM_PHASE_SENTINEL &&
+    !eventiDisponibili.some((ev) => ev.code === eventoCode);
+
+  const isCustomMode = eventoCode === CUSTOM_PHASE_SENTINEL || isCustomPhase;
 
   const handleDateChange = (key: string) => (d: Date | null) => {
     const value = d ? toDateOnlyString(d) : "";
@@ -240,12 +249,16 @@ export function MacroAreaPanel({
       )}
 
       {/* Livello 4: Fase */}
-      {eventiDisponibili.length > 0 && (
+      {macroArea && procedimento && parteProcessuale && (
         <div>
           <Label>Fase</Label>
           <Select
-            value={eventoCode ?? ""}
-            onValueChange={(v) => onEventoChange(v)}
+            value={
+              isCustomMode
+                ? CUSTOM_PHASE_SENTINEL
+                : (eventoCode ?? "")
+            }
+            onValueChange={(v) => onEventoChange(v, { resetInputs: true })}
           >
             <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
               <SelectValue placeholder="*Fase non individuata (seleziona)*" />
@@ -256,8 +269,37 @@ export function MacroAreaPanel({
                   {ev.label}
                 </SelectItem>
               ))}
+              <SelectItem value={CUSTOM_PHASE_SENTINEL}>
+                Altro (scrivi a mano)
+              </SelectItem>
             </SelectContent>
           </Select>
+
+          {isCustomMode && (
+            <div className="pt-2 space-y-3">
+              <div>
+                <Label className="text-sm font-medium text-zinc-700">Fase (specificare)</Label>
+                <Input
+                  value={eventoCode === CUSTOM_PHASE_SENTINEL ? "" : eventoCode ?? ""}
+                  onChange={(e) => onEventoChange(e.target.value, { resetInputs: false })}
+                  placeholder="Es. Udienza istruttoria (o altra fase non presente in elenco)…"
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              <div className="pt-1">
+                <Label className="text-sm font-semibold text-zinc-700">Data base fase</Label>
+                <DatePicker
+                  value={dataPrimaUdienza}
+                  onChange={handleDateChange("dataPrimaUdienza")}
+                  placeholder="Inserisci la data base della fase"
+                />
+                <p className="text-xs text-zinc-500 mt-1">
+                  Usata per impostare la data della pratica e (se disponibile) per il calcolo dei termini.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
