@@ -329,6 +329,8 @@ export function ProsecuzionePanel({
   const [parsingRinvio, setParsingRinvio] = useState(false);
   const rinvioFileInputRef = useRef<HTMLInputElement>(null);
 
+  const CUSTOM_PHASE_CODE = "__CUSTOM_PHASE__";
+
   // New rinvio form state
   const [tipoUdienza, setTipoUdienza] = useState<TipoUdienza | "">("");
   const [tipoUdienzaCustom, setTipoUdienzaCustom] = useState("");
@@ -337,6 +339,7 @@ export function ProsecuzionePanel({
   const [adempimenti, setAdempimenti] = useState<AdempimentoForm[]>([]);
   const [availableEventi, setAvailableEventi] = useState<EventoDisponibile[]>([]);
   const [selectedEventoCode, setSelectedEventoCode] = useState<string>("");
+  const [faseCustomLabel, setFaseCustomLabel] = useState<string>("");
   const [reminderOffsets, setReminderOffsets] = useState<number[]>([]);
 
   const loadRinvii = useCallback(async () => {
@@ -369,6 +372,7 @@ export function ProsecuzionePanel({
     setNote("");
     setAdempimenti([]);
     setSelectedEventoCode("");
+    setFaseCustomLabel("");
     setReminderOffsets([]);
     setShowForm(false);
     setError(null);
@@ -389,14 +393,22 @@ export function ProsecuzionePanel({
   const handleSaveRinvio = async () => {
     setError(null);
 
+    const isCustomPhaseSelected = selectedEventoCode === CUSTOM_PHASE_CODE;
+    const hasCustomLabel = faseCustomLabel.trim().length > 0;
+
+    // Per pratiche “generiche” o senza fasi proposte consentiamo comunque la creazione
+    // del rinvio se l'utente inserisce una fase scritta a mano.
     if (!macroArea || !procedimento || !parteProcessuale) {
-      setError(
-        "La prosecuzione è disponibile solo per pratiche con Macro Area, Procedimento e Parte processuale impostati.",
-      );
-      return;
+      if (!hasCustomLabel) {
+        setError(
+          "La prosecuzione è disponibile solo per pratiche con Macro Area, Procedimento e Parte processuale impostati (oppure inserisci una fase scritta a mano).",
+        );
+        return;
+      }
     }
-    if (!selectedEventoCode) {
-      setError("Selezionare l'evento/fase dalla tabella.");
+
+    if (!selectedEventoCode && !hasCustomLabel) {
+      setError("Selezionare l'evento/fase (da tabella) oppure scrivere a mano la fase.");
       return;
     }
     if (!dataUdienza) {
@@ -417,8 +429,22 @@ export function ProsecuzionePanel({
         12, 0, 0
       );
 
-      const evento = availableEventi.find((e) => e.code === selectedEventoCode);
-      const labelEvento = evento?.label ?? selectedEventoCode;
+      const evento =
+        !isCustomPhaseSelected && selectedEventoCode
+          ? availableEventi.find((e) => e.code === selectedEventoCode)
+          : undefined;
+      const labelEvento =
+        hasCustomLabel || isCustomPhaseSelected ? faseCustomLabel.trim() : evento?.label ?? selectedEventoCode;
+
+      if (!labelEvento) {
+        setError("Inserire la fase (da tabella o scritta a mano).");
+        return;
+      }
+
+      const eventoCodeForBackend =
+        !isCustomPhaseSelected && selectedEventoCode.trim().length > 0
+          ? selectedEventoCode.trim()
+          : undefined;
 
       const result = await createRinvio({
         parentEventId: eventId,
@@ -429,7 +455,7 @@ export function ProsecuzionePanel({
         tipoUdienzaCustom: labelEvento,
         note: note || null,
         adempimenti: validAdempimenti,
-        eventoCode: selectedEventoCode,
+        eventoCode: eventoCodeForBackend,
         reminderOffsets,
       }, targetUserId);
 
@@ -573,6 +599,10 @@ export function ProsecuzionePanel({
               onValueChange={(v) => {
                 const val = v === "__empty" ? "" : v;
                 setSelectedEventoCode(val);
+                // Se l'utente sceglie “custom”, l'etichetta la completa con l'input.
+                if (val === CUSTOM_PHASE_CODE) {
+                  // non cancelliamo l'eventuale testo digitato
+                }
               }}
             >
               <SelectTrigger className="bg-white text-sm">
@@ -587,8 +617,27 @@ export function ProsecuzionePanel({
                     {ev.label}
                   </SelectItem>
                 ))}
+                <SelectItem value={CUSTOM_PHASE_CODE}>Altro (scrivi a mano)</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Input libero quando la tabella non propone fasi o quando selezioni “Altro”. */}
+            {(selectedEventoCode === CUSTOM_PHASE_CODE || availableEventi.length === 0) && (
+              <div className="mt-2 space-y-2">
+                <Label className="text-xs">Fase (scrivi a mano)</Label>
+                <Input
+                  value={faseCustomLabel}
+                  onChange={(e) => {
+                    setFaseCustomLabel(e.target.value);
+                    if (e.target.value.trim().length > 0 && selectedEventoCode !== CUSTOM_PHASE_CODE) {
+                      setSelectedEventoCode(CUSTOM_PHASE_CODE);
+                    }
+                  }}
+                  placeholder="Es. Udienza di precisazione / Altro specificare..."
+                  className="h-8 text-sm"
+                />
+              </div>
+            )}
           </div>
 
           {/* Data udienza */}
