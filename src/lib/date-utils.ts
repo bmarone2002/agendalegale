@@ -52,7 +52,9 @@ function easterSunday(year: number): Date {
 
 export function isWeekend(date: Date): boolean {
   const dow = getDay(date);
-  return dow === 0 || dow === 6;
+  // Per le scadenze processuali calcolate "a giorni", consideriamo non lavorativi
+  // solo la domenica (dow=0). Il sabato non viene trattato automaticamente come festivo.
+  return dow === 0;
 }
 
 export function isItalianHoliday(date: Date, extraHolidays?: string[]): boolean {
@@ -91,7 +93,7 @@ export function isNonBusinessDay(date: Date, settings: AppSettings): boolean {
 }
 
 /**
- * Se la data cade di sabato, domenica o festivo, slitta al primo giorno
+ * Se la data cade di domenica o festivo, slitta al primo giorno
  * lavorativo successivo (art. 155 c.p.c.).
  */
 export function adjustToNextBusinessDay(

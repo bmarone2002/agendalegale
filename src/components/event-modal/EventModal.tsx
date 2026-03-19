@@ -1067,8 +1067,8 @@ export function EventModal({
                     <SelectValue placeholder="Seleziona tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="generico">Pratica generica</SelectItem>
-                    <SelectItem value="ATTO_GIURIDICO">NUOVO ATTO GIURIDICO</SelectItem>
+                    <SelectItem value="generico">Gestione Manuale</SelectItem>
+                    <SelectItem value="ATTO_GIURIDICO">Gestione Automatizzata</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

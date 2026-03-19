@@ -104,6 +104,31 @@ assert(memorie171ter.length === 3, "CITAZIONE DA_NOT: 3 memorie 171 ter");
 const promemoriaCitNot = outCitNot.subEvents.filter((s) => s.kind === "promemoria");
 assert(promemoriaCitNot.length >= 4, "CITAZIONE DA_NOT: almeno 4 promemoria (1 iscrizione + 3 memorie)");
 
+// ------------------------------------------------------------
+// MEMORIE 171-TER: check -10 quando la scadenza cade di sabato
+// Caso specifico: 30/06/2026 (martedi) -> 3^ memoria -10 = 20/06/2026 (sabato)
+// La data non deve slittare al lunedi.
+const outCitNotUdienza30Giu = run("CITAZIONE", "DA_NOTIFICARE", {
+  dataNotifica: "2026-03-01",
+  dataUdienzaComparizione: "2026-06-30T10:00:00",
+});
+
+const memorie171terN3Udienza30Giu = outCitNotUdienza30Giu.subEvents.find(
+  (s) => s.kind === "termine" && s.title.startsWith("3") && s.title.includes("Memoria 171 ter")
+);
+assert(
+  memorie171terN3Udienza30Giu != null,
+  "CITAZIONE DA_NOT: esiste la 3^ memoria 171-ter (caso 30/06/2026)"
+);
+
+const attesoMemoria3Udienza30Giu = new Date("2026-06-20T12:00:00");
+assert(
+  memorie171terN3Udienza30Giu
+    ? sameDay(asDate(memorie171terN3Udienza30Giu.dueAt), attesoMemoria3Udienza30Giu)
+    : false,
+  "CITAZIONE DA_NOT: 3^ memoria = udienza - 10 gg (nessuno slittamento sabato)"
+);
+
 // ────────────────────────────────────────────────────────────────────
 // CITAZIONE COSTITUZIONE (CONVENUTO)
 // ────────────────────────────────────────────────────────────────────

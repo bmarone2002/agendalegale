@@ -42,11 +42,7 @@ export const PROCEDIMENTI_PER_MACRO_AREA = {
   ],
   PROCEDIMENTI_SPECIALI: [
     "DECRETO_INGIUNTIVO",
-    "OPPOSIZIONE_DECRETO_INGIUNTIVO_SPEC",
-    "PROCEDIMENTO_CAUTELARE",
     "ATP",
-    "PROCEDIMENTO_SOMMARIO",
-    "CONVALIDA_SFRATTO",
   ],
   ESECUZIONI: [
     "PIGNORAMENTO_MOBILIARE",
@@ -97,7 +93,7 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   DECRETO_INGIUNTIVO: "Decreto ingiuntivo",
   OPPOSIZIONE_DECRETO_INGIUNTIVO_SPEC: "Opposizione a decreto ingiuntivo",
   PROCEDIMENTO_CAUTELARE: "Procedimento cautelare",
-  ATP: "Accertamento tecnico preventivo (ATP)",
+  ATP: "Accertamento tecnico preventivo (ATP) 696 c.p.c.",
   PROCEDIMENTO_SOMMARIO: "Procedimento sommario",
   CONVALIDA_SFRATTO: "Convalida di sfratto",
   // Esecuzioni
