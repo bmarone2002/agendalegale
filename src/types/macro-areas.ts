@@ -91,11 +91,7 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   APPELLO_CIVILE: "Appello civile",
   // Procedimenti speciali
   DECRETO_INGIUNTIVO: "Decreto ingiuntivo",
-  OPPOSIZIONE_DECRETO_INGIUNTIVO_SPEC: "Opposizione a decreto ingiuntivo",
-  PROCEDIMENTO_CAUTELARE: "Procedimento cautelare",
   ATP: "Accertamento tecnico preventivo (ATP) 696 c.p.c.",
-  PROCEDIMENTO_SOMMARIO: "Procedimento sommario",
-  CONVALIDA_SFRATTO: "Convalida di sfratto",
   // Esecuzioni
   PIGNORAMENTO_MOBILIARE: "Pignoramento mobiliare",
   PIGNORAMENTO_IMMOBILIARE: "Pignoramento immobiliare",
@@ -1071,7 +1067,8 @@ export function getRegisteredProcedimenti(): Set<ProcedimentoCode> {
  */
 export const LEGACY_ACTION_TYPE_MAP: Record<string, { macroArea: MacroAreaCode; procedimento: ProcedimentoCode }> = {
   CITAZIONE: { macroArea: "CIVILE_CONTENZIOSO", procedimento: "CITAZIONE_CIVILE" },
-  RICORSO_OPPOSIZIONE: { macroArea: "PROCEDIMENTI_SPECIALI", procedimento: "OPPOSIZIONE_DECRETO_INGIUNTIVO_SPEC" },
+  // In legacy, "opposizione a decreto ingiuntivo" viene agganciata al workflow del decreto ingiuntivo.
+  RICORSO_OPPOSIZIONE: { macroArea: "PROCEDIMENTI_SPECIALI", procedimento: "DECRETO_INGIUNTIVO" },
   RICORSO_TRIBUTARIO: { macroArea: "TRIBUTARIO", procedimento: "RICORSO_TRIBUTARIO" },
   APPELLO_CIVILE: { macroArea: "CIVILE_CONTENZIOSO", procedimento: "APPELLO_CIVILE" },
   APPELLO_TRIBUTARIO: { macroArea: "TRIBUTARIO", procedimento: "APPELLO_TRIBUTARIO" },
