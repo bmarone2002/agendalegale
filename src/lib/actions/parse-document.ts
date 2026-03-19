@@ -292,10 +292,18 @@ export async function parseDocumentForEvent(formData: FormData): Promise<ParseDo
     return { success: false, error: "Nessun file allegato." };
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const mime = file.type?.toLowerCase() ?? "";
-  const isPdf = mime === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
-  const isImage = /^image\/(jpeg|png|gif|webp)$/.test(mime);
+  let buffer: Buffer;
+  let mime = "";
+  let isPdf = false;
+  let isImage = false;
+  try {
+    buffer = Buffer.from(await file.arrayBuffer());
+    mime = file.type?.toLowerCase() ?? "";
+    isPdf = mime === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
+    isImage = /^image\/(jpeg|png|gif|webp)$/.test(mime);
+  } catch (e) {
+    return { success: false, error: getUnknownErrorMessage(e, "Errore nella lettura del file allegato.") };
+  }
 
   let textToSend: string;
   let imagePart: { type: "image_url"; image_url: { url: string } } | null = null;
@@ -476,10 +484,18 @@ export async function parseDocumentForRinvio(formData: FormData): Promise<ParseD
     return { success: false, error: "Nessun file allegato." };
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const mime = file.type?.toLowerCase() ?? "";
-  const isPdf = mime === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
-  const isImage = /^image\/(jpeg|png|gif|webp)$/.test(mime);
+  let buffer: Buffer;
+  let mime = "";
+  let isPdf = false;
+  let isImage = false;
+  try {
+    buffer = Buffer.from(await file.arrayBuffer());
+    mime = file.type?.toLowerCase() ?? "";
+    isPdf = mime === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf");
+    isImage = /^image\/(jpeg|png|gif|webp)$/.test(mime);
+  } catch (e) {
+    return { success: false, error: getUnknownErrorMessage(e, "Errore nella lettura del file allegato.") };
+  }
 
   let textToSend: string;
   let imagePart: { type: "image_url"; image_url: { url: string } } | null = null;
