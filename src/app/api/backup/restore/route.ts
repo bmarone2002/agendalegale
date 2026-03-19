@@ -118,6 +118,24 @@ export async function POST(req: Request) {
             });
           }
         }
+
+        if (eventData.rinvii && eventData.rinvii.length > 0) {
+          for (const r of eventData.rinvii) {
+            await tx.rinvio.create({
+              data: {
+                parentEventId: createdEvent.id,
+                numero: r.numero,
+                dataUdienza: toDate(r.dataUdienza, "rinvio.dataUdienza"),
+                tipoUdienza: r.tipoUdienza,
+                tipoUdienzaCustom: r.tipoUdienzaCustom ?? null,
+                note: r.note ?? null,
+                adempimenti: JSON.stringify(
+                  Array.isArray(r.adempimenti) ? r.adempimenti : []
+                ),
+              },
+            });
+          }
+        }
       }
     });
 

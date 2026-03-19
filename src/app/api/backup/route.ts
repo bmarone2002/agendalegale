@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { resolveCalendarUser } from "@/lib/auth/calendar-access";
-import type { BackupEvent, BackupFile, BackupSubEvent } from "@/types/backup";
+import type { BackupEvent, BackupFile, BackupRinvio, BackupSubEvent } from "@/types/backup";
 
 export async function GET() {
   try {
@@ -12,6 +12,9 @@ export async function GET() {
       include: {
         subEvents: {
           orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { priority: "asc" }],
+        },
+        rinvii: {
+          orderBy: [{ numero: "asc" }, { dataUdienza: "asc" }],
         },
       },
       orderBy: { startAt: "asc" },
@@ -59,6 +62,31 @@ export async function GET() {
           locked: s.locked,
           createdAt: s.createdAt.toISOString(),
           updatedAt: s.updatedAt.toISOString(),
+          metadata: undefined,
+        })),
+        rinvii: e.rinvii?.map<BackupRinvio>((r) => ({
+          id: r.id,
+          parentEventId: r.parentEventId,
+          numero: r.numero,
+          dataUdienza: r.dataUdienza.toISOString(),
+          tipoUdienza: r.tipoUdienza,
+          tipoUdienzaCustom: r.tipoUdienzaCustom,
+          note: r.note,
+          adempimenti: (() => {
+            try {
+              const parsed = JSON.parse(r.adempimenti) as unknown;
+              return Array.isArray(parsed)
+                ? (parsed.filter(
+                    (item): item is Record<string, unknown> =>
+                      typeof item === "object" && item !== null
+                  ) as Record<string, unknown>[])
+                : [];
+            } catch {
+              return [];
+            }
+          })(),
+          createdAt: r.createdAt.toISOString(),
+          updatedAt: r.updatedAt.toISOString(),
           metadata: undefined,
         })),
       };

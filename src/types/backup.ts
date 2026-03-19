@@ -18,6 +18,20 @@ export interface BackupSubEvent {
   metadata?: Record<string, unknown>;
 }
 
+export interface BackupRinvio {
+  id: string;
+  parentEventId: string;
+  numero: number;
+  dataUdienza: string;
+  tipoUdienza: string;
+  tipoUdienzaCustom?: string | null;
+  note?: string | null;
+  adempimenti: Record<string, unknown>[];
+  createdAt: string;
+  updatedAt: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface BackupEvent {
   id: string;
   title: string;
@@ -44,6 +58,7 @@ export interface BackupEvent {
   createdAt: string;
   updatedAt: string;
   subEvents?: BackupSubEvent[];
+  rinvii?: BackupRinvio[];
   metadata?: Record<string, unknown>;
 }
 
