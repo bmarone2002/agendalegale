@@ -165,6 +165,12 @@ function getUnknownErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function isUploadLikeFile(value: unknown): value is { arrayBuffer: () => Promise<ArrayBuffer>; name?: string; type?: string } {
+  if (!value || typeof value !== "object") return false;
+  const maybe = value as { arrayBuffer?: unknown };
+  return typeof maybe.arrayBuffer === "function";
+}
+
 function isTableLikeLine(line: string): boolean {
   const normalized = line.trim();
   if (!normalized) return false;
@@ -288,7 +294,7 @@ export async function parseDocumentForEvent(formData: FormData): Promise<ParseDo
   }
 
   const file = formData.get("file");
-  if (!file || !(file instanceof File)) {
+  if (!isUploadLikeFile(file)) {
     return { success: false, error: "Nessun file allegato." };
   }
 
@@ -480,7 +486,7 @@ export async function parseDocumentForRinvio(formData: FormData): Promise<ParseD
   }
 
   const file = formData.get("file");
-  if (!file || !(file instanceof File)) {
+  if (!isUploadLikeFile(file)) {
     return { success: false, error: "Nessun file allegato." };
   }
 
