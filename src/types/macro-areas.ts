@@ -552,6 +552,153 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
       ordine: 4,
     },
   ],
+  PIGNORAMENTO_MOBILIARE: [
+    // ATTORE / creditore
+    {
+      code: "NOTIFICA_PRECETTO_MOBILIARE",
+      label: "Notifica precetto",
+      inputKey: "dataNotificaPrecettoMobiliare",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "NOTIFICA_PIGNORAMENTO_MOBILIARE",
+      label: "Notifica pignoramento",
+      inputKey: "dataNotificaPrecettoMobiliare",
+      parteProcessuale: "ATTORE",
+      ordine: 2,
+    },
+    {
+      code: "ISCRIZIONE_RUOLO_ESECUZIONE_MOBILIARE",
+      label: "Iscrizione a ruolo esecuzione",
+      inputKey: "dataRestituzioneVerbalePignoramentoMobiliare",
+      parteProcessuale: "ATTORE",
+      ordine: 3,
+    },
+
+    // CONVENUTO / opponente
+    {
+      code: "NOTIFICA_CITAZIONE_OPPOSIZIONE_615_1_MOBILIARE",
+      label: "Notifica citazione in opposizione esecuzione 615, comma 1",
+      inputKey: "dataNotificaPrecettoMobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 1,
+    },
+    {
+      code: "DEPOSITO_RICORSO_OPPOSIZIONE_615_2_MOBILIARE",
+      label: "Deposito Ricorso in opposizione esecuzione 615, comma 2",
+      inputKey: "dataPrimoAttoEsecuzione615Mobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 2,
+    },
+    {
+      code: "NOTIFICA_RICORSO_DECRETO_615_2_MOBILIARE",
+      label: "Notifica Ricorso e Decreto fissazione udienza (opposizione 615, c. 2)",
+      inputKey: "dataDecretoFissazioneUdienza615Mobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 3,
+    },
+    {
+      code: "NOTIFICA_CITAZIONE_OPPOSIZIONE_ATTI_617_1_MOBILIARE",
+      label: "Notifica citazione in opposizione atti 617, comma 1",
+      inputKey: "dataNotificaPrecettoMobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 4,
+    },
+    {
+      code: "DEPOSITO_RICORSO_OPPOSIZIONE_ATTI_617_2_MOBILIARE",
+      label: "Deposito Ricorso in opposizione atti 617, comma 2",
+      inputKey: "dataConoscenzaAttoEsecutivoMobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 5,
+    },
+    {
+      code: "NOTIFICA_RICORSO_DECRETO_617_2_MOBILIARE",
+      label: "Notifica Ricorso e Decreto fissazione udienza (opposizione 617, c. 2)",
+      inputKey: "dataDecretoFissazioneUdienza617Mobiliare",
+      parteProcessuale: "CONVENUTO",
+      ordine: 6,
+    },
+
+    // COMUNE
+    {
+      code: "TERMINE_EFFICACIA_PRECETTO_MOBILIARE",
+      label: "Termine efficacia precetto",
+      inputKey: "dataNotificaPrecettoMobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 1,
+    },
+    {
+      code: "UDIENZA_COMPARIZIONE_MOBILIARE",
+      label: "Udienza comparizione",
+      inputKey: "dataUdienzaComparizioneMobiliare530",
+      parteProcessuale: "COMUNE",
+      ordine: 2,
+    },
+    {
+      code: "ORDINANZA_ASSEGNAZIONE_MOBILIARE",
+      label: "Ordinanza assegnazione",
+      inputKey: "dataProvvedimentoOrdinanzaAssegnazioneMobiliare529",
+      parteProcessuale: "COMUNE",
+      ordine: 3,
+    },
+    {
+      code: "NOTIFICA_ORDINANZA_ASSEGNAZIONE_MOBILIARE",
+      label: "Notifica Ordinanza assegnazione",
+      inputKey: "dataNotificaOrdinanzaAssegnazioneMobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 4,
+    },
+    {
+      code: "VENDITA_MOBILIARE",
+      label: "Vendita",
+      inputKey: "dataFissataGiudiceIVGVenditaMobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 5,
+    },
+    {
+      code: "UDIENZA_COMPARIZIONE_615_2_MOBILIARE",
+      label: "Udienza comparizione",
+      inputKey: "dataUdienzaComparizione615Mobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 6,
+    },
+    {
+      code: "DECRETO_FISSAZIONE_UDIENZA_615_2_MOBILIARE",
+      label: "Decreto fissazione udienza comparizione (615, c. 2)",
+      inputKey: "dataDepositoRicorso615Mobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+    {
+      code: "UDIENZA_COMPARIZIONE_617_2_MOBILIARE",
+      label: "Udienza comparizione",
+      inputKey: "dataUdienzaComparizione617Mobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 8,
+    },
+    {
+      code: "DECRETO_FISSAZIONE_UDIENZA_617_2_MOBILIARE",
+      label: "Decreto fissazione udienza comparizione (617, c. 2)",
+      inputKey: "dataDepositoRicorso617Mobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 9,
+    },
+    {
+      code: "NOTIFICA_SENTENZA_APPELLO_MOBILIARE",
+      label: "Notifica Sentenza (per calcolare termini Appello)",
+      inputKey: "dataNotificaSentenzaMobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 10,
+    },
+    {
+      code: "DEPOSITO_SENTENZA_APPELLO_MOBILIARE",
+      label: "Deposito Sentenza (per calcolare termini Appello)",
+      inputKey: "dataDepositoSentenzaMobiliare",
+      parteProcessuale: "COMUNE",
+      ordine: 11,
+    },
+  ],
   RICORSO_CASSAZIONE: [
     // RICORRENTE
     {

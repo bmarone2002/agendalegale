@@ -5,6 +5,7 @@
  */
 
 import "./civile-contenzioso";
+import "./esecuzioni";
 import "./procedimenti-speciali";
 import "./tributario";
 import "./cassazione";

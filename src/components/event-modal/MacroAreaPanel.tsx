@@ -99,6 +99,15 @@ function getEffectivePartiLabels(
       };
     }
 
+    // Esecuzioni: Pignoramento mobiliare = Creditore/Opponente (mappato su ATTORE/CONVENUTO)
+    if (macroArea === "ESECUZIONI" && procedimento === "PIGNORAMENTO_MOBILIARE") {
+      return {
+        ...base,
+        ATTORE: "Creditore",
+        CONVENUTO: "Opponente",
+      };
+    }
+
     // Civile – contenzioso ordinario: Appello civile = Appellante/Appellato
     if (macroArea === "CIVILE_CONTENZIOSO" && procedimento === "APPELLO_CIVILE") {
       return {
