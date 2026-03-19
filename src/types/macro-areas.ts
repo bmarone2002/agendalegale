@@ -399,7 +399,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     // ATTORE / APPELLANTE
     {
       code: "NOTIFICA_APPELLO_CIVILE",
-      label: "Notifica atto di appello",
+      label: "Notifica atto di citazione",
       inputKey: "dataNotificaAppelloCivile",
       parteProcessuale: "ATTORE",
       ordine: 1,
@@ -459,14 +459,14 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     },
     {
       code: "SENTENZA_APPELLO_CIVILE",
-      label: "Sentenza di appello (per calcolare termini ricorso Cassazione)",
+      label: "Sentenza (per calcolare termini Ric Cassazione)",
       inputKey: "dataPubblicazioneSentenzaAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 9,
     },
     {
       code: "NOTIFICA_SENTENZA_APPELLO_CIVILE",
-      label: "Notifica sentenza di appello (per calcolare termini ricorso Cassazione)",
+      label: "Notifica Sentenza (per calcolare termini Ric Cassazione)",
       inputKey: "dataNotificaSentenzaAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 10,
