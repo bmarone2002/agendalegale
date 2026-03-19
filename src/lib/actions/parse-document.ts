@@ -14,6 +14,11 @@ import {
 } from "@/types/macro-areas";
 
 const OPENAI_MODEL = "gpt-4o-mini";
+const SINGLE_PASS_TEXT_LIMIT = 120000;
+const CHUNK_SIZE = 45000;
+const CHUNK_OVERLAP = 3000;
+const MAX_CHUNKS = 6;
+const IGNORE_TABLE_LIKE_LINES = true;
 
 /** Risposta strutturata dall'AI per precompilare il form Atto Giuridico */
 const parsedDocumentSchema = z.object({
@@ -49,6 +54,12 @@ Le liste complete di macro aree, procedimenti, parti processuali e fasi disponib
 DEVI SEMPRE SCEGLIERE SOLO TRA I CODICI ELENCATI IN QUEL JSON (macroArea, procedimento, parteProcessuale, eventoCode, inputKey) E NON DEVI INVENTARE CODICI NUOVI.
 
 METODO: Analizza il documento DA CIMA A FONDO come farebbe un legale: prima il tipo di atto e l’autorità, poi le parti e il rito, poi la parte processuale (attore/ricorrente vs convenuto/resistente) e infine la FASE processuale più coerente tra quelle disponibili. Dopo aver individuato la fase, estrai OGNI data rilevante e assegnala alla/e chiave/i corretta/e in "inputs" in base al contesto (notifica della citazione vs data udienza vs deposito, ecc.).
+
+ATTENZIONE SU TABELLE E TESTI LUNGHI:
+- Se il testo contiene tabelle/listati contabili (es. colonne DATA/IMPORTO/MODALITÀ o sequenze numeriche), trattale come secondarie e privilegia la parte narrativa processuale.
+- Ignora informazioni puramente contabili o ripetitive che non servono a classificare macroArea/procedimento/fase o a valorizzare i campi data processuali.
+- Se il documento è parziale (chunk di un file più lungo), non inventare dati mancanti: compila solo ciò che è presente nel testo ricevuto.
+- Mantieni coerenza tra fase scelta e date estratte: inserisci solo chiavi input che trovi davvero nel testo.
 
 PASSI OBBLIGATORI:
 1) MACRO AREA e PROCEDIMENTO: dal tipo di atto (citazione, ricorso, opposizione, decreto ingiuntivo, appello, ecc.) e dall’autorità (Tribunale, GIP, TAR, ecc.) determina la macroArea e il procedimento più coerenti scegliendo tra quelli forniti.
@@ -142,6 +153,122 @@ function parseJsonFromResponse(content: string): unknown {
   return JSON.parse(trimmed.slice(start, end)) as unknown;
 }
 
+function isTableLikeLine(line: string): boolean {
+  const normalized = line.trim();
+  if (!normalized) return false;
+
+  // Intestazioni o righe tipiche di tabelle contabili/listati
+  if (/\b(data|importo|modalit[aà]|banca|totale)\b/i.test(normalized)) return true;
+
+  // Molti numeri separati da spazi (es. righe movimenti/pagamenti)
+  const numericTokens = (normalized.match(/\b\d+[.,]?\d*\b/g) ?? []).length;
+  if (numericTokens >= 4) return true;
+
+  // Righe quasi solo simboli / separatori
+  const alphaCount = (normalized.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) ?? []).length;
+  const nonAlphaCount = normalized.length - alphaCount;
+  if (alphaCount > 0 && nonAlphaCount / normalized.length > 0.55 && numericTokens >= 2) return true;
+
+  return false;
+}
+
+function normalizeAndFilterText(raw: string): string {
+  const lines = raw
+    .split(/\r?\n/)
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const out: string[] = [];
+  for (const line of lines) {
+    // Filtra marker pagina/impaginazione
+    if (/^--\s*\d+\s+of\s+\d+\s*--$/i.test(line)) continue;
+    if (/^s\s*t\s*u\s*d\s*i\s*o/i.test(line)) continue;
+    if (/^via\s+monteoliveto/i.test(line)) continue;
+    if (/^tel\./i.test(line)) continue;
+    if (/^\d{1,2}$/.test(line)) continue; // numeri pagina isolati
+
+    if (IGNORE_TABLE_LIKE_LINES && isTableLikeLine(line)) continue;
+    out.push(line);
+  }
+
+  return out.join("\n");
+}
+
+function chunkText(text: string, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP, maxChunks = MAX_CHUNKS): string[] {
+  if (!text.trim()) return [];
+  if (text.length <= chunkSize) return [text];
+
+  const chunks: string[] = [];
+  let start = 0;
+
+  while (start < text.length && chunks.length < maxChunks) {
+    const end = Math.min(start + chunkSize, text.length);
+    chunks.push(text.slice(start, end));
+    if (end >= text.length) break;
+    start = Math.max(0, end - overlap);
+  }
+
+  return chunks;
+}
+
+function firstNonEmptyString(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function mergeEventResults(results: ParsedDocumentResult[]): ParsedDocumentResult {
+  const mergedInputs: Record<string, unknown> = {};
+  const notes: string[] = [];
+
+  for (const item of results) {
+    for (const [k, v] of Object.entries(item.inputs ?? {})) {
+      if (mergedInputs[k] == null || mergedInputs[k] === "") {
+        mergedInputs[k] = v;
+      }
+    }
+    if (item.notes?.trim()) notes.push(item.notes.trim());
+  }
+
+  const uniqueNotes = Array.from(new Set(notes));
+
+  return {
+    title: firstNonEmptyString(...results.map((r) => r.title)) ?? "",
+    description: firstNonEmptyString(...results.map((r) => r.description)) ?? "",
+    type: (results.find((r) => r.type && r.type !== "altro")?.type ?? results[0]?.type ?? "altro") as ParsedDocumentResult["type"],
+    macroArea: results.find((r) => r.macroArea)?.macroArea,
+    procedimento: results.find((r) => r.procedimento)?.procedimento,
+    parteProcessuale: results.find((r) => r.parteProcessuale)?.parteProcessuale,
+    eventoCode: firstNonEmptyString(...results.map((r) => r.eventoCode)),
+    actionType: firstNonEmptyString(...results.map((r) => r.actionType)),
+    actionMode: firstNonEmptyString(...results.map((r) => r.actionMode)),
+    inputs: mergedInputs,
+    notes: uniqueNotes.join(" | "),
+  };
+}
+
+function mergeRinvioResults(results: ParsedRinvioResult[]): ParsedRinvioResult {
+  const seen = new Set<string>();
+  const adempimenti: Array<{ titolo: string; scadenza: string }> = [];
+
+  for (const result of results) {
+    for (const ad of result.adempimenti ?? []) {
+      const key = `${ad.titolo}::${ad.scadenza}`.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        adempimenti.push(ad);
+      }
+    }
+  }
+
+  return {
+    dataUdienza: results.find((r) => r.dataUdienza?.trim())?.dataUdienza,
+    tipoUdienza: results.find((r) => r.tipoUdienza)?.tipoUdienza,
+    adempimenti,
+  };
+}
+
 export async function parseDocumentForEvent(formData: FormData): Promise<ParseDocumentActionResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey?.trim()) {
@@ -167,6 +294,7 @@ export async function parseDocumentForEvent(formData: FormData): Promise<ParseDo
       if (!textToSend || textToSend === "(Nessun testo estratto dal PDF)") {
         return { success: false, error: "Impossibile estrarre testo dal PDF. Prova con un PDF con testo selezionabile (non solo scansione)." };
       }
+      textToSend = normalizeAndFilterText(textToSend);
     } catch (e) {
       return {
         success: false,
@@ -210,62 +338,115 @@ export async function parseDocumentForEvent(formData: FormData): Promise<ParseDo
     EVENTI_PER_PROCEDIMENTO: eventiPerProcedimentoForAi,
   };
 
-  const baseTextContent = `CONTESTO CATEGORIE (usa SOLO questi codici):
-${JSON.stringify(aiContext, null, 2)}
+  const contextText = `CONTESTO CATEGORIE (usa SOLO questi codici):
+${JSON.stringify(aiContext, null, 2)}`;
+
+  try {
+    if (imagePart || textToSend.length <= SINGLE_PASS_TEXT_LIMIT) {
+      const baseTextContent = `${contextText}
 
 TESTO DEL DOCUMENTO:
 
-${textToSend.slice(0, 120000)}`;
+${textToSend.slice(0, SINGLE_PASS_TEXT_LIMIT)}`;
 
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: EXTRACT_PROMPT },
-    {
-      role: "user",
-      content: imagePart
-        ? ([
-            { type: "text", text: baseTextContent },
-            imagePart,
-          ] as OpenAI.Chat.Completions.ChatCompletionContentPart[])
-        : baseTextContent,
-    },
-  ];
+      const completion = await openai.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages: [
+          { role: "system", content: EXTRACT_PROMPT },
+          {
+            role: "user",
+            content: imagePart
+              ? ([
+                  { type: "text", text: baseTextContent },
+                  imagePart,
+                ] as OpenAI.Chat.Completions.ChatCompletionContentPart[])
+              : baseTextContent,
+          },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+      });
 
-  try {
-    const completion = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages,
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-    });
+      const raw = completion.choices[0]?.message?.content?.trim();
+      if (!raw) {
+        return { success: false, error: "L'AI non ha restituito una risposta valida." };
+      }
 
-    const raw = completion.choices[0]?.message?.content?.trim();
-    if (!raw) {
+      const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
+      const validated = parsedDocumentSchema.safeParse({
+        title: parsed.title ?? "",
+        description: parsed.description ?? "",
+        type: parsed.type ?? "altro",
+        macroArea: parsed.macroArea ?? undefined,
+        procedimento: parsed.procedimento ?? undefined,
+        parteProcessuale: parsed.parteProcessuale ?? undefined,
+        eventoCode: parsed.eventoCode ?? undefined,
+        actionType: parsed.actionType ?? undefined,
+        actionMode: parsed.actionMode ?? undefined,
+        inputs: parsed.inputs ?? {},
+        notes: parsed.notes ?? "",
+      });
+
+      if (!validated.success) {
+        return {
+          success: false,
+          error: "Dati estratti non validi. Verifica e inserisci manualmente se necessario.",
+        };
+      }
+
+      return { success: true, data: validated.data };
+    }
+
+    const chunks = chunkText(textToSend);
+    const partialResults: ParsedDocumentResult[] = [];
+
+    for (let i = 0; i < chunks.length; i += 1) {
+      const chunk = chunks[i];
+      const chunkPrompt = `${contextText}
+
+Il seguente testo e' una PARTE del documento completo (chunk ${i + 1} di ${chunks.length}).
+Estrai solo elementi supportati dal testo presente in questo chunk.
+
+TESTO DEL DOCUMENTO (PARZIALE):
+
+${chunk}`;
+
+      const completion = await openai.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages: [
+          { role: "system", content: EXTRACT_PROMPT },
+          { role: "user", content: chunkPrompt },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+      });
+
+      const raw = completion.choices[0]?.message?.content?.trim();
+      if (!raw) continue;
+
+      const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
+      const validated = parsedDocumentSchema.safeParse({
+        title: parsed.title ?? "",
+        description: parsed.description ?? "",
+        type: parsed.type ?? "altro",
+        macroArea: parsed.macroArea ?? undefined,
+        procedimento: parsed.procedimento ?? undefined,
+        parteProcessuale: parsed.parteProcessuale ?? undefined,
+        eventoCode: parsed.eventoCode ?? undefined,
+        actionType: parsed.actionType ?? undefined,
+        actionMode: parsed.actionMode ?? undefined,
+        inputs: parsed.inputs ?? {},
+        notes: parsed.notes ?? "",
+      });
+
+      if (validated.success) partialResults.push(validated.data);
+    }
+
+    if (partialResults.length === 0) {
       return { success: false, error: "L'AI non ha restituito una risposta valida." };
     }
 
-    const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
-    const validated = parsedDocumentSchema.safeParse({
-      title: parsed.title ?? "",
-      description: parsed.description ?? "",
-      type: parsed.type ?? "altro",
-      macroArea: parsed.macroArea ?? undefined,
-      procedimento: parsed.procedimento ?? undefined,
-      parteProcessuale: parsed.parteProcessuale ?? undefined,
-      eventoCode: parsed.eventoCode ?? undefined,
-      actionType: parsed.actionType ?? undefined,
-      actionMode: parsed.actionMode ?? undefined,
-      inputs: parsed.inputs ?? {},
-      notes: parsed.notes ?? "",
-    });
-
-    if (!validated.success) {
-      return {
-        success: false,
-        error: "Dati estratti non validi. Verifica e inserisci manualmente se necessario.",
-      };
-    }
-
-    return { success: true, data: validated.data };
+    return { success: true, data: mergeEventResults(partialResults) };
   } catch (e) {
     const message = e instanceof Error ? e.message : "Errore durante l'analisi del documento.";
     return { success: false, error: message };
@@ -297,6 +478,7 @@ export async function parseDocumentForRinvio(formData: FormData): Promise<ParseD
       if (!textToSend || textToSend === "(Nessun testo estratto dal PDF)") {
         return { success: false, error: "Impossibile estrarre testo dal PDF. Prova con un PDF con testo selezionabile (non solo scansione)." };
       }
+      textToSend = normalizeAndFilterText(textToSend);
     } catch (e) {
       return {
         success: false,
@@ -317,44 +499,81 @@ export async function parseDocumentForRinvio(formData: FormData): Promise<ParseD
 
   const openai = new OpenAI({ apiKey });
 
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: EXTRACT_RINVIO_PROMPT },
-    {
-      role: "user",
-      content: imagePart
-        ? ([{ type: "text", text: textToSend }, imagePart] as OpenAI.Chat.Completions.ChatCompletionContentPart[])
-        : `Testo del documento:\n\n${textToSend.slice(0, 120000)}`,
-    },
-  ];
-
   try {
-    const completion = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages,
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-    });
+    if (imagePart || textToSend.length <= SINGLE_PASS_TEXT_LIMIT) {
+      const completion = await openai.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages: [
+          { role: "system", content: EXTRACT_RINVIO_PROMPT },
+          {
+            role: "user",
+            content: imagePart
+              ? ([{ type: "text", text: textToSend }, imagePart] as OpenAI.Chat.Completions.ChatCompletionContentPart[])
+              : `Testo del documento:\n\n${textToSend.slice(0, SINGLE_PASS_TEXT_LIMIT)}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+      });
 
-    const raw = completion.choices[0]?.message?.content?.trim();
-    if (!raw) {
+      const raw = completion.choices[0]?.message?.content?.trim();
+      if (!raw) {
+        return { success: false, error: "L'AI non ha restituito una risposta valida." };
+      }
+
+      const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
+      const validated = parsedRinvioSchema.safeParse({
+        dataUdienza: parsed.dataUdienza ?? undefined,
+        tipoUdienza: parsed.tipoUdienza ?? undefined,
+        adempimenti: Array.isArray(parsed.adempimenti) ? parsed.adempimenti : [],
+      });
+
+      if (!validated.success) {
+        return {
+          success: false,
+          error: "Dati estratti non validi. Verifica e inserisci manualmente se necessario.",
+        };
+      }
+
+      return { success: true, data: validated.data };
+    }
+
+    const chunks = chunkText(textToSend);
+    const partialResults: ParsedRinvioResult[] = [];
+
+    for (let i = 0; i < chunks.length; i += 1) {
+      const chunk = chunks[i];
+      const completion = await openai.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages: [
+          { role: "system", content: EXTRACT_RINVIO_PROMPT },
+          {
+            role: "user",
+            content: `Il seguente testo e' una PARTE del documento completo (chunk ${i + 1} di ${chunks.length}). Estrai solo dati presenti in questo chunk.\n\nTesto del documento (parziale):\n\n${chunk}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+      });
+
+      const raw = completion.choices[0]?.message?.content?.trim();
+      if (!raw) continue;
+
+      const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
+      const validated = parsedRinvioSchema.safeParse({
+        dataUdienza: parsed.dataUdienza ?? undefined,
+        tipoUdienza: parsed.tipoUdienza ?? undefined,
+        adempimenti: Array.isArray(parsed.adempimenti) ? parsed.adempimenti : [],
+      });
+
+      if (validated.success) partialResults.push(validated.data);
+    }
+
+    if (partialResults.length === 0) {
       return { success: false, error: "L'AI non ha restituito una risposta valida." };
     }
 
-    const parsed = parseJsonFromResponse(raw) as Record<string, unknown>;
-    const validated = parsedRinvioSchema.safeParse({
-      dataUdienza: parsed.dataUdienza ?? undefined,
-      tipoUdienza: parsed.tipoUdienza ?? undefined,
-      adempimenti: Array.isArray(parsed.adempimenti) ? parsed.adempimenti : [],
-    });
-
-    if (!validated.success) {
-      return {
-        success: false,
-        error: "Dati estratti non validi. Verifica e inserisci manualmente se necessario.",
-      };
-    }
-
-    return { success: true, data: validated.data };
+    return { success: true, data: mergeRinvioResults(partialResults) };
   } catch (e) {
     const message = e instanceof Error ? e.message : "Errore durante l'analisi del documento.";
     return { success: false, error: message };
