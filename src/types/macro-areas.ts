@@ -520,6 +520,38 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
       ordine: 6,
     },
   ],
+  ATP: [
+    // RICORRENTE
+    {
+      code: "DEPOSITO_RICORSO_ATP",
+      label: "Deposito ricorso",
+      inputKey: "dataDepositoRicorsoATP",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "EMISSIONE_DECRETO_ATP",
+      label: "Emissione decreto",
+      inputKey: "dataDepositoRicorsoATP",
+      parteProcessuale: "ATTORE",
+      ordine: 2,
+    },
+    {
+      code: "NOTIFICA_RICORSO_DECRETO_ATP",
+      label: "Notifica ricorso e decreto",
+      inputKey: "dataEmissioneDecretoATP",
+      parteProcessuale: "ATTORE",
+      ordine: 3,
+    },
+    // COMUNE
+    {
+      code: "INIZIO_OPERAZIONI_PERITALI_ATP",
+      label: "Data inizio operazioni peritali",
+      inputKey: "dataOperazioniPeritaliATP",
+      parteProcessuale: "COMUNE",
+      ordine: 4,
+    },
+  ],
   RICORSO_CASSAZIONE: [
     // RICORRENTE
     {

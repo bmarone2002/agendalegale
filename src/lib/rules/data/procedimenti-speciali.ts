@@ -1,6 +1,7 @@
 /**
  * Regole per la macro area: PROCEDIMENTI SPECIALI
- * Procedimento: Decreto ingiuntivo – post Riforma Cartabia
+ * - Decreto ingiuntivo – post Riforma Cartabia
+ * - Accertamento tecnico preventivo (ATP) ex art. 696 c.p.c.
  */
 
 import type { ExcelRuleRow } from "@/lib/rules/excel-import";
@@ -128,6 +129,90 @@ const { eventRules: DECRETO_INGIUNTIVO_RULES } = fromExcelJson(
   DECRETO_INGIUNTIVO_ROWS,
 );
 
-registerEventRules(DECRETO_INGIUNTIVO_RULES);
+// ── Accertamento tecnico preventivo (ATP) ex art. 696 c.p.c. ────────────────
 
-export { DECRETO_INGIUNTIVO_RULES };
+const ATP_ROWS: ExcelRuleRow[] = [
+  {
+    macroArea: "PROCEDIMENTI_SPECIALI",
+    procedimento: "ATP",
+    parteProcessuale: "ATTORE", // Ricorrente
+    eventoLabel: "Deposito ricorso",
+    eventoCode: "DEPOSITO_RICORSO_ATP",
+    eventoBaseKey: null,
+    direzioneCalcolo: null,
+    numero: null,
+    unita: null,
+    tipoTermine: "manuale",
+    isTermine: false,
+    isSospensioneFeriale: false,
+    isPromemoriaFestivi: false,
+    norma: "Art. 696 c.p.c.",
+    noteOperative:
+      "Evento iniziale del procedimento: il ricorso si propone al giudice competente con indicazione dell'urgenza e dell'accertamento richiesto.",
+    ordine: 1,
+  },
+  {
+    macroArea: "PROCEDIMENTI_SPECIALI",
+    procedimento: "ATP",
+    parteProcessuale: "ATTORE", // Ricorrente
+    eventoLabel: "Emissione decreto",
+    eventoCode: "EMISSIONE_DECRETO_ATP",
+    eventoBaseKey: null,
+    direzioneCalcolo: null,
+    numero: null,
+    unita: null,
+    tipoTermine: "manuale",
+    isTermine: false,
+    isSospensioneFeriale: false,
+    isPromemoriaFestivi: false,
+    norma: "Art. 696 c.p.c.",
+    noteOperative:
+      "Nel procedimento ATP il giudice emette il provvedimento di fissazione dell'udienza e/o di nomina del consulente. Non esiste un termine fisso legale come nel decreto ingiuntivo; va gestito come evento manuale.",
+    ordine: 2,
+  },
+  {
+    macroArea: "PROCEDIMENTI_SPECIALI",
+    procedimento: "ATP",
+    parteProcessuale: "ATTORE", // Ricorrente
+    eventoLabel: "Notifica ricorso e decreto",
+    eventoCode: "NOTIFICA_RICORSO_DECRETO_ATP",
+    eventoBaseKey: null,
+    direzioneCalcolo: null,
+    numero: null,
+    unita: null,
+    tipoTermine: "manuale",
+    isTermine: false,
+    isSospensioneFeriale: false,
+    isPromemoriaFestivi: false,
+    norma: "Art. 696 c.p.c.",
+    noteOperative:
+      "La notificazione del ricorso e del decreto alla controparte è necessaria per l'instaurazione del contraddittorio, salvo casi di eccezionale urgenza.",
+    ordine: 3,
+  },
+  {
+    macroArea: "PROCEDIMENTI_SPECIALI",
+    procedimento: "ATP",
+    parteProcessuale: "COMUNE",
+    eventoLabel: "Data inizio operazioni peritali",
+    eventoCode: "INIZIO_OPERAZIONI_PERITALI_ATP",
+    eventoBaseKey: null,
+    direzioneCalcolo: null,
+    numero: null,
+    unita: null,
+    tipoTermine: "da_parametrizzare",
+    isTermine: false,
+    isSospensioneFeriale: false,
+    isPromemoriaFestivi: false,
+    norma: "Art. 698 c.p.c.",
+    noteOperative:
+      "Nell'ATP non c'è un giudizio di opposizione. Dopo l'espletamento dell'accertamento, la parte può promuovere il giudizio di merito, da agganciare al workflow del procedimento ordinario di citazione civile se coerente col caso concreto.",
+    ordine: 4,
+  },
+];
+
+const { eventRules: ATP_RULES } = fromExcelJson(ATP_ROWS);
+
+registerEventRules(DECRETO_INGIUNTIVO_RULES);
+registerEventRules(ATP_RULES);
+
+export { DECRETO_INGIUNTIVO_RULES, ATP_RULES };
