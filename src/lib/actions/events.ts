@@ -7,6 +7,7 @@ import { getOrCreateDbUser } from "@/lib/db/user";
 import { parseJsonField } from "@/lib/utils";
 import { toSubEvent } from "@/lib/mappers";
 import { resolveCalendarUser } from "@/lib/auth/calendar-access";
+import { sendOneSignalNotification } from "@/lib/notifications/onesignal";
 
 function parseTags(tags: string): string[] {
   try {
@@ -161,7 +162,48 @@ export async function createEvent(data: CreateEventInput, targetUserId?: string)
         status: p.status ?? "pending",
       },
     });
-    return { success: true, data: toEvent(event) };
+    const mapped = toEvent(event);
+
+    // Push best-effort: non blocca mai la creazione evento.
+    try {
+      const userPrefs = await prisma.eventNotificationPreference.findMany({
+        where: {
+          enabled: true,
+          OR: [{ eventType: null }, { eventType: event.type }],
+        },
+        select: { userId: true, macroArea: true },
+      });
+      const targetUserIds = new Set<string>();
+      for (const pref of userPrefs) {
+        if (!pref.macroArea || pref.macroArea === event.macroArea) {
+          targetUserIds.add(pref.userId);
+        }
+      }
+      if (targetUserIds.size > 0) {
+        const users = await prisma.user.findMany({
+          where: { id: { in: Array.from(targetUserIds) } },
+          select: { clerkUserId: true },
+        });
+        const externalUserIds = users.map((u) => u.clerkUserId).filter(Boolean);
+        if (externalUserIds.length > 0) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://legal-calendar-production.up.railway.app";
+          await sendOneSignalNotification({
+            externalUserIds,
+            title: "Nuovo evento in agenda",
+            message: event.title,
+            data: {
+              type: "event",
+              eventId: event.id,
+              url: `${baseUrl}/?eventId=${encodeURIComponent(event.id)}`,
+            },
+          });
+        }
+      }
+    } catch (notifyError) {
+      console.warn("Notifica evento non inviata:", notifyError);
+    }
+
+    return { success: true, data: mapped };
   } catch (e) {
     return {
       success: false,

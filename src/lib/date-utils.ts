@@ -115,13 +115,9 @@ export function isNonBusinessDay(date: Date, settings: AppSettings): boolean {
  */
 export function isNonWorkingFinalDay(
   date: Date,
-  direction: TermDirection,
+  _direction: TermDirection,
   settings: AppSettings
 ): boolean {
-  // direction serve per mantenere la semantica leggibile e permettere estensioni future,
-  // ma la condizione di "giorno finale non valido" coincide per entrambe le direzioni
-  // (sabato/domenica/festivo non possono essere finali).
-  const _ = direction;
   const sunday = isSunday(date);
   const saturday = isSaturday(date);
   const holiday = isHoliday(date, settings);

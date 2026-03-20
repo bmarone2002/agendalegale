@@ -39,6 +39,16 @@ export type Rinvio = $Result.DefaultSelection<Prisma.$RinvioPayload>
  */
 export type Setting = $Result.DefaultSelection<Prisma.$SettingPayload>
 /**
+ * Model NotificationDevice
+ * 
+ */
+export type NotificationDevice = $Result.DefaultSelection<Prisma.$NotificationDevicePayload>
+/**
+ * Model EventNotificationPreference
+ * 
+ */
+export type EventNotificationPreference = $Result.DefaultSelection<Prisma.$EventNotificationPreferencePayload>
+/**
  * Model CalendarShare
  * 
  */
@@ -233,6 +243,26 @@ export class PrismaClient<
     * ```
     */
   get setting(): Prisma.SettingDelegate<ExtArgs>;
+
+  /**
+   * `prisma.notificationDevice`: Exposes CRUD operations for the **NotificationDevice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NotificationDevices
+    * const notificationDevices = await prisma.notificationDevice.findMany()
+    * ```
+    */
+  get notificationDevice(): Prisma.NotificationDeviceDelegate<ExtArgs>;
+
+  /**
+   * `prisma.eventNotificationPreference`: Exposes CRUD operations for the **EventNotificationPreference** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EventNotificationPreferences
+    * const eventNotificationPreferences = await prisma.eventNotificationPreference.findMany()
+    * ```
+    */
+  get eventNotificationPreference(): Prisma.EventNotificationPreferenceDelegate<ExtArgs>;
 
   /**
    * `prisma.calendarShare`: Exposes CRUD operations for the **CalendarShare** model.
@@ -689,6 +719,8 @@ export namespace Prisma {
     SubEvent: 'SubEvent',
     Rinvio: 'Rinvio',
     Setting: 'Setting',
+    NotificationDevice: 'NotificationDevice',
+    EventNotificationPreference: 'EventNotificationPreference',
     CalendarShare: 'CalendarShare'
   };
 
@@ -705,7 +737,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "event" | "subEvent" | "rinvio" | "setting" | "calendarShare"
+      modelProps: "user" | "event" | "subEvent" | "rinvio" | "setting" | "notificationDevice" | "eventNotificationPreference" | "calendarShare"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1059,6 +1091,146 @@ export namespace Prisma {
           }
         }
       }
+      NotificationDevice: {
+        payload: Prisma.$NotificationDevicePayload<ExtArgs>
+        fields: Prisma.NotificationDeviceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NotificationDeviceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NotificationDeviceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          findFirst: {
+            args: Prisma.NotificationDeviceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NotificationDeviceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          findMany: {
+            args: Prisma.NotificationDeviceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>[]
+          }
+          create: {
+            args: Prisma.NotificationDeviceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          createMany: {
+            args: Prisma.NotificationDeviceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NotificationDeviceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>[]
+          }
+          delete: {
+            args: Prisma.NotificationDeviceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          update: {
+            args: Prisma.NotificationDeviceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          deleteMany: {
+            args: Prisma.NotificationDeviceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NotificationDeviceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NotificationDeviceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationDevicePayload>
+          }
+          aggregate: {
+            args: Prisma.NotificationDeviceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotificationDevice>
+          }
+          groupBy: {
+            args: Prisma.NotificationDeviceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationDeviceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NotificationDeviceCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationDeviceCountAggregateOutputType> | number
+          }
+        }
+      }
+      EventNotificationPreference: {
+        payload: Prisma.$EventNotificationPreferencePayload<ExtArgs>
+        fields: Prisma.EventNotificationPreferenceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventNotificationPreferenceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventNotificationPreferenceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          findFirst: {
+            args: Prisma.EventNotificationPreferenceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventNotificationPreferenceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          findMany: {
+            args: Prisma.EventNotificationPreferenceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>[]
+          }
+          create: {
+            args: Prisma.EventNotificationPreferenceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          createMany: {
+            args: Prisma.EventNotificationPreferenceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventNotificationPreferenceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>[]
+          }
+          delete: {
+            args: Prisma.EventNotificationPreferenceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          update: {
+            args: Prisma.EventNotificationPreferenceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          deleteMany: {
+            args: Prisma.EventNotificationPreferenceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventNotificationPreferenceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.EventNotificationPreferenceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventNotificationPreferencePayload>
+          }
+          aggregate: {
+            args: Prisma.EventNotificationPreferenceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEventNotificationPreference>
+          }
+          groupBy: {
+            args: Prisma.EventNotificationPreferenceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventNotificationPreferenceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventNotificationPreferenceCountArgs<ExtArgs>
+            result: $Utils.Optional<EventNotificationPreferenceCountAggregateOutputType> | number
+          }
+        }
+      }
       CalendarShare: {
         payload: Prisma.$CalendarSharePayload<ExtArgs>
         fields: Prisma.CalendarShareFieldRefs
@@ -1291,12 +1463,16 @@ export namespace Prisma {
 
   export type UserCountOutputType = {
     events: number
+    notificationDevices: number
+    eventNotificationPrefs: number
     sharedByMe: number
     sharedWithMe: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     events?: boolean | UserCountOutputTypeCountEventsArgs
+    notificationDevices?: boolean | UserCountOutputTypeCountNotificationDevicesArgs
+    eventNotificationPrefs?: boolean | UserCountOutputTypeCountEventNotificationPrefsArgs
     sharedByMe?: boolean | UserCountOutputTypeCountSharedByMeArgs
     sharedWithMe?: boolean | UserCountOutputTypeCountSharedWithMeArgs
   }
@@ -1317,6 +1493,20 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EventWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotificationDevicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationDeviceWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountEventNotificationPrefsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventNotificationPreferenceWhereInput
   }
 
   /**
@@ -1543,6 +1733,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     events?: boolean | User$eventsArgs<ExtArgs>
+    notificationDevices?: boolean | User$notificationDevicesArgs<ExtArgs>
+    eventNotificationPrefs?: boolean | User$eventNotificationPrefsArgs<ExtArgs>
     sharedByMe?: boolean | User$sharedByMeArgs<ExtArgs>
     sharedWithMe?: boolean | User$sharedWithMeArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1566,6 +1758,8 @@ export namespace Prisma {
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     events?: boolean | User$eventsArgs<ExtArgs>
+    notificationDevices?: boolean | User$notificationDevicesArgs<ExtArgs>
+    eventNotificationPrefs?: boolean | User$eventNotificationPrefsArgs<ExtArgs>
     sharedByMe?: boolean | User$sharedByMeArgs<ExtArgs>
     sharedWithMe?: boolean | User$sharedWithMeArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1576,6 +1770,8 @@ export namespace Prisma {
     name: "User"
     objects: {
       events: Prisma.$EventPayload<ExtArgs>[]
+      notificationDevices: Prisma.$NotificationDevicePayload<ExtArgs>[]
+      eventNotificationPrefs: Prisma.$EventNotificationPreferencePayload<ExtArgs>[]
       sharedByMe: Prisma.$CalendarSharePayload<ExtArgs>[]
       sharedWithMe: Prisma.$CalendarSharePayload<ExtArgs>[]
     }
@@ -1950,6 +2146,8 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     events<T extends User$eventsArgs<ExtArgs> = {}>(args?: Subset<T, User$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany"> | Null>
+    notificationDevices<T extends User$notificationDevicesArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationDevicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findMany"> | Null>
+    eventNotificationPrefs<T extends User$eventNotificationPrefsArgs<ExtArgs> = {}>(args?: Subset<T, User$eventNotificationPrefsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findMany"> | Null>
     sharedByMe<T extends User$sharedByMeArgs<ExtArgs> = {}>(args?: Subset<T, User$sharedByMeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CalendarSharePayload<ExtArgs>, T, "findMany"> | Null>
     sharedWithMe<T extends User$sharedWithMeArgs<ExtArgs> = {}>(args?: Subset<T, User$sharedWithMeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CalendarSharePayload<ExtArgs>, T, "findMany"> | Null>
     /**
@@ -2317,6 +2515,46 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
+  }
+
+  /**
+   * User.notificationDevices
+   */
+  export type User$notificationDevicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    where?: NotificationDeviceWhereInput
+    orderBy?: NotificationDeviceOrderByWithRelationInput | NotificationDeviceOrderByWithRelationInput[]
+    cursor?: NotificationDeviceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationDeviceScalarFieldEnum | NotificationDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * User.eventNotificationPrefs
+   */
+  export type User$eventNotificationPrefsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    where?: EventNotificationPreferenceWhereInput
+    orderBy?: EventNotificationPreferenceOrderByWithRelationInput | EventNotificationPreferenceOrderByWithRelationInput[]
+    cursor?: EventNotificationPreferenceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EventNotificationPreferenceScalarFieldEnum | EventNotificationPreferenceScalarFieldEnum[]
   }
 
   /**
@@ -6566,6 +6804,2014 @@ export namespace Prisma {
 
 
   /**
+   * Model NotificationDevice
+   */
+
+  export type AggregateNotificationDevice = {
+    _count: NotificationDeviceCountAggregateOutputType | null
+    _min: NotificationDeviceMinAggregateOutputType | null
+    _max: NotificationDeviceMaxAggregateOutputType | null
+  }
+
+  export type NotificationDeviceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    provider: string | null
+    externalDeviceId: string | null
+    pushToken: string | null
+    platform: string | null
+    locale: string | null
+    notificationsOn: boolean | null
+    lastSeenAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NotificationDeviceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    provider: string | null
+    externalDeviceId: string | null
+    pushToken: string | null
+    platform: string | null
+    locale: string | null
+    notificationsOn: boolean | null
+    lastSeenAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type NotificationDeviceCountAggregateOutputType = {
+    id: number
+    userId: number
+    provider: number
+    externalDeviceId: number
+    pushToken: number
+    platform: number
+    locale: number
+    notificationsOn: number
+    lastSeenAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type NotificationDeviceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    provider?: true
+    externalDeviceId?: true
+    pushToken?: true
+    platform?: true
+    locale?: true
+    notificationsOn?: true
+    lastSeenAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NotificationDeviceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    provider?: true
+    externalDeviceId?: true
+    pushToken?: true
+    platform?: true
+    locale?: true
+    notificationsOn?: true
+    lastSeenAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type NotificationDeviceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    provider?: true
+    externalDeviceId?: true
+    pushToken?: true
+    platform?: true
+    locale?: true
+    notificationsOn?: true
+    lastSeenAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type NotificationDeviceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationDevice to aggregate.
+     */
+    where?: NotificationDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationDevices to fetch.
+     */
+    orderBy?: NotificationDeviceOrderByWithRelationInput | NotificationDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NotificationDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NotificationDevices
+    **/
+    _count?: true | NotificationDeviceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NotificationDeviceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NotificationDeviceMaxAggregateInputType
+  }
+
+  export type GetNotificationDeviceAggregateType<T extends NotificationDeviceAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotificationDevice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNotificationDevice[P]>
+      : GetScalarType<T[P], AggregateNotificationDevice[P]>
+  }
+
+
+
+
+  export type NotificationDeviceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationDeviceWhereInput
+    orderBy?: NotificationDeviceOrderByWithAggregationInput | NotificationDeviceOrderByWithAggregationInput[]
+    by: NotificationDeviceScalarFieldEnum[] | NotificationDeviceScalarFieldEnum
+    having?: NotificationDeviceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NotificationDeviceCountAggregateInputType | true
+    _min?: NotificationDeviceMinAggregateInputType
+    _max?: NotificationDeviceMaxAggregateInputType
+  }
+
+  export type NotificationDeviceGroupByOutputType = {
+    id: string
+    userId: string
+    provider: string
+    externalDeviceId: string
+    pushToken: string | null
+    platform: string | null
+    locale: string | null
+    notificationsOn: boolean
+    lastSeenAt: Date
+    createdAt: Date
+    updatedAt: Date
+    _count: NotificationDeviceCountAggregateOutputType | null
+    _min: NotificationDeviceMinAggregateOutputType | null
+    _max: NotificationDeviceMaxAggregateOutputType | null
+  }
+
+  type GetNotificationDeviceGroupByPayload<T extends NotificationDeviceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NotificationDeviceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NotificationDeviceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NotificationDeviceGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationDeviceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NotificationDeviceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    provider?: boolean
+    externalDeviceId?: boolean
+    pushToken?: boolean
+    platform?: boolean
+    locale?: boolean
+    notificationsOn?: boolean
+    lastSeenAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationDevice"]>
+
+  export type NotificationDeviceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    provider?: boolean
+    externalDeviceId?: boolean
+    pushToken?: boolean
+    platform?: boolean
+    locale?: boolean
+    notificationsOn?: boolean
+    lastSeenAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationDevice"]>
+
+  export type NotificationDeviceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    provider?: boolean
+    externalDeviceId?: boolean
+    pushToken?: boolean
+    platform?: boolean
+    locale?: boolean
+    notificationsOn?: boolean
+    lastSeenAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type NotificationDeviceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type NotificationDeviceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $NotificationDevicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NotificationDevice"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      provider: string
+      externalDeviceId: string
+      pushToken: string | null
+      platform: string | null
+      locale: string | null
+      notificationsOn: boolean
+      lastSeenAt: Date
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["notificationDevice"]>
+    composites: {}
+  }
+
+  type NotificationDeviceGetPayload<S extends boolean | null | undefined | NotificationDeviceDefaultArgs> = $Result.GetResult<Prisma.$NotificationDevicePayload, S>
+
+  type NotificationDeviceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<NotificationDeviceFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: NotificationDeviceCountAggregateInputType | true
+    }
+
+  export interface NotificationDeviceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationDevice'], meta: { name: 'NotificationDevice' } }
+    /**
+     * Find zero or one NotificationDevice that matches the filter.
+     * @param {NotificationDeviceFindUniqueArgs} args - Arguments to find a NotificationDevice
+     * @example
+     * // Get one NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NotificationDeviceFindUniqueArgs>(args: SelectSubset<T, NotificationDeviceFindUniqueArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one NotificationDevice that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {NotificationDeviceFindUniqueOrThrowArgs} args - Arguments to find a NotificationDevice
+     * @example
+     * // Get one NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NotificationDeviceFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationDeviceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first NotificationDevice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceFindFirstArgs} args - Arguments to find a NotificationDevice
+     * @example
+     * // Get one NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NotificationDeviceFindFirstArgs>(args?: SelectSubset<T, NotificationDeviceFindFirstArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first NotificationDevice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceFindFirstOrThrowArgs} args - Arguments to find a NotificationDevice
+     * @example
+     * // Get one NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NotificationDeviceFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationDeviceFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more NotificationDevices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NotificationDevices
+     * const notificationDevices = await prisma.notificationDevice.findMany()
+     * 
+     * // Get first 10 NotificationDevices
+     * const notificationDevices = await prisma.notificationDevice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const notificationDeviceWithIdOnly = await prisma.notificationDevice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NotificationDeviceFindManyArgs>(args?: SelectSubset<T, NotificationDeviceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a NotificationDevice.
+     * @param {NotificationDeviceCreateArgs} args - Arguments to create a NotificationDevice.
+     * @example
+     * // Create one NotificationDevice
+     * const NotificationDevice = await prisma.notificationDevice.create({
+     *   data: {
+     *     // ... data to create a NotificationDevice
+     *   }
+     * })
+     * 
+     */
+    create<T extends NotificationDeviceCreateArgs>(args: SelectSubset<T, NotificationDeviceCreateArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many NotificationDevices.
+     * @param {NotificationDeviceCreateManyArgs} args - Arguments to create many NotificationDevices.
+     * @example
+     * // Create many NotificationDevices
+     * const notificationDevice = await prisma.notificationDevice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NotificationDeviceCreateManyArgs>(args?: SelectSubset<T, NotificationDeviceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NotificationDevices and returns the data saved in the database.
+     * @param {NotificationDeviceCreateManyAndReturnArgs} args - Arguments to create many NotificationDevices.
+     * @example
+     * // Create many NotificationDevices
+     * const notificationDevice = await prisma.notificationDevice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NotificationDevices and only return the `id`
+     * const notificationDeviceWithIdOnly = await prisma.notificationDevice.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NotificationDeviceCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationDeviceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a NotificationDevice.
+     * @param {NotificationDeviceDeleteArgs} args - Arguments to delete one NotificationDevice.
+     * @example
+     * // Delete one NotificationDevice
+     * const NotificationDevice = await prisma.notificationDevice.delete({
+     *   where: {
+     *     // ... filter to delete one NotificationDevice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NotificationDeviceDeleteArgs>(args: SelectSubset<T, NotificationDeviceDeleteArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one NotificationDevice.
+     * @param {NotificationDeviceUpdateArgs} args - Arguments to update one NotificationDevice.
+     * @example
+     * // Update one NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NotificationDeviceUpdateArgs>(args: SelectSubset<T, NotificationDeviceUpdateArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more NotificationDevices.
+     * @param {NotificationDeviceDeleteManyArgs} args - Arguments to filter NotificationDevices to delete.
+     * @example
+     * // Delete a few NotificationDevices
+     * const { count } = await prisma.notificationDevice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NotificationDeviceDeleteManyArgs>(args?: SelectSubset<T, NotificationDeviceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NotificationDevices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NotificationDevices
+     * const notificationDevice = await prisma.notificationDevice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NotificationDeviceUpdateManyArgs>(args: SelectSubset<T, NotificationDeviceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one NotificationDevice.
+     * @param {NotificationDeviceUpsertArgs} args - Arguments to update or create a NotificationDevice.
+     * @example
+     * // Update or create a NotificationDevice
+     * const notificationDevice = await prisma.notificationDevice.upsert({
+     *   create: {
+     *     // ... data to create a NotificationDevice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NotificationDevice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NotificationDeviceUpsertArgs>(args: SelectSubset<T, NotificationDeviceUpsertArgs<ExtArgs>>): Prisma__NotificationDeviceClient<$Result.GetResult<Prisma.$NotificationDevicePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of NotificationDevices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceCountArgs} args - Arguments to filter NotificationDevices to count.
+     * @example
+     * // Count the number of NotificationDevices
+     * const count = await prisma.notificationDevice.count({
+     *   where: {
+     *     // ... the filter for the NotificationDevices we want to count
+     *   }
+     * })
+    **/
+    count<T extends NotificationDeviceCountArgs>(
+      args?: Subset<T, NotificationDeviceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NotificationDeviceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NotificationDevice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NotificationDeviceAggregateArgs>(args: Subset<T, NotificationDeviceAggregateArgs>): Prisma.PrismaPromise<GetNotificationDeviceAggregateType<T>>
+
+    /**
+     * Group by NotificationDevice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationDeviceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NotificationDeviceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NotificationDeviceGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationDeviceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NotificationDeviceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationDeviceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NotificationDevice model
+   */
+  readonly fields: NotificationDeviceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NotificationDevice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NotificationDeviceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NotificationDevice model
+   */ 
+  interface NotificationDeviceFieldRefs {
+    readonly id: FieldRef<"NotificationDevice", 'String'>
+    readonly userId: FieldRef<"NotificationDevice", 'String'>
+    readonly provider: FieldRef<"NotificationDevice", 'String'>
+    readonly externalDeviceId: FieldRef<"NotificationDevice", 'String'>
+    readonly pushToken: FieldRef<"NotificationDevice", 'String'>
+    readonly platform: FieldRef<"NotificationDevice", 'String'>
+    readonly locale: FieldRef<"NotificationDevice", 'String'>
+    readonly notificationsOn: FieldRef<"NotificationDevice", 'Boolean'>
+    readonly lastSeenAt: FieldRef<"NotificationDevice", 'DateTime'>
+    readonly createdAt: FieldRef<"NotificationDevice", 'DateTime'>
+    readonly updatedAt: FieldRef<"NotificationDevice", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NotificationDevice findUnique
+   */
+  export type NotificationDeviceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationDevice to fetch.
+     */
+    where: NotificationDeviceWhereUniqueInput
+  }
+
+  /**
+   * NotificationDevice findUniqueOrThrow
+   */
+  export type NotificationDeviceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationDevice to fetch.
+     */
+    where: NotificationDeviceWhereUniqueInput
+  }
+
+  /**
+   * NotificationDevice findFirst
+   */
+  export type NotificationDeviceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationDevice to fetch.
+     */
+    where?: NotificationDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationDevices to fetch.
+     */
+    orderBy?: NotificationDeviceOrderByWithRelationInput | NotificationDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationDevices.
+     */
+    cursor?: NotificationDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationDevices.
+     */
+    distinct?: NotificationDeviceScalarFieldEnum | NotificationDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationDevice findFirstOrThrow
+   */
+  export type NotificationDeviceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationDevice to fetch.
+     */
+    where?: NotificationDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationDevices to fetch.
+     */
+    orderBy?: NotificationDeviceOrderByWithRelationInput | NotificationDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationDevices.
+     */
+    cursor?: NotificationDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationDevices.
+     */
+    distinct?: NotificationDeviceScalarFieldEnum | NotificationDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationDevice findMany
+   */
+  export type NotificationDeviceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationDevices to fetch.
+     */
+    where?: NotificationDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationDevices to fetch.
+     */
+    orderBy?: NotificationDeviceOrderByWithRelationInput | NotificationDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NotificationDevices.
+     */
+    cursor?: NotificationDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationDevices.
+     */
+    skip?: number
+    distinct?: NotificationDeviceScalarFieldEnum | NotificationDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationDevice create
+   */
+  export type NotificationDeviceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a NotificationDevice.
+     */
+    data: XOR<NotificationDeviceCreateInput, NotificationDeviceUncheckedCreateInput>
+  }
+
+  /**
+   * NotificationDevice createMany
+   */
+  export type NotificationDeviceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NotificationDevices.
+     */
+    data: NotificationDeviceCreateManyInput | NotificationDeviceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NotificationDevice createManyAndReturn
+   */
+  export type NotificationDeviceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many NotificationDevices.
+     */
+    data: NotificationDeviceCreateManyInput | NotificationDeviceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * NotificationDevice update
+   */
+  export type NotificationDeviceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a NotificationDevice.
+     */
+    data: XOR<NotificationDeviceUpdateInput, NotificationDeviceUncheckedUpdateInput>
+    /**
+     * Choose, which NotificationDevice to update.
+     */
+    where: NotificationDeviceWhereUniqueInput
+  }
+
+  /**
+   * NotificationDevice updateMany
+   */
+  export type NotificationDeviceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NotificationDevices.
+     */
+    data: XOR<NotificationDeviceUpdateManyMutationInput, NotificationDeviceUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationDevices to update
+     */
+    where?: NotificationDeviceWhereInput
+  }
+
+  /**
+   * NotificationDevice upsert
+   */
+  export type NotificationDeviceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the NotificationDevice to update in case it exists.
+     */
+    where: NotificationDeviceWhereUniqueInput
+    /**
+     * In case the NotificationDevice found by the `where` argument doesn't exist, create a new NotificationDevice with this data.
+     */
+    create: XOR<NotificationDeviceCreateInput, NotificationDeviceUncheckedCreateInput>
+    /**
+     * In case the NotificationDevice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NotificationDeviceUpdateInput, NotificationDeviceUncheckedUpdateInput>
+  }
+
+  /**
+   * NotificationDevice delete
+   */
+  export type NotificationDeviceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+    /**
+     * Filter which NotificationDevice to delete.
+     */
+    where: NotificationDeviceWhereUniqueInput
+  }
+
+  /**
+   * NotificationDevice deleteMany
+   */
+  export type NotificationDeviceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationDevices to delete
+     */
+    where?: NotificationDeviceWhereInput
+  }
+
+  /**
+   * NotificationDevice without action
+   */
+  export type NotificationDeviceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationDevice
+     */
+    select?: NotificationDeviceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationDeviceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EventNotificationPreference
+   */
+
+  export type AggregateEventNotificationPreference = {
+    _count: EventNotificationPreferenceCountAggregateOutputType | null
+    _avg: EventNotificationPreferenceAvgAggregateOutputType | null
+    _sum: EventNotificationPreferenceSumAggregateOutputType | null
+    _min: EventNotificationPreferenceMinAggregateOutputType | null
+    _max: EventNotificationPreferenceMaxAggregateOutputType | null
+  }
+
+  export type EventNotificationPreferenceAvgAggregateOutputType = {
+    notifyHoursBefore: number | null
+  }
+
+  export type EventNotificationPreferenceSumAggregateOutputType = {
+    notifyHoursBefore: number | null
+  }
+
+  export type EventNotificationPreferenceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    eventType: string | null
+    macroArea: string | null
+    enabled: boolean | null
+    notifyHoursBefore: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EventNotificationPreferenceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    eventType: string | null
+    macroArea: string | null
+    enabled: boolean | null
+    notifyHoursBefore: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EventNotificationPreferenceCountAggregateOutputType = {
+    id: number
+    userId: number
+    eventType: number
+    macroArea: number
+    enabled: number
+    notifyHoursBefore: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type EventNotificationPreferenceAvgAggregateInputType = {
+    notifyHoursBefore?: true
+  }
+
+  export type EventNotificationPreferenceSumAggregateInputType = {
+    notifyHoursBefore?: true
+  }
+
+  export type EventNotificationPreferenceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    eventType?: true
+    macroArea?: true
+    enabled?: true
+    notifyHoursBefore?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EventNotificationPreferenceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    eventType?: true
+    macroArea?: true
+    enabled?: true
+    notifyHoursBefore?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EventNotificationPreferenceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    eventType?: true
+    macroArea?: true
+    enabled?: true
+    notifyHoursBefore?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type EventNotificationPreferenceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventNotificationPreference to aggregate.
+     */
+    where?: EventNotificationPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventNotificationPreferences to fetch.
+     */
+    orderBy?: EventNotificationPreferenceOrderByWithRelationInput | EventNotificationPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventNotificationPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventNotificationPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventNotificationPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EventNotificationPreferences
+    **/
+    _count?: true | EventNotificationPreferenceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: EventNotificationPreferenceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: EventNotificationPreferenceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventNotificationPreferenceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventNotificationPreferenceMaxAggregateInputType
+  }
+
+  export type GetEventNotificationPreferenceAggregateType<T extends EventNotificationPreferenceAggregateArgs> = {
+        [P in keyof T & keyof AggregateEventNotificationPreference]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEventNotificationPreference[P]>
+      : GetScalarType<T[P], AggregateEventNotificationPreference[P]>
+  }
+
+
+
+
+  export type EventNotificationPreferenceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventNotificationPreferenceWhereInput
+    orderBy?: EventNotificationPreferenceOrderByWithAggregationInput | EventNotificationPreferenceOrderByWithAggregationInput[]
+    by: EventNotificationPreferenceScalarFieldEnum[] | EventNotificationPreferenceScalarFieldEnum
+    having?: EventNotificationPreferenceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventNotificationPreferenceCountAggregateInputType | true
+    _avg?: EventNotificationPreferenceAvgAggregateInputType
+    _sum?: EventNotificationPreferenceSumAggregateInputType
+    _min?: EventNotificationPreferenceMinAggregateInputType
+    _max?: EventNotificationPreferenceMaxAggregateInputType
+  }
+
+  export type EventNotificationPreferenceGroupByOutputType = {
+    id: string
+    userId: string
+    eventType: string | null
+    macroArea: string | null
+    enabled: boolean
+    notifyHoursBefore: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: EventNotificationPreferenceCountAggregateOutputType | null
+    _avg: EventNotificationPreferenceAvgAggregateOutputType | null
+    _sum: EventNotificationPreferenceSumAggregateOutputType | null
+    _min: EventNotificationPreferenceMinAggregateOutputType | null
+    _max: EventNotificationPreferenceMaxAggregateOutputType | null
+  }
+
+  type GetEventNotificationPreferenceGroupByPayload<T extends EventNotificationPreferenceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventNotificationPreferenceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventNotificationPreferenceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventNotificationPreferenceGroupByOutputType[P]>
+            : GetScalarType<T[P], EventNotificationPreferenceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventNotificationPreferenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    eventType?: boolean
+    macroArea?: boolean
+    enabled?: boolean
+    notifyHoursBefore?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["eventNotificationPreference"]>
+
+  export type EventNotificationPreferenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    eventType?: boolean
+    macroArea?: boolean
+    enabled?: boolean
+    notifyHoursBefore?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["eventNotificationPreference"]>
+
+  export type EventNotificationPreferenceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    eventType?: boolean
+    macroArea?: boolean
+    enabled?: boolean
+    notifyHoursBefore?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type EventNotificationPreferenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type EventNotificationPreferenceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $EventNotificationPreferencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EventNotificationPreference"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      eventType: string | null
+      macroArea: string | null
+      enabled: boolean
+      notifyHoursBefore: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["eventNotificationPreference"]>
+    composites: {}
+  }
+
+  type EventNotificationPreferenceGetPayload<S extends boolean | null | undefined | EventNotificationPreferenceDefaultArgs> = $Result.GetResult<Prisma.$EventNotificationPreferencePayload, S>
+
+  type EventNotificationPreferenceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<EventNotificationPreferenceFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: EventNotificationPreferenceCountAggregateInputType | true
+    }
+
+  export interface EventNotificationPreferenceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EventNotificationPreference'], meta: { name: 'EventNotificationPreference' } }
+    /**
+     * Find zero or one EventNotificationPreference that matches the filter.
+     * @param {EventNotificationPreferenceFindUniqueArgs} args - Arguments to find a EventNotificationPreference
+     * @example
+     * // Get one EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventNotificationPreferenceFindUniqueArgs>(args: SelectSubset<T, EventNotificationPreferenceFindUniqueArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one EventNotificationPreference that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {EventNotificationPreferenceFindUniqueOrThrowArgs} args - Arguments to find a EventNotificationPreference
+     * @example
+     * // Get one EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventNotificationPreferenceFindUniqueOrThrowArgs>(args: SelectSubset<T, EventNotificationPreferenceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first EventNotificationPreference that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceFindFirstArgs} args - Arguments to find a EventNotificationPreference
+     * @example
+     * // Get one EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventNotificationPreferenceFindFirstArgs>(args?: SelectSubset<T, EventNotificationPreferenceFindFirstArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first EventNotificationPreference that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceFindFirstOrThrowArgs} args - Arguments to find a EventNotificationPreference
+     * @example
+     * // Get one EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventNotificationPreferenceFindFirstOrThrowArgs>(args?: SelectSubset<T, EventNotificationPreferenceFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more EventNotificationPreferences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EventNotificationPreferences
+     * const eventNotificationPreferences = await prisma.eventNotificationPreference.findMany()
+     * 
+     * // Get first 10 EventNotificationPreferences
+     * const eventNotificationPreferences = await prisma.eventNotificationPreference.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventNotificationPreferenceWithIdOnly = await prisma.eventNotificationPreference.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventNotificationPreferenceFindManyArgs>(args?: SelectSubset<T, EventNotificationPreferenceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a EventNotificationPreference.
+     * @param {EventNotificationPreferenceCreateArgs} args - Arguments to create a EventNotificationPreference.
+     * @example
+     * // Create one EventNotificationPreference
+     * const EventNotificationPreference = await prisma.eventNotificationPreference.create({
+     *   data: {
+     *     // ... data to create a EventNotificationPreference
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventNotificationPreferenceCreateArgs>(args: SelectSubset<T, EventNotificationPreferenceCreateArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many EventNotificationPreferences.
+     * @param {EventNotificationPreferenceCreateManyArgs} args - Arguments to create many EventNotificationPreferences.
+     * @example
+     * // Create many EventNotificationPreferences
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventNotificationPreferenceCreateManyArgs>(args?: SelectSubset<T, EventNotificationPreferenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EventNotificationPreferences and returns the data saved in the database.
+     * @param {EventNotificationPreferenceCreateManyAndReturnArgs} args - Arguments to create many EventNotificationPreferences.
+     * @example
+     * // Create many EventNotificationPreferences
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EventNotificationPreferences and only return the `id`
+     * const eventNotificationPreferenceWithIdOnly = await prisma.eventNotificationPreference.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventNotificationPreferenceCreateManyAndReturnArgs>(args?: SelectSubset<T, EventNotificationPreferenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a EventNotificationPreference.
+     * @param {EventNotificationPreferenceDeleteArgs} args - Arguments to delete one EventNotificationPreference.
+     * @example
+     * // Delete one EventNotificationPreference
+     * const EventNotificationPreference = await prisma.eventNotificationPreference.delete({
+     *   where: {
+     *     // ... filter to delete one EventNotificationPreference
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventNotificationPreferenceDeleteArgs>(args: SelectSubset<T, EventNotificationPreferenceDeleteArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one EventNotificationPreference.
+     * @param {EventNotificationPreferenceUpdateArgs} args - Arguments to update one EventNotificationPreference.
+     * @example
+     * // Update one EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventNotificationPreferenceUpdateArgs>(args: SelectSubset<T, EventNotificationPreferenceUpdateArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more EventNotificationPreferences.
+     * @param {EventNotificationPreferenceDeleteManyArgs} args - Arguments to filter EventNotificationPreferences to delete.
+     * @example
+     * // Delete a few EventNotificationPreferences
+     * const { count } = await prisma.eventNotificationPreference.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventNotificationPreferenceDeleteManyArgs>(args?: SelectSubset<T, EventNotificationPreferenceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventNotificationPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EventNotificationPreferences
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventNotificationPreferenceUpdateManyArgs>(args: SelectSubset<T, EventNotificationPreferenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one EventNotificationPreference.
+     * @param {EventNotificationPreferenceUpsertArgs} args - Arguments to update or create a EventNotificationPreference.
+     * @example
+     * // Update or create a EventNotificationPreference
+     * const eventNotificationPreference = await prisma.eventNotificationPreference.upsert({
+     *   create: {
+     *     // ... data to create a EventNotificationPreference
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EventNotificationPreference we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventNotificationPreferenceUpsertArgs>(args: SelectSubset<T, EventNotificationPreferenceUpsertArgs<ExtArgs>>): Prisma__EventNotificationPreferenceClient<$Result.GetResult<Prisma.$EventNotificationPreferencePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of EventNotificationPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceCountArgs} args - Arguments to filter EventNotificationPreferences to count.
+     * @example
+     * // Count the number of EventNotificationPreferences
+     * const count = await prisma.eventNotificationPreference.count({
+     *   where: {
+     *     // ... the filter for the EventNotificationPreferences we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventNotificationPreferenceCountArgs>(
+      args?: Subset<T, EventNotificationPreferenceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventNotificationPreferenceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EventNotificationPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventNotificationPreferenceAggregateArgs>(args: Subset<T, EventNotificationPreferenceAggregateArgs>): Prisma.PrismaPromise<GetEventNotificationPreferenceAggregateType<T>>
+
+    /**
+     * Group by EventNotificationPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventNotificationPreferenceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventNotificationPreferenceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventNotificationPreferenceGroupByArgs['orderBy'] }
+        : { orderBy?: EventNotificationPreferenceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventNotificationPreferenceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventNotificationPreferenceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EventNotificationPreference model
+   */
+  readonly fields: EventNotificationPreferenceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EventNotificationPreference.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventNotificationPreferenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EventNotificationPreference model
+   */ 
+  interface EventNotificationPreferenceFieldRefs {
+    readonly id: FieldRef<"EventNotificationPreference", 'String'>
+    readonly userId: FieldRef<"EventNotificationPreference", 'String'>
+    readonly eventType: FieldRef<"EventNotificationPreference", 'String'>
+    readonly macroArea: FieldRef<"EventNotificationPreference", 'String'>
+    readonly enabled: FieldRef<"EventNotificationPreference", 'Boolean'>
+    readonly notifyHoursBefore: FieldRef<"EventNotificationPreference", 'Int'>
+    readonly createdAt: FieldRef<"EventNotificationPreference", 'DateTime'>
+    readonly updatedAt: FieldRef<"EventNotificationPreference", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EventNotificationPreference findUnique
+   */
+  export type EventNotificationPreferenceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventNotificationPreference to fetch.
+     */
+    where: EventNotificationPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventNotificationPreference findUniqueOrThrow
+   */
+  export type EventNotificationPreferenceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventNotificationPreference to fetch.
+     */
+    where: EventNotificationPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventNotificationPreference findFirst
+   */
+  export type EventNotificationPreferenceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventNotificationPreference to fetch.
+     */
+    where?: EventNotificationPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventNotificationPreferences to fetch.
+     */
+    orderBy?: EventNotificationPreferenceOrderByWithRelationInput | EventNotificationPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventNotificationPreferences.
+     */
+    cursor?: EventNotificationPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventNotificationPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventNotificationPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventNotificationPreferences.
+     */
+    distinct?: EventNotificationPreferenceScalarFieldEnum | EventNotificationPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventNotificationPreference findFirstOrThrow
+   */
+  export type EventNotificationPreferenceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventNotificationPreference to fetch.
+     */
+    where?: EventNotificationPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventNotificationPreferences to fetch.
+     */
+    orderBy?: EventNotificationPreferenceOrderByWithRelationInput | EventNotificationPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventNotificationPreferences.
+     */
+    cursor?: EventNotificationPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventNotificationPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventNotificationPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventNotificationPreferences.
+     */
+    distinct?: EventNotificationPreferenceScalarFieldEnum | EventNotificationPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventNotificationPreference findMany
+   */
+  export type EventNotificationPreferenceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventNotificationPreferences to fetch.
+     */
+    where?: EventNotificationPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventNotificationPreferences to fetch.
+     */
+    orderBy?: EventNotificationPreferenceOrderByWithRelationInput | EventNotificationPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EventNotificationPreferences.
+     */
+    cursor?: EventNotificationPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventNotificationPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventNotificationPreferences.
+     */
+    skip?: number
+    distinct?: EventNotificationPreferenceScalarFieldEnum | EventNotificationPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventNotificationPreference create
+   */
+  export type EventNotificationPreferenceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a EventNotificationPreference.
+     */
+    data: XOR<EventNotificationPreferenceCreateInput, EventNotificationPreferenceUncheckedCreateInput>
+  }
+
+  /**
+   * EventNotificationPreference createMany
+   */
+  export type EventNotificationPreferenceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EventNotificationPreferences.
+     */
+    data: EventNotificationPreferenceCreateManyInput | EventNotificationPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventNotificationPreference createManyAndReturn
+   */
+  export type EventNotificationPreferenceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many EventNotificationPreferences.
+     */
+    data: EventNotificationPreferenceCreateManyInput | EventNotificationPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * EventNotificationPreference update
+   */
+  export type EventNotificationPreferenceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a EventNotificationPreference.
+     */
+    data: XOR<EventNotificationPreferenceUpdateInput, EventNotificationPreferenceUncheckedUpdateInput>
+    /**
+     * Choose, which EventNotificationPreference to update.
+     */
+    where: EventNotificationPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventNotificationPreference updateMany
+   */
+  export type EventNotificationPreferenceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EventNotificationPreferences.
+     */
+    data: XOR<EventNotificationPreferenceUpdateManyMutationInput, EventNotificationPreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which EventNotificationPreferences to update
+     */
+    where?: EventNotificationPreferenceWhereInput
+  }
+
+  /**
+   * EventNotificationPreference upsert
+   */
+  export type EventNotificationPreferenceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the EventNotificationPreference to update in case it exists.
+     */
+    where: EventNotificationPreferenceWhereUniqueInput
+    /**
+     * In case the EventNotificationPreference found by the `where` argument doesn't exist, create a new EventNotificationPreference with this data.
+     */
+    create: XOR<EventNotificationPreferenceCreateInput, EventNotificationPreferenceUncheckedCreateInput>
+    /**
+     * In case the EventNotificationPreference was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventNotificationPreferenceUpdateInput, EventNotificationPreferenceUncheckedUpdateInput>
+  }
+
+  /**
+   * EventNotificationPreference delete
+   */
+  export type EventNotificationPreferenceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter which EventNotificationPreference to delete.
+     */
+    where: EventNotificationPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventNotificationPreference deleteMany
+   */
+  export type EventNotificationPreferenceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventNotificationPreferences to delete
+     */
+    where?: EventNotificationPreferenceWhereInput
+  }
+
+  /**
+   * EventNotificationPreference without action
+   */
+  export type EventNotificationPreferenceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventNotificationPreference
+     */
+    select?: EventNotificationPreferenceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventNotificationPreferenceInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model CalendarShare
    */
 
@@ -7618,6 +9864,37 @@ export namespace Prisma {
   export type SettingScalarFieldEnum = (typeof SettingScalarFieldEnum)[keyof typeof SettingScalarFieldEnum]
 
 
+  export const NotificationDeviceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    provider: 'provider',
+    externalDeviceId: 'externalDeviceId',
+    pushToken: 'pushToken',
+    platform: 'platform',
+    locale: 'locale',
+    notificationsOn: 'notificationsOn',
+    lastSeenAt: 'lastSeenAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type NotificationDeviceScalarFieldEnum = (typeof NotificationDeviceScalarFieldEnum)[keyof typeof NotificationDeviceScalarFieldEnum]
+
+
+  export const EventNotificationPreferenceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    eventType: 'eventType',
+    macroArea: 'macroArea',
+    enabled: 'enabled',
+    notifyHoursBefore: 'notifyHoursBefore',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type EventNotificationPreferenceScalarFieldEnum = (typeof EventNotificationPreferenceScalarFieldEnum)[keyof typeof EventNotificationPreferenceScalarFieldEnum]
+
+
   export const CalendarShareScalarFieldEnum: {
     id: 'id',
     ownerId: 'ownerId',
@@ -7749,6 +10026,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     events?: EventListRelationFilter
+    notificationDevices?: NotificationDeviceListRelationFilter
+    eventNotificationPrefs?: EventNotificationPreferenceListRelationFilter
     sharedByMe?: CalendarShareListRelationFilter
     sharedWithMe?: CalendarShareListRelationFilter
   }
@@ -7760,6 +10039,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     events?: EventOrderByRelationAggregateInput
+    notificationDevices?: NotificationDeviceOrderByRelationAggregateInput
+    eventNotificationPrefs?: EventNotificationPreferenceOrderByRelationAggregateInput
     sharedByMe?: CalendarShareOrderByRelationAggregateInput
     sharedWithMe?: CalendarShareOrderByRelationAggregateInput
   }
@@ -7774,6 +10055,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     events?: EventListRelationFilter
+    notificationDevices?: NotificationDeviceListRelationFilter
+    eventNotificationPrefs?: EventNotificationPreferenceListRelationFilter
     sharedByMe?: CalendarShareListRelationFilter
     sharedWithMe?: CalendarShareListRelationFilter
   }, "id" | "clerkUserId">
@@ -8192,6 +10475,164 @@ export namespace Prisma {
     value?: StringWithAggregatesFilter<"Setting"> | string
   }
 
+  export type NotificationDeviceWhereInput = {
+    AND?: NotificationDeviceWhereInput | NotificationDeviceWhereInput[]
+    OR?: NotificationDeviceWhereInput[]
+    NOT?: NotificationDeviceWhereInput | NotificationDeviceWhereInput[]
+    id?: StringFilter<"NotificationDevice"> | string
+    userId?: StringFilter<"NotificationDevice"> | string
+    provider?: StringFilter<"NotificationDevice"> | string
+    externalDeviceId?: StringFilter<"NotificationDevice"> | string
+    pushToken?: StringNullableFilter<"NotificationDevice"> | string | null
+    platform?: StringNullableFilter<"NotificationDevice"> | string | null
+    locale?: StringNullableFilter<"NotificationDevice"> | string | null
+    notificationsOn?: BoolFilter<"NotificationDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    createdAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type NotificationDeviceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    externalDeviceId?: SortOrder
+    pushToken?: SortOrderInput | SortOrder
+    platform?: SortOrderInput | SortOrder
+    locale?: SortOrderInput | SortOrder
+    notificationsOn?: SortOrder
+    lastSeenAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type NotificationDeviceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    provider_externalDeviceId?: NotificationDeviceProviderExternalDeviceIdCompoundUniqueInput
+    AND?: NotificationDeviceWhereInput | NotificationDeviceWhereInput[]
+    OR?: NotificationDeviceWhereInput[]
+    NOT?: NotificationDeviceWhereInput | NotificationDeviceWhereInput[]
+    userId?: StringFilter<"NotificationDevice"> | string
+    provider?: StringFilter<"NotificationDevice"> | string
+    externalDeviceId?: StringFilter<"NotificationDevice"> | string
+    pushToken?: StringNullableFilter<"NotificationDevice"> | string | null
+    platform?: StringNullableFilter<"NotificationDevice"> | string | null
+    locale?: StringNullableFilter<"NotificationDevice"> | string | null
+    notificationsOn?: BoolFilter<"NotificationDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    createdAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "provider_externalDeviceId">
+
+  export type NotificationDeviceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    externalDeviceId?: SortOrder
+    pushToken?: SortOrderInput | SortOrder
+    platform?: SortOrderInput | SortOrder
+    locale?: SortOrderInput | SortOrder
+    notificationsOn?: SortOrder
+    lastSeenAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: NotificationDeviceCountOrderByAggregateInput
+    _max?: NotificationDeviceMaxOrderByAggregateInput
+    _min?: NotificationDeviceMinOrderByAggregateInput
+  }
+
+  export type NotificationDeviceScalarWhereWithAggregatesInput = {
+    AND?: NotificationDeviceScalarWhereWithAggregatesInput | NotificationDeviceScalarWhereWithAggregatesInput[]
+    OR?: NotificationDeviceScalarWhereWithAggregatesInput[]
+    NOT?: NotificationDeviceScalarWhereWithAggregatesInput | NotificationDeviceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"NotificationDevice"> | string
+    userId?: StringWithAggregatesFilter<"NotificationDevice"> | string
+    provider?: StringWithAggregatesFilter<"NotificationDevice"> | string
+    externalDeviceId?: StringWithAggregatesFilter<"NotificationDevice"> | string
+    pushToken?: StringNullableWithAggregatesFilter<"NotificationDevice"> | string | null
+    platform?: StringNullableWithAggregatesFilter<"NotificationDevice"> | string | null
+    locale?: StringNullableWithAggregatesFilter<"NotificationDevice"> | string | null
+    notificationsOn?: BoolWithAggregatesFilter<"NotificationDevice"> | boolean
+    lastSeenAt?: DateTimeWithAggregatesFilter<"NotificationDevice"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"NotificationDevice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"NotificationDevice"> | Date | string
+  }
+
+  export type EventNotificationPreferenceWhereInput = {
+    AND?: EventNotificationPreferenceWhereInput | EventNotificationPreferenceWhereInput[]
+    OR?: EventNotificationPreferenceWhereInput[]
+    NOT?: EventNotificationPreferenceWhereInput | EventNotificationPreferenceWhereInput[]
+    id?: StringFilter<"EventNotificationPreference"> | string
+    userId?: StringFilter<"EventNotificationPreference"> | string
+    eventType?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    macroArea?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    enabled?: BoolFilter<"EventNotificationPreference"> | boolean
+    notifyHoursBefore?: IntNullableFilter<"EventNotificationPreference"> | number | null
+    createdAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type EventNotificationPreferenceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    eventType?: SortOrderInput | SortOrder
+    macroArea?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    notifyHoursBefore?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type EventNotificationPreferenceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EventNotificationPreferenceWhereInput | EventNotificationPreferenceWhereInput[]
+    OR?: EventNotificationPreferenceWhereInput[]
+    NOT?: EventNotificationPreferenceWhereInput | EventNotificationPreferenceWhereInput[]
+    userId?: StringFilter<"EventNotificationPreference"> | string
+    eventType?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    macroArea?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    enabled?: BoolFilter<"EventNotificationPreference"> | boolean
+    notifyHoursBefore?: IntNullableFilter<"EventNotificationPreference"> | number | null
+    createdAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type EventNotificationPreferenceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    eventType?: SortOrderInput | SortOrder
+    macroArea?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    notifyHoursBefore?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: EventNotificationPreferenceCountOrderByAggregateInput
+    _avg?: EventNotificationPreferenceAvgOrderByAggregateInput
+    _max?: EventNotificationPreferenceMaxOrderByAggregateInput
+    _min?: EventNotificationPreferenceMinOrderByAggregateInput
+    _sum?: EventNotificationPreferenceSumOrderByAggregateInput
+  }
+
+  export type EventNotificationPreferenceScalarWhereWithAggregatesInput = {
+    AND?: EventNotificationPreferenceScalarWhereWithAggregatesInput | EventNotificationPreferenceScalarWhereWithAggregatesInput[]
+    OR?: EventNotificationPreferenceScalarWhereWithAggregatesInput[]
+    NOT?: EventNotificationPreferenceScalarWhereWithAggregatesInput | EventNotificationPreferenceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EventNotificationPreference"> | string
+    userId?: StringWithAggregatesFilter<"EventNotificationPreference"> | string
+    eventType?: StringNullableWithAggregatesFilter<"EventNotificationPreference"> | string | null
+    macroArea?: StringNullableWithAggregatesFilter<"EventNotificationPreference"> | string | null
+    enabled?: BoolWithAggregatesFilter<"EventNotificationPreference"> | boolean
+    notifyHoursBefore?: IntNullableWithAggregatesFilter<"EventNotificationPreference"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"EventNotificationPreference"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"EventNotificationPreference"> | Date | string
+  }
+
   export type CalendarShareWhereInput = {
     AND?: CalendarShareWhereInput | CalendarShareWhereInput[]
     OR?: CalendarShareWhereInput[]
@@ -8263,6 +10704,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareCreateNestedManyWithoutOwnerInput
     sharedWithMe?: CalendarShareCreateNestedManyWithoutSharedWithInput
   }
@@ -8274,6 +10717,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventUncheckedCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceUncheckedCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareUncheckedCreateNestedManyWithoutOwnerInput
     sharedWithMe?: CalendarShareUncheckedCreateNestedManyWithoutSharedWithInput
   }
@@ -8285,6 +10730,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUpdateManyWithoutOwnerNestedInput
     sharedWithMe?: CalendarShareUpdateManyWithoutSharedWithNestedInput
   }
@@ -8296,6 +10743,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUncheckedUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput
     sharedWithMe?: CalendarShareUncheckedUpdateManyWithoutSharedWithNestedInput
   }
@@ -8784,6 +11233,179 @@ export namespace Prisma {
     value?: StringFieldUpdateOperationsInput | string
   }
 
+  export type NotificationDeviceCreateInput = {
+    id?: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutNotificationDevicesInput
+  }
+
+  export type NotificationDeviceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NotificationDeviceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutNotificationDevicesNestedInput
+  }
+
+  export type NotificationDeviceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationDeviceCreateManyInput = {
+    id?: string
+    userId: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NotificationDeviceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationDeviceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceCreateInput = {
+    id?: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutEventNotificationPrefsInput
+  }
+
+  export type EventNotificationPreferenceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventNotificationPreferenceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutEventNotificationPrefsNestedInput
+  }
+
+  export type EventNotificationPreferenceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceCreateManyInput = {
+    id?: string
+    userId: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventNotificationPreferenceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CalendarShareCreateInput = {
     id?: string
     permission?: $Enums.SharePermission
@@ -8892,6 +11514,18 @@ export namespace Prisma {
     none?: EventWhereInput
   }
 
+  export type NotificationDeviceListRelationFilter = {
+    every?: NotificationDeviceWhereInput
+    some?: NotificationDeviceWhereInput
+    none?: NotificationDeviceWhereInput
+  }
+
+  export type EventNotificationPreferenceListRelationFilter = {
+    every?: EventNotificationPreferenceWhereInput
+    some?: EventNotificationPreferenceWhereInput
+    none?: EventNotificationPreferenceWhereInput
+  }
+
   export type CalendarShareListRelationFilter = {
     every?: CalendarShareWhereInput
     some?: CalendarShareWhereInput
@@ -8904,6 +11538,14 @@ export namespace Prisma {
   }
 
   export type EventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NotificationDeviceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type EventNotificationPreferenceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -9291,6 +11933,121 @@ export namespace Prisma {
     value?: SortOrder
   }
 
+  export type NotificationDeviceProviderExternalDeviceIdCompoundUniqueInput = {
+    provider: string
+    externalDeviceId: string
+  }
+
+  export type NotificationDeviceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    externalDeviceId?: SortOrder
+    pushToken?: SortOrder
+    platform?: SortOrder
+    locale?: SortOrder
+    notificationsOn?: SortOrder
+    lastSeenAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NotificationDeviceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    externalDeviceId?: SortOrder
+    pushToken?: SortOrder
+    platform?: SortOrder
+    locale?: SortOrder
+    notificationsOn?: SortOrder
+    lastSeenAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type NotificationDeviceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    externalDeviceId?: SortOrder
+    pushToken?: SortOrder
+    platform?: SortOrder
+    locale?: SortOrder
+    notificationsOn?: SortOrder
+    lastSeenAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type EventNotificationPreferenceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    eventType?: SortOrder
+    macroArea?: SortOrder
+    enabled?: SortOrder
+    notifyHoursBefore?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventNotificationPreferenceAvgOrderByAggregateInput = {
+    notifyHoursBefore?: SortOrder
+  }
+
+  export type EventNotificationPreferenceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    eventType?: SortOrder
+    macroArea?: SortOrder
+    enabled?: SortOrder
+    notifyHoursBefore?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventNotificationPreferenceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    eventType?: SortOrder
+    macroArea?: SortOrder
+    enabled?: SortOrder
+    notifyHoursBefore?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventNotificationPreferenceSumOrderByAggregateInput = {
+    notifyHoursBefore?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type EnumSharePermissionFilter<$PrismaModel = never> = {
     equals?: $Enums.SharePermission | EnumSharePermissionFieldRefInput<$PrismaModel>
     in?: $Enums.SharePermission[] | ListEnumSharePermissionFieldRefInput<$PrismaModel>
@@ -9347,6 +12104,20 @@ export namespace Prisma {
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
   }
 
+  export type NotificationDeviceCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput> | NotificationDeviceCreateWithoutUserInput[] | NotificationDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationDeviceCreateOrConnectWithoutUserInput | NotificationDeviceCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationDeviceCreateManyUserInputEnvelope
+    connect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+  }
+
+  export type EventNotificationPreferenceCreateNestedManyWithoutUserInput = {
+    create?: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput> | EventNotificationPreferenceCreateWithoutUserInput[] | EventNotificationPreferenceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: EventNotificationPreferenceCreateOrConnectWithoutUserInput | EventNotificationPreferenceCreateOrConnectWithoutUserInput[]
+    createMany?: EventNotificationPreferenceCreateManyUserInputEnvelope
+    connect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+  }
+
   export type CalendarShareCreateNestedManyWithoutOwnerInput = {
     create?: XOR<CalendarShareCreateWithoutOwnerInput, CalendarShareUncheckedCreateWithoutOwnerInput> | CalendarShareCreateWithoutOwnerInput[] | CalendarShareUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: CalendarShareCreateOrConnectWithoutOwnerInput | CalendarShareCreateOrConnectWithoutOwnerInput[]
@@ -9366,6 +12137,20 @@ export namespace Prisma {
     connectOrCreate?: EventCreateOrConnectWithoutUserInput | EventCreateOrConnectWithoutUserInput[]
     createMany?: EventCreateManyUserInputEnvelope
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+  }
+
+  export type NotificationDeviceUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput> | NotificationDeviceCreateWithoutUserInput[] | NotificationDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationDeviceCreateOrConnectWithoutUserInput | NotificationDeviceCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationDeviceCreateManyUserInputEnvelope
+    connect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+  }
+
+  export type EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput> | EventNotificationPreferenceCreateWithoutUserInput[] | EventNotificationPreferenceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: EventNotificationPreferenceCreateOrConnectWithoutUserInput | EventNotificationPreferenceCreateOrConnectWithoutUserInput[]
+    createMany?: EventNotificationPreferenceCreateManyUserInputEnvelope
+    connect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
   }
 
   export type CalendarShareUncheckedCreateNestedManyWithoutOwnerInput = {
@@ -9408,6 +12193,34 @@ export namespace Prisma {
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
   }
 
+  export type NotificationDeviceUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput> | NotificationDeviceCreateWithoutUserInput[] | NotificationDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationDeviceCreateOrConnectWithoutUserInput | NotificationDeviceCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationDeviceUpsertWithWhereUniqueWithoutUserInput | NotificationDeviceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationDeviceCreateManyUserInputEnvelope
+    set?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    disconnect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    delete?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    connect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    update?: NotificationDeviceUpdateWithWhereUniqueWithoutUserInput | NotificationDeviceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationDeviceUpdateManyWithWhereWithoutUserInput | NotificationDeviceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationDeviceScalarWhereInput | NotificationDeviceScalarWhereInput[]
+  }
+
+  export type EventNotificationPreferenceUpdateManyWithoutUserNestedInput = {
+    create?: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput> | EventNotificationPreferenceCreateWithoutUserInput[] | EventNotificationPreferenceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: EventNotificationPreferenceCreateOrConnectWithoutUserInput | EventNotificationPreferenceCreateOrConnectWithoutUserInput[]
+    upsert?: EventNotificationPreferenceUpsertWithWhereUniqueWithoutUserInput | EventNotificationPreferenceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: EventNotificationPreferenceCreateManyUserInputEnvelope
+    set?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    disconnect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    delete?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    connect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    update?: EventNotificationPreferenceUpdateWithWhereUniqueWithoutUserInput | EventNotificationPreferenceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: EventNotificationPreferenceUpdateManyWithWhereWithoutUserInput | EventNotificationPreferenceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: EventNotificationPreferenceScalarWhereInput | EventNotificationPreferenceScalarWhereInput[]
+  }
+
   export type CalendarShareUpdateManyWithoutOwnerNestedInput = {
     create?: XOR<CalendarShareCreateWithoutOwnerInput, CalendarShareUncheckedCreateWithoutOwnerInput> | CalendarShareCreateWithoutOwnerInput[] | CalendarShareUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: CalendarShareCreateOrConnectWithoutOwnerInput | CalendarShareCreateOrConnectWithoutOwnerInput[]
@@ -9448,6 +12261,34 @@ export namespace Prisma {
     update?: EventUpdateWithWhereUniqueWithoutUserInput | EventUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: EventUpdateManyWithWhereWithoutUserInput | EventUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
+  }
+
+  export type NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput> | NotificationDeviceCreateWithoutUserInput[] | NotificationDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationDeviceCreateOrConnectWithoutUserInput | NotificationDeviceCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationDeviceUpsertWithWhereUniqueWithoutUserInput | NotificationDeviceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationDeviceCreateManyUserInputEnvelope
+    set?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    disconnect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    delete?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    connect?: NotificationDeviceWhereUniqueInput | NotificationDeviceWhereUniqueInput[]
+    update?: NotificationDeviceUpdateWithWhereUniqueWithoutUserInput | NotificationDeviceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationDeviceUpdateManyWithWhereWithoutUserInput | NotificationDeviceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationDeviceScalarWhereInput | NotificationDeviceScalarWhereInput[]
+  }
+
+  export type EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput> | EventNotificationPreferenceCreateWithoutUserInput[] | EventNotificationPreferenceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: EventNotificationPreferenceCreateOrConnectWithoutUserInput | EventNotificationPreferenceCreateOrConnectWithoutUserInput[]
+    upsert?: EventNotificationPreferenceUpsertWithWhereUniqueWithoutUserInput | EventNotificationPreferenceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: EventNotificationPreferenceCreateManyUserInputEnvelope
+    set?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    disconnect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    delete?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    connect?: EventNotificationPreferenceWhereUniqueInput | EventNotificationPreferenceWhereUniqueInput[]
+    update?: EventNotificationPreferenceUpdateWithWhereUniqueWithoutUserInput | EventNotificationPreferenceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: EventNotificationPreferenceUpdateManyWithWhereWithoutUserInput | EventNotificationPreferenceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: EventNotificationPreferenceScalarWhereInput | EventNotificationPreferenceScalarWhereInput[]
   }
 
   export type CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput = {
@@ -9618,6 +12459,42 @@ export namespace Prisma {
     upsert?: EventUpsertWithoutRinviiInput
     connect?: EventWhereUniqueInput
     update?: XOR<XOR<EventUpdateToOneWithWhereWithoutRinviiInput, EventUpdateWithoutRinviiInput>, EventUncheckedUpdateWithoutRinviiInput>
+  }
+
+  export type UserCreateNestedOneWithoutNotificationDevicesInput = {
+    create?: XOR<UserCreateWithoutNotificationDevicesInput, UserUncheckedCreateWithoutNotificationDevicesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationDevicesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutNotificationDevicesNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationDevicesInput, UserUncheckedCreateWithoutNotificationDevicesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationDevicesInput
+    upsert?: UserUpsertWithoutNotificationDevicesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationDevicesInput, UserUpdateWithoutNotificationDevicesInput>, UserUncheckedUpdateWithoutNotificationDevicesInput>
+  }
+
+  export type UserCreateNestedOneWithoutEventNotificationPrefsInput = {
+    create?: XOR<UserCreateWithoutEventNotificationPrefsInput, UserUncheckedCreateWithoutEventNotificationPrefsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutEventNotificationPrefsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutEventNotificationPrefsNestedInput = {
+    create?: XOR<UserCreateWithoutEventNotificationPrefsInput, UserUncheckedCreateWithoutEventNotificationPrefsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutEventNotificationPrefsInput
+    upsert?: UserUpsertWithoutEventNotificationPrefsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutEventNotificationPrefsInput, UserUpdateWithoutEventNotificationPrefsInput>, UserUncheckedUpdateWithoutEventNotificationPrefsInput>
   }
 
   export type UserCreateNestedOneWithoutSharedByMeInput = {
@@ -9826,6 +12703,33 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedEnumSharePermissionFilter<$PrismaModel = never> = {
     equals?: $Enums.SharePermission | EnumSharePermissionFieldRefInput<$PrismaModel>
     in?: $Enums.SharePermission[] | ListEnumSharePermissionFieldRefInput<$PrismaModel>
@@ -9910,6 +12814,72 @@ export namespace Prisma {
 
   export type EventCreateManyUserInputEnvelope = {
     data: EventCreateManyUserInput | EventCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type NotificationDeviceCreateWithoutUserInput = {
+    id?: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NotificationDeviceUncheckedCreateWithoutUserInput = {
+    id?: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type NotificationDeviceCreateOrConnectWithoutUserInput = {
+    where: NotificationDeviceWhereUniqueInput
+    create: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationDeviceCreateManyUserInputEnvelope = {
+    data: NotificationDeviceCreateManyUserInput | NotificationDeviceCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type EventNotificationPreferenceCreateWithoutUserInput = {
+    id?: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventNotificationPreferenceUncheckedCreateWithoutUserInput = {
+    id?: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventNotificationPreferenceCreateOrConnectWithoutUserInput = {
+    where: EventNotificationPreferenceWhereUniqueInput
+    create: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput>
+  }
+
+  export type EventNotificationPreferenceCreateManyUserInputEnvelope = {
+    data: EventNotificationPreferenceCreateManyUserInput | EventNotificationPreferenceCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -10013,6 +12983,69 @@ export namespace Prisma {
     orgId?: StringNullableFilter<"Event"> | string | null
   }
 
+  export type NotificationDeviceUpsertWithWhereUniqueWithoutUserInput = {
+    where: NotificationDeviceWhereUniqueInput
+    update: XOR<NotificationDeviceUpdateWithoutUserInput, NotificationDeviceUncheckedUpdateWithoutUserInput>
+    create: XOR<NotificationDeviceCreateWithoutUserInput, NotificationDeviceUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationDeviceUpdateWithWhereUniqueWithoutUserInput = {
+    where: NotificationDeviceWhereUniqueInput
+    data: XOR<NotificationDeviceUpdateWithoutUserInput, NotificationDeviceUncheckedUpdateWithoutUserInput>
+  }
+
+  export type NotificationDeviceUpdateManyWithWhereWithoutUserInput = {
+    where: NotificationDeviceScalarWhereInput
+    data: XOR<NotificationDeviceUpdateManyMutationInput, NotificationDeviceUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type NotificationDeviceScalarWhereInput = {
+    AND?: NotificationDeviceScalarWhereInput | NotificationDeviceScalarWhereInput[]
+    OR?: NotificationDeviceScalarWhereInput[]
+    NOT?: NotificationDeviceScalarWhereInput | NotificationDeviceScalarWhereInput[]
+    id?: StringFilter<"NotificationDevice"> | string
+    userId?: StringFilter<"NotificationDevice"> | string
+    provider?: StringFilter<"NotificationDevice"> | string
+    externalDeviceId?: StringFilter<"NotificationDevice"> | string
+    pushToken?: StringNullableFilter<"NotificationDevice"> | string | null
+    platform?: StringNullableFilter<"NotificationDevice"> | string | null
+    locale?: StringNullableFilter<"NotificationDevice"> | string | null
+    notificationsOn?: BoolFilter<"NotificationDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    createdAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"NotificationDevice"> | Date | string
+  }
+
+  export type EventNotificationPreferenceUpsertWithWhereUniqueWithoutUserInput = {
+    where: EventNotificationPreferenceWhereUniqueInput
+    update: XOR<EventNotificationPreferenceUpdateWithoutUserInput, EventNotificationPreferenceUncheckedUpdateWithoutUserInput>
+    create: XOR<EventNotificationPreferenceCreateWithoutUserInput, EventNotificationPreferenceUncheckedCreateWithoutUserInput>
+  }
+
+  export type EventNotificationPreferenceUpdateWithWhereUniqueWithoutUserInput = {
+    where: EventNotificationPreferenceWhereUniqueInput
+    data: XOR<EventNotificationPreferenceUpdateWithoutUserInput, EventNotificationPreferenceUncheckedUpdateWithoutUserInput>
+  }
+
+  export type EventNotificationPreferenceUpdateManyWithWhereWithoutUserInput = {
+    where: EventNotificationPreferenceScalarWhereInput
+    data: XOR<EventNotificationPreferenceUpdateManyMutationInput, EventNotificationPreferenceUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type EventNotificationPreferenceScalarWhereInput = {
+    AND?: EventNotificationPreferenceScalarWhereInput | EventNotificationPreferenceScalarWhereInput[]
+    OR?: EventNotificationPreferenceScalarWhereInput[]
+    NOT?: EventNotificationPreferenceScalarWhereInput | EventNotificationPreferenceScalarWhereInput[]
+    id?: StringFilter<"EventNotificationPreference"> | string
+    userId?: StringFilter<"EventNotificationPreference"> | string
+    eventType?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    macroArea?: StringNullableFilter<"EventNotificationPreference"> | string | null
+    enabled?: BoolFilter<"EventNotificationPreference"> | boolean
+    notifyHoursBefore?: IntNullableFilter<"EventNotificationPreference"> | number | null
+    createdAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventNotificationPreference"> | Date | string
+  }
+
   export type CalendarShareUpsertWithWhereUniqueWithoutOwnerInput = {
     where: CalendarShareWhereUniqueInput
     update: XOR<CalendarShareUpdateWithoutOwnerInput, CalendarShareUncheckedUpdateWithoutOwnerInput>
@@ -10063,6 +13096,8 @@ export namespace Prisma {
     email?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    notificationDevices?: NotificationDeviceCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareCreateNestedManyWithoutOwnerInput
     sharedWithMe?: CalendarShareCreateNestedManyWithoutSharedWithInput
   }
@@ -10073,6 +13108,8 @@ export namespace Prisma {
     email?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    notificationDevices?: NotificationDeviceUncheckedCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareUncheckedCreateNestedManyWithoutOwnerInput
     sharedWithMe?: CalendarShareUncheckedCreateNestedManyWithoutSharedWithInput
   }
@@ -10177,6 +13214,8 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notificationDevices?: NotificationDeviceUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUpdateManyWithoutOwnerNestedInput
     sharedWithMe?: CalendarShareUpdateManyWithoutSharedWithNestedInput
   }
@@ -10187,6 +13226,8 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notificationDevices?: NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput
     sharedWithMe?: CalendarShareUncheckedUpdateManyWithoutSharedWithNestedInput
   }
@@ -10532,6 +13573,134 @@ export namespace Prisma {
     subEvents?: SubEventUncheckedUpdateManyWithoutParentEventNestedInput
   }
 
+  export type UserCreateWithoutNotificationDevicesInput = {
+    id?: string
+    clerkUserId: string
+    email?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    events?: EventCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceCreateNestedManyWithoutUserInput
+    sharedByMe?: CalendarShareCreateNestedManyWithoutOwnerInput
+    sharedWithMe?: CalendarShareCreateNestedManyWithoutSharedWithInput
+  }
+
+  export type UserUncheckedCreateWithoutNotificationDevicesInput = {
+    id?: string
+    clerkUserId: string
+    email?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    events?: EventUncheckedCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+    sharedByMe?: CalendarShareUncheckedCreateNestedManyWithoutOwnerInput
+    sharedWithMe?: CalendarShareUncheckedCreateNestedManyWithoutSharedWithInput
+  }
+
+  export type UserCreateOrConnectWithoutNotificationDevicesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotificationDevicesInput, UserUncheckedCreateWithoutNotificationDevicesInput>
+  }
+
+  export type UserUpsertWithoutNotificationDevicesInput = {
+    update: XOR<UserUpdateWithoutNotificationDevicesInput, UserUncheckedUpdateWithoutNotificationDevicesInput>
+    create: XOR<UserCreateWithoutNotificationDevicesInput, UserUncheckedCreateWithoutNotificationDevicesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotificationDevicesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotificationDevicesInput, UserUncheckedUpdateWithoutNotificationDevicesInput>
+  }
+
+  export type UserUpdateWithoutNotificationDevicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkUserId?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    events?: EventUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUpdateManyWithoutUserNestedInput
+    sharedByMe?: CalendarShareUpdateManyWithoutOwnerNestedInput
+    sharedWithMe?: CalendarShareUpdateManyWithoutSharedWithNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotificationDevicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkUserId?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    events?: EventUncheckedUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+    sharedByMe?: CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput
+    sharedWithMe?: CalendarShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  }
+
+  export type UserCreateWithoutEventNotificationPrefsInput = {
+    id?: string
+    clerkUserId: string
+    email?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    events?: EventCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceCreateNestedManyWithoutUserInput
+    sharedByMe?: CalendarShareCreateNestedManyWithoutOwnerInput
+    sharedWithMe?: CalendarShareCreateNestedManyWithoutSharedWithInput
+  }
+
+  export type UserUncheckedCreateWithoutEventNotificationPrefsInput = {
+    id?: string
+    clerkUserId: string
+    email?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    events?: EventUncheckedCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceUncheckedCreateNestedManyWithoutUserInput
+    sharedByMe?: CalendarShareUncheckedCreateNestedManyWithoutOwnerInput
+    sharedWithMe?: CalendarShareUncheckedCreateNestedManyWithoutSharedWithInput
+  }
+
+  export type UserCreateOrConnectWithoutEventNotificationPrefsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutEventNotificationPrefsInput, UserUncheckedCreateWithoutEventNotificationPrefsInput>
+  }
+
+  export type UserUpsertWithoutEventNotificationPrefsInput = {
+    update: XOR<UserUpdateWithoutEventNotificationPrefsInput, UserUncheckedUpdateWithoutEventNotificationPrefsInput>
+    create: XOR<UserCreateWithoutEventNotificationPrefsInput, UserUncheckedCreateWithoutEventNotificationPrefsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutEventNotificationPrefsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutEventNotificationPrefsInput, UserUncheckedUpdateWithoutEventNotificationPrefsInput>
+  }
+
+  export type UserUpdateWithoutEventNotificationPrefsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkUserId?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    events?: EventUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUpdateManyWithoutUserNestedInput
+    sharedByMe?: CalendarShareUpdateManyWithoutOwnerNestedInput
+    sharedWithMe?: CalendarShareUpdateManyWithoutSharedWithNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutEventNotificationPrefsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkUserId?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    events?: EventUncheckedUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput
+    sharedByMe?: CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput
+    sharedWithMe?: CalendarShareUncheckedUpdateManyWithoutSharedWithNestedInput
+  }
+
   export type UserCreateWithoutSharedByMeInput = {
     id?: string
     clerkUserId: string
@@ -10539,6 +13708,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceCreateNestedManyWithoutUserInput
     sharedWithMe?: CalendarShareCreateNestedManyWithoutSharedWithInput
   }
 
@@ -10549,6 +13720,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventUncheckedCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceUncheckedCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
     sharedWithMe?: CalendarShareUncheckedCreateNestedManyWithoutSharedWithInput
   }
 
@@ -10564,6 +13737,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareCreateNestedManyWithoutOwnerInput
   }
 
@@ -10574,6 +13749,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventUncheckedCreateNestedManyWithoutUserInput
+    notificationDevices?: NotificationDeviceUncheckedCreateNestedManyWithoutUserInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
     sharedByMe?: CalendarShareUncheckedCreateNestedManyWithoutOwnerInput
   }
 
@@ -10600,6 +13777,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUpdateManyWithoutUserNestedInput
     sharedWithMe?: CalendarShareUpdateManyWithoutSharedWithNestedInput
   }
 
@@ -10610,6 +13789,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUncheckedUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
     sharedWithMe?: CalendarShareUncheckedUpdateManyWithoutSharedWithNestedInput
   }
 
@@ -10631,6 +13812,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUpdateManyWithoutOwnerNestedInput
   }
 
@@ -10641,6 +13824,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventUncheckedUpdateManyWithoutUserNestedInput
+    notificationDevices?: NotificationDeviceUncheckedUpdateManyWithoutUserNestedInput
+    eventNotificationPrefs?: EventNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
     sharedByMe?: CalendarShareUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
@@ -10670,6 +13855,29 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     orgId?: string | null
+  }
+
+  export type NotificationDeviceCreateManyUserInput = {
+    id?: string
+    provider?: string
+    externalDeviceId: string
+    pushToken?: string | null
+    platform?: string | null
+    locale?: string | null
+    notificationsOn?: boolean
+    lastSeenAt?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventNotificationPreferenceCreateManyUserInput = {
+    id?: string
+    eventType?: string | null
+    macroArea?: string | null
+    enabled?: boolean
+    notifyHoursBefore?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CalendarShareCreateManyOwnerInput = {
@@ -10774,6 +13982,75 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orgId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type NotificationDeviceUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationDeviceUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationDeviceUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalDeviceId?: StringFieldUpdateOperationsInput | string
+    pushToken?: NullableStringFieldUpdateOperationsInput | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
+    locale?: NullableStringFieldUpdateOperationsInput | string | null
+    notificationsOn?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventNotificationPreferenceUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    macroArea?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    notifyHoursBefore?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CalendarShareUpdateWithoutOwnerInput = {
@@ -10973,6 +14250,14 @@ export namespace Prisma {
      * @deprecated Use SettingDefaultArgs instead
      */
     export type SettingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SettingDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use NotificationDeviceDefaultArgs instead
+     */
+    export type NotificationDeviceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationDeviceDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use EventNotificationPreferenceDefaultArgs instead
+     */
+    export type EventNotificationPreferenceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = EventNotificationPreferenceDefaultArgs<ExtArgs>
     /**
      * @deprecated Use CalendarShareDefaultArgs instead
      */

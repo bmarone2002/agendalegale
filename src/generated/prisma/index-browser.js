@@ -195,6 +195,31 @@ exports.Prisma.SettingScalarFieldEnum = {
   value: 'value'
 };
 
+exports.Prisma.NotificationDeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  externalDeviceId: 'externalDeviceId',
+  pushToken: 'pushToken',
+  platform: 'platform',
+  locale: 'locale',
+  notificationsOn: 'notificationsOn',
+  lastSeenAt: 'lastSeenAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventNotificationPreferenceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  macroArea: 'macroArea',
+  enabled: 'enabled',
+  notifyHoursBefore: 'notifyHoursBefore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.CalendarShareScalarFieldEnum = {
   id: 'id',
   ownerId: 'ownerId',
@@ -229,6 +254,8 @@ exports.Prisma.ModelName = {
   SubEvent: 'SubEvent',
   Rinvio: 'Rinvio',
   Setting: 'Setting',
+  NotificationDevice: 'NotificationDevice',
+  EventNotificationPreference: 'EventNotificationPreference',
   CalendarShare: 'CalendarShare'
 };
 

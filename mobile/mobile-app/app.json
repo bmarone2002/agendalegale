@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Legal Calendar",
+    "slug": "legal-calendar-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "legalcalendar",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.archivagroup.legalcalendar"
+    },
+    "android": {
+      "package": "com.archivagroup.legalcalendar",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "production"
+        }
+      ]
+    ],
+    "extra": {
+      "webBaseUrl": "https://legalcalendar-production.up.railway.app",
+      "clerkPublishableKey": "pk_test_Z3JhbmQtbWFsbGFyZC03Ny5jbGVyay5hY2NvdW50cy5kZXYk",
+      "oneSignalAppId": "",
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    }
+  }
+}

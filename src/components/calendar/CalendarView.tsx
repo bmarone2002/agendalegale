@@ -180,6 +180,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     setInitialView(viewToUse);
     setCurrentView(viewToUse);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkEventId = params.get("eventId");
+    if (!deepLinkEventId) return;
+    setModalState({ mode: "edit", eventId: deepLinkEventId });
+  }, []);
   const handleDatesSet = useCallback(
     (arg: { start: Date; end: Date; view: { type: string; title: string } }) => {
       setCurrentView(arg.view.type);
