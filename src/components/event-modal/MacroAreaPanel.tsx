@@ -333,7 +333,8 @@ export function MacroAreaPanel({
             placeholder="Inserisci data prima udienza"
           />
           <p className="text-xs text-zinc-500 mt-1">
-            Da questa data vengono calcolati l&apos;evento Prima udienza e le Memorie 171 ter n.1, n.2, n.3.
+            Data ancora della pratica (prima udienza o eventuale slittamento): da questa si calcolano i termini a
+            ritroso delle Memorie 171-ter n.1, n.2, n.3.
           </p>
         </div>
       )}
@@ -362,7 +363,8 @@ export function MacroAreaPanel({
               placeholder="Inserisci data prima udienza"
             />
             <p className="text-xs text-zinc-500 mt-1">
-              Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171 ter n.1, n.2, n.3.
+              Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+              n.2, n.3.
             </p>
           </div>
         </div>
@@ -393,7 +395,8 @@ export function MacroAreaPanel({
                 placeholder="Inserisci data prima udienza"
               />
               <p className="text-xs text-zinc-500 mt-1">
-                Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171 ter n.1, n.2, n.3.
+                Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+                n.2, n.3.
               </p>
             </div>
           )}
@@ -411,7 +414,8 @@ export function MacroAreaPanel({
               placeholder="Inserisci data notifica citazione"
             />
             <p className="text-xs text-zinc-500 mt-1">
-              Usata per l&apos;evento Notifica atto di citazione e per il calcolo di Iscrizione a ruolo (+10 gg).
+              Usata per l&apos;evento Notifica atto di citazione e per il calcolo di Iscrizione a ruolo/Costituzione
+              attore (+10 gg).
             </p>
           </div>
           <div>
@@ -424,7 +428,8 @@ export function MacroAreaPanel({
               placeholder="Inserisci data prima udienza"
             />
             <p className="text-xs text-zinc-500 mt-1">
-              Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171 ter n.1, n.2, n.3.
+              Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+              n.2, n.3.
             </p>
           </div>
         </div>

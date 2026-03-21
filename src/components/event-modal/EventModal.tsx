@@ -692,7 +692,7 @@ export function EventModal({
       if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
         setError(
           isNotificaCitazione
-            ? "Inserisci entrambe le date: Notifica atto di citazione e Data prima udienza, poi clicca Calcola."
+            ? "Inserisci entrambe le date: Data notifica atto di citazione e Data prima udienza, poi clicca Calcola."
             : richiedeDataPrimaUdienza
                 ? soloDataPrimaUdienza
                   ? "Inserisci la Data prima udienza, poi clicca Calcola."
@@ -774,7 +774,7 @@ export function EventModal({
           } else {
             setError(
               form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE"
-                ? "Inserisci entrambe le date (Notifica citazione e Data prima udienza) e clicca Calcola."
+                ? "Inserisci entrambe le date (Data notifica atto di citazione e Data prima udienza) e clicca Calcola."
                 : "Inserire la data base per la fase selezionata (es. data prima udienza) per calcolare le fasi successive dalla tabella."
             );
           }

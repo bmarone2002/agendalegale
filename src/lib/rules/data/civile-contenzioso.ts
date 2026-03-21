@@ -24,7 +24,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: false,
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
-    norma: "Art. 163 e 163 bis c.p.c.",
+    norma: "Art. 163 e 163-bis c.p.c.",
     noteOperative:
       "Evento da parametrizzare in base al termine a comparire; utile distinguere notifica Italia/estero e abbreviazione termini.",
     ordine: 1,
@@ -34,7 +34,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "ATTORE",
     eventoBaseKey: "dataPrimaNotificaCitazione",
-    eventoLabel: "Iscrizione a ruolo / Costituzione attore",
+    eventoLabel: "Iscrizione a ruolo/Costituzione attore",
     direzioneCalcolo: "+",
     numero: 10,
     unita: "giorni",
@@ -43,7 +43,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: true,
     isPromemoriaFestivi: true,
     norma: "Art. 165 c.p.c.",
-    noteOperative: "Regola ordinaria: entro 10 giorni dalla prima notificazione, salvo termini ridotti o particolarità del rito",
+    noteOperative:
+      "Regola ordinaria: entro 10 giorni dalla prima notificazione, salvo termini ridotti o particolarità del rito.",
     ordine: 2,
   },
 
@@ -66,13 +67,13 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     ordine: 3,
   },
 
-  // ── COMUNE: Data prima udienza → Prima udienza + Memorie 171-ter ──
+  // ── COMUNE: Data prima udienza (o slittamento) → Memorie 171-ter ──
   {
     macroArea: "CIVILE_CONTENZIOSO",
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataPrimaUdienza",
-    eventoLabel: "Prima udienza",
+    eventoLabel: "Eventuale slittamento Prima udienza",
     direzioneCalcolo: null,
     numero: null,
     unita: null,
@@ -81,7 +82,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: "Art. 183 c.p.c.",
-    noteOperative: "Data àncora della pratica: da questa si calcolano i termini a ritroso delle memorie 171 ter",
+    noteOperative:
+      "Data ancora della pratica: da questa si calcolano i termini a ritroso delle memorie 171-ter.",
     ordine: 4,
   },
   {
@@ -89,7 +91,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataPrimaUdienza",
-    eventoLabel: "Memoria 171 ter n.1",
+    eventoLabel: "Memoria 171-ter n.1",
     direzioneCalcolo: "-",
     numero: 40,
     unita: "giorni",
@@ -97,7 +99,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: true,
     isSospensioneFeriale: true,
     isPromemoriaFestivi: true,
-    norma: "Art. 171 ter c.p.c.",
+    norma: "Art. 171-ter c.p.c.",
     noteOperative: "Prima memoria integrativa / precisazione e modificazione domande, eccezioni e conclusioni nei limiti di legge",
     ordine: 5,
   },
@@ -106,7 +108,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataPrimaUdienza",
-    eventoLabel: "Memoria 171 ter n.2",
+    eventoLabel: "Memoria 171-ter n.2",
     direzioneCalcolo: "-",
     numero: 20,
     unita: "giorni",
@@ -114,7 +116,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: true,
     isSospensioneFeriale: true,
     isPromemoriaFestivi: true,
-    norma: "Art. 171 ter c.p.c.",
+    norma: "Art. 171-ter c.p.c.",
     noteOperative: "Replica e indicazione mezzi di prova / produzioni nei limiti consentiti",
     ordine: 6,
   },
@@ -123,7 +125,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataPrimaUdienza",
-    eventoLabel: "Memoria 171 ter n.3",
+    eventoLabel: "Memoria 171-ter n.3",
     direzioneCalcolo: "-",
     numero: 10,
     unita: "giorni",
@@ -131,8 +133,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: true,
     isSospensioneFeriale: true,
     isPromemoriaFestivi: true,
-    norma: "Art. 171 ter c.p.c.",
-    noteOperative: "Prova contraria e indicazione istruttorie conseguenti",
+    norma: "Art. 171-ter c.p.c.",
+    noteOperative: "Prova contraria e indicazioni istruttorie conseguenti",
     ordine: 7,
   },
   {
@@ -149,7 +151,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: null,
-    noteOperative: "Evento successivo eventualmente fissato dal giudice; non automaticamente ricavabile",
+    noteOperative:
+      "Evento successivo eventualmente fissato dal giudice; non automaticamente ricavabile in modo affidabile.",
     ordine: 8,
   },
   {
@@ -166,7 +169,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: null,
-    noteOperative: "Data da inserire manualmente; da qui possono derivare termini conclusionali",
+    noteOperative:
+      "Data da inserire manualmente; da qui possono derivare termini conclusionali solo se il modello processuale li prevede e il giudice li assegna.",
     ordine: 9,
   },
   {
@@ -182,8 +186,9 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: false,
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
-    norma: "Art. 189 c.p.c.",
-    noteOperative: "Da parametrizzare: la decorrenza può dipendere dal provvedimento del giudice",
+    norma: "Art. 189 c.p.c. / provvedimento del giudice",
+    noteOperative:
+      "Conviene gestirle come evento manuale o come regola parametrica separata, perché la decorrenza può dipendere dal provvedimento di rimessione in decisione.",
     ordine: 10,
   },
   {
@@ -199,8 +204,9 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: false,
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
-    norma: "Art. 190 c.p.c.",
-    noteOperative: "Non automatizzare in prima versione: distinguere il momento da cui decorre il termine",
+    norma: "Art. 189 c.p.c. / provvedimento del giudice",
+    noteOperative:
+      "Meglio non automatizzarla in questa prima versione senza distinguere bene il momento da cui decorre il termine.",
     ordine: 11,
   },
   {
@@ -216,8 +222,9 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isTermine: false,
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
-    norma: "Art. 190 c.p.c.",
-    noteOperative: "Non automatizzare in prima versione: distinguere il momento da cui decorre il termine",
+    norma: "Art. 189 c.p.c. / provvedimento del giudice",
+    noteOperative:
+      "Meglio non automatizzarla in questa prima versione senza distinguere bene il momento da cui decorre il termine.",
     ordine: 12,
   },
   {
@@ -225,7 +232,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataPubblicazioneSentenza",
-    eventoLabel: "Sentenza (per calcolare termini appello/Ric. Cassazione)",
+    eventoLabel: "Sentenza (per calcolare termini Appello)",
     direzioneCalcolo: "+",
     numero: 6,
     unita: "mesi",
@@ -234,7 +241,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: "Art. 327 c.p.c.; artt. 325, 326 c.p.c.",
-    noteOperative: "Data chiave per il termine lungo di impugnazione se manca la notifica della sentenza.",
+    noteOperative:
+      "Data chiave per il termine lungo di impugnazione se manca la notifica della sentenza.",
     ordine: 13,
   },
   {
@@ -242,7 +250,7 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataNotificaSentenza",
-    eventoLabel: "Notifica sentenza (per calcolare termini appello/Ric. Cassazione)",
+    eventoLabel: "Notifica sentenza (per calcolare termini Appello)",
     direzioneCalcolo: "+",
     numero: 30,
     unita: "giorni",
@@ -251,7 +259,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: "Artt. 325 e 326 c.p.c.",
-    noteOperative: "Data chiave per il termine breve di impugnazione; da essa dipendono appello e ricorso per cassazione.",
+    noteOperative:
+      "Data chiave per il termine breve di impugnazione; da essa dipendono appello e ricorso per cassazione.",
     ordine: 14,
   },
 ];
