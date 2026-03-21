@@ -7,7 +7,14 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
 import itLocale from "@fullcalendar/core/locales/it";
-import type { EventClickArg, DateSelectArg, EventDropArg, EventContentArg } from "@fullcalendar/core";
+import type {
+  EventClickArg,
+  DateSelectArg,
+  EventDropArg,
+  EventContentArg,
+  EventMountArg,
+  EventChangeArg,
+} from "@fullcalendar/core";
 import { getEvents, updateEvent, deleteEvent } from "@/lib/actions/events";
 import { regenerateSubEvents, updateSubEvent, deleteSubEvent } from "@/lib/actions/sub-events";
 import type { Event as AppEvent, SubEvent } from "@/types";
@@ -30,6 +37,32 @@ import { Input } from "@/components/ui/input";
 const SUB_EVENT_COLOR_PENDING = "#C62828";
 const SUB_EVENT_COLOR_DONE = "#2E7D32";
 const SUB_EVENT_COLOR_FUTURE = "#e4e4e7"; // nessun colore fino al giorno del promemoria
+
+/** Pallino colonna grafica (lista FullCalendar `.fc-list-event-dot`): colore tag evento madre, non rosso/verde stato */
+const LIST_SUB_DOT_NEUTRAL = "#a1a1aa";
+
+function paintListSubEventDotFromParentTag(el: HTMLElement, parentTagColor: string | null | undefined) {
+  const dot = el.querySelector(".fc-list-event-dot") as HTMLElement | null;
+  if (!dot) return;
+  const trimmed = parentTagColor?.trim();
+  if (trimmed) {
+    dot.style.borderColor = trimmed;
+    dot.style.backgroundColor = trimmed;
+  } else {
+    dot.style.borderColor = LIST_SUB_DOT_NEUTRAL;
+    dot.style.backgroundColor = LIST_SUB_DOT_NEUTRAL;
+  }
+}
+
+function isListViewType(viewType: string): boolean {
+  return (
+    viewType === "list" ||
+    viewType === "listWeek" ||
+    viewType === "listDay" ||
+    viewType === "listMonth" ||
+    viewType === "listFromToday"
+  );
+}
 
 function blendWithWhite(hex: string, whiteAmount: number): string {
   const h = hex.replace("#", "").trim();
@@ -231,6 +264,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const canEdit = !targetUserId || permission === "FULL";
   const calendarRef = useRef<InstanceType<typeof FullCalendar> | null>(null);
   const calendarContainerRef = useRef<HTMLDivElement | null>(null);
+  const listEventRowElsRef = useRef<Map<string, HTMLElement>>(new Map());
   const skipFilterEffectRef = useRef(true);
   const [initialView, setInitialView] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>("dayGridMonth");
@@ -332,6 +366,31 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const handleEventsSet = useCallback(() => {
     scrollAgendaToToday();
   }, [scrollAgendaToToday]);
+
+  const handleEventDidMount = useCallback((info: EventMountArg) => {
+    if (!isListViewType(info.view.type)) return;
+    const isSub = info.event.extendedProps.isSubEvent as boolean | undefined;
+    if (!isSub) return;
+    const id = String(info.event.id);
+    listEventRowElsRef.current.set(id, info.el);
+    const parentTag = info.event.extendedProps.parentTagColor as string | null | undefined;
+    paintListSubEventDotFromParentTag(info.el, parentTag);
+  }, []);
+
+  const handleEventWillUnmount = useCallback((info: EventMountArg) => {
+    const isSub = info.event.extendedProps.isSubEvent as boolean | undefined;
+    if (!isSub) return;
+    listEventRowElsRef.current.delete(String(info.event.id));
+  }, []);
+
+  const handleEventChange = useCallback((arg: EventChangeArg) => {
+    const isSub = arg.event.extendedProps.isSubEvent as boolean | undefined;
+    if (!isSub) return;
+    const el = listEventRowElsRef.current.get(String(arg.event.id));
+    if (!el) return;
+    const parentTag = arg.event.extendedProps.parentTagColor as string | null | undefined;
+    paintListSubEventDotFromParentTag(el, parentTag);
+  }, []);
 
   useEffect(() => {
     if (skipFilterEffectRef.current) {
@@ -827,6 +886,15 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 arg.event.setExtendedProp("status", newStatus);
                 arg.event.setProp("backgroundColor", newBg);
                 arg.event.setProp("borderColor", newBorder);
+                requestAnimationFrame(() => {
+                  const row = listEventRowElsRef.current.get(id);
+                  if (row) {
+                    paintListSubEventDotFromParentTag(
+                      row,
+                      arg.event.extendedProps.parentTagColor as string | null | undefined
+                    );
+                  }
+                });
                 if (newStatus === "done" && !showDone) {
                   arg.event.remove();
                 }
@@ -845,7 +913,16 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </button>
           ) : (
             <span
-              className={`inline-block h-3 w-3 rounded-full shrink-0 ${isFutureReminder ? "bg-zinc-400" : isDone ? "bg-emerald-500" : "bg-red-500"}`}
+              className={`inline-block h-3 w-3 rounded-full shrink-0 ${isFutureReminder ? "bg-zinc-400" : ""}`}
+              style={
+                isFutureReminder
+                  ? undefined
+                  : (() => {
+                      const pt = (arg.event.extendedProps.parentTagColor as string | undefined)?.trim();
+                      if (pt) return { backgroundColor: pt };
+                      return { backgroundColor: isDone ? SUB_EVENT_COLOR_DONE : SUB_EVENT_COLOR_PENDING };
+                    })()
+              }
             />
           )}
           <span className="fc-list-event-title flex-1 truncate" style={{ color: "#171717" }}>{arg.event.title}</span>
@@ -1403,6 +1480,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
           eventContent={renderEventContent}
+          eventDidMount={handleEventDidMount}
+          eventWillUnmount={handleEventWillUnmount}
+          eventChange={handleEventChange}
           eventClassNames={(arg) => (arg.event.extendedProps.isSubEvent as boolean) ? ["fc-event-sub"] : ["fc-event-madre"]}
           height={currentView === "listFromToday" ? "100%" : "auto"}
           expandRows={false}
