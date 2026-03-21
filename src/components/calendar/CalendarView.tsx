@@ -230,6 +230,7 @@ interface CalendarViewProps {
 export function CalendarView({ targetUserId, permission }: CalendarViewProps = {}) {
   const canEdit = !targetUserId || permission === "FULL";
   const calendarRef = useRef<InstanceType<typeof FullCalendar> | null>(null);
+  const calendarContainerRef = useRef<HTMLDivElement | null>(null);
   const skipFilterEffectRef = useRef(true);
   const [initialView, setInitialView] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<string>("dayGridMonth");
@@ -290,6 +291,26 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     if (!deepLinkEventId) return;
     setModalState({ mode: "edit", eventId: deepLinkEventId });
   }, []);
+
+  /** Scroll interno vista Agenda: porta in vista la riga del giorno corrente (FullCalendar non espone scrollTo per list view). */
+  const scrollAgendaToToday = useCallback(() => {
+    const api = calendarRef.current?.getApi();
+    if (!api || api.view.type !== "listFromToday") return;
+    const root = calendarContainerRef.current;
+    if (!root) return;
+    const scroller = root.querySelector(".fc-scroller") as HTMLElement | null;
+    const todayRow =
+      (root.querySelector(".fc-list-day.fc-day-today") as HTMLElement | null) ??
+      (root.querySelector("tr.fc-list-day.fc-day-today") as HTMLElement | null);
+    if (!scroller || !todayRow) return;
+    requestAnimationFrame(() => {
+      const sRect = scroller.getBoundingClientRect();
+      const tRect = todayRow.getBoundingClientRect();
+      const nextTop = scroller.scrollTop + (tRect.top - sRect.top) - 8;
+      scroller.scrollTop = Math.max(0, nextTop);
+    });
+  }, []);
+
   const handleDatesSet = useCallback(
     (arg: { start: Date; end: Date; view: { type: string; title: string } }) => {
       setCurrentView(arg.view.type);
@@ -297,9 +318,20 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("calendar:lastView", arg.view.type);
       }
+      if (arg.view.type === "listFromToday") {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            scrollAgendaToToday();
+          });
+        });
+      }
     },
-    []
+    [scrollAgendaToToday]
   );
+
+  const handleEventsSet = useCallback(() => {
+    scrollAgendaToToday();
+  }, [scrollAgendaToToday]);
 
   useEffect(() => {
     if (skipFilterEffectRef.current) {
@@ -958,8 +990,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   }, [canEdit, targetUserId, showPending, showDone]);
 
   return (
-      <div className="flex h-full min-w-0 flex-col gap-2 sm:gap-3 calendar-theme">
-      <div className="flex flex-col gap-2 sm:gap-3 mb-1">
+      <div className="flex min-h-0 flex-1 min-w-0 flex-col gap-2 sm:gap-3 calendar-theme">
+      <div className="flex flex-col gap-2 sm:gap-3 mb-1 shrink-0">
         {/* Riga 1: Nuovo evento + ricerca + filtri (layout ottimizzato per mobile) */}
         <div className="flex flex-col gap-2 border-b border-zinc-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Nuovo evento + ricerca */}
@@ -1292,7 +1324,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </div>
         </div>
       </div>
-      <div className="w-full min-w-0 max-w-full overflow-x-auto calendar-month-container">
+      <div
+        ref={calendarContainerRef}
+        className={
+          currentView === "listFromToday"
+            ? "calendar-agenda-scroll-container calendar-month-container flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-x-auto"
+            : "calendar-month-container w-full min-w-0 max-w-full overflow-x-auto"
+        }
+      >
         {currentView === "listFromToday" && (
           <div className="mb-1 px-1 sm:hidden">
             <p className="text-[11px] text-zinc-500 flex items-center gap-1">
@@ -1334,12 +1373,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             },
             listFromToday: {
               type: "list",
-              duration: { years: 1 },
+              duration: { years: 2 },
               visibleRange: (currentDate: Date) => {
-                const start = new Date();
+                const start = new Date(currentDate);
+                start.setFullYear(start.getFullYear() - 1);
                 start.setHours(0, 0, 0, 0);
-                const end = new Date(start);
+                const end = new Date(currentDate);
                 end.setFullYear(end.getFullYear() + 1);
+                end.setHours(0, 0, 0, 0);
                 return { start, end };
               },
               buttonText: "Agenda",
@@ -1352,12 +1393,13 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           dayMaxEvents
           weekends
           datesSet={handleDatesSet}
+          eventsSet={handleEventsSet}
           select={handleSelect}
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
           eventContent={renderEventContent}
           eventClassNames={(arg) => (arg.event.extendedProps.isSubEvent as boolean) ? ["fc-event-sub"] : ["fc-event-madre"]}
-          height="auto"
+          height={currentView === "listFromToday" ? "100%" : "auto"}
           expandRows={false}
           slotMinTime="00:00:00"
           slotMaxTime="24:00:00"

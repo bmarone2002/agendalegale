@@ -110,6 +110,24 @@ body {
 .calendar-theme .calendar-month-container .fc-daygrid-view table.fc-scrollgrid-sync-table { min-height: 600px !important; }
 .calendar-theme .calendar-month-container { display: flex; flex-direction: column; min-height: 0; }
 .calendar-theme .calendar-month-container .fc { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+/* Vista Agenda: scroll nel blocco (header sito e barra strumenti restano visibili) */
+.calendar-theme .calendar-agenda-scroll-container {
+  flex: 1 1 0%;
+  min-height: 0;
+}
+.calendar-theme .calendar-agenda-scroll-container .fc {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+.calendar-theme .calendar-agenda-scroll-container .fc .fc-view-harness {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.calendar-theme .calendar-agenda-scroll-container .fc-list-view .fc-scroller {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
 .calendar-theme .calendar-month-container .fc .fc-view-harness { flex: 1 1 auto; min-height: 0; }
 .calendar-theme .calendar-month-container .fc .fc-view-harness-active { flex: 1 1 auto; }
 .calendar-theme .text-calendar-muted { color: var(--calendar-muted); }

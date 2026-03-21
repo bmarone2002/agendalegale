@@ -79,7 +79,10 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
             </Link>{" "}
             per tenere sempre al sicuro i tuoi eventi e poterli recuperare in ogni momento.
           </div>
-          <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-5 lg:p-6" style={{ backgroundColor: "var(--surface)" }}>
+          <main
+            className="flex min-h-0 flex-1 flex-col overflow-auto p-3 sm:p-4 md:p-5 lg:p-6"
+            style={{ backgroundColor: "var(--surface)" }}
+          >
             {children}
           </main>
         </div>
