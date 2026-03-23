@@ -43,6 +43,8 @@ import { EVENT_TAG_COLORS } from "@/constants/event-tag-colors";
 type ModalMode = "create" | "edit";
 
 type ActiveTab = "dettagli" | "prosecuzione";
+type DesktopLayoutMode = "focus-scadenze" | "bilanciata" | "focus-dettagli";
+type PanelDensity = "compatta" | "standard" | "ampia";
 
 type PendingRinvioSaveResult = "not_required" | "saved" | "failed";
 
@@ -279,6 +281,7 @@ interface EventSummaryPanelProps {
   readOnly: boolean;
   /** Se true, il pannello è mostrato nel bottom sheet mobile (niente hidden lg). */
   embedInSheet?: boolean;
+  density?: PanelDensity;
 }
 
 function EventSummaryPanel({
@@ -296,6 +299,7 @@ function EventSummaryPanel({
   saving,
   readOnly,
   embedInSheet = false,
+  density = "standard",
 }: EventSummaryPanelProps) {
   const baseEventsToShow =
     mode === "edit" && subEvents.length > 0 ? subEvents : previewSubEvents;
@@ -321,12 +325,30 @@ function EventSummaryPanel({
         ]
       : baseEventsToShow;
 
+  const headerTitleClass =
+    density === "compatta"
+      ? "mt-1 text-xs font-medium line-clamp-2"
+      : density === "ampia"
+      ? "mt-1 text-base font-semibold line-clamp-2"
+      : "mt-1 text-sm font-medium line-clamp-2";
+  const headerMetaClass =
+    density === "ampia" ? "mt-1 text-sm text-white/75" : "mt-1 text-xs text-white/70";
+  const cardTextClass =
+    density === "compatta" ? "rounded-md border px-3 py-1.5 text-[11px] bg-white/5 backdrop-blur-sm transition-colors cursor-pointer" :
+    density === "ampia" ? "rounded-md border px-3 py-3 text-sm bg-white/5 backdrop-blur-sm transition-colors cursor-pointer" :
+    "rounded-md border px-3 py-2 text-xs bg-white/5 backdrop-blur-sm transition-colors cursor-pointer";
+  const titleLineClass = density === "ampia" ? "font-semibold leading-snug" : "font-semibold truncate";
+  const dueAtClass =
+    density === "ampia" ? "mt-0.5 text-xs text-white/75" : "mt-0.5 text-[11px] text-white/75";
+  const explanationClass =
+    density === "ampia" ? "mt-1 text-xs text-white/65 line-clamp-3" : "mt-0.5 text-[11px] text-white/65 line-clamp-2";
+
   return (
     <div
       className={
         embedInSheet
           ? "flex flex-col w-full min-h-0 flex-1"
-          : "hidden lg:flex lg:flex-col lg:w-80 lg:border-l lg:border-zinc-200 lg:pl-4 lg:ml-4 lg:pt-1"
+          : "hidden lg:flex lg:flex-col lg:flex-1 lg:border-l lg:border-zinc-200 lg:pl-4 lg:ml-4 lg:pt-1"
       }
     >
       <div className={`rounded-lg bg-[var(--navy)] text-white flex flex-col ${embedInSheet ? "min-h-0 flex-1" : "h-full"}`}>
@@ -334,10 +356,10 @@ function EventSummaryPanel({
           <p className="text-xs font-semibold tracking-wide uppercase text-white/70">
             Eventi &amp; Scadenze
           </p>
-          <p className="mt-1 text-sm font-medium line-clamp-2">
+          <p className={headerTitleClass}>
             {form.title?.trim() || "Pratica senza titolo"}
           </p>
-          <div className="mt-1 text-xs text-white/70">
+          <div className={headerMetaClass}>
             {mainDate ? formatDateTime(mainDate) : "Data da definire"}
           </div>
           {form.reminderOffsets.length > 0 && (
@@ -368,7 +390,7 @@ function EventSummaryPanel({
                     <li
                       key={currentId}
                       ref={isHighlightRow ? (el) => { highlightRowRef.current = el; } : undefined}
-                      className={`rounded-md border px-3 py-2 text-xs bg-white/5 backdrop-blur-sm transition-colors cursor-pointer ${
+                      className={`${cardTextClass} ${
                         isSelected
                           ? "bg-white text-[var(--navy)] border-white shadow-sm"
                           : "border-white/10 hover:bg-white/10"
@@ -381,8 +403,8 @@ function EventSummaryPanel({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">{s.title}</p>
-                          <p className="mt-0.5 text-[11px] text-white/75">
+                          <p className={titleLineClass}>{s.title}</p>
+                          <p className={dueAtClass}>
                             {isPlaceholder ? (
                               <span className="italic text-amber-200">
                                 Da schedulare
@@ -392,7 +414,7 @@ function EventSummaryPanel({
                             )}
                           </p>
                           {(s as { explanation?: string | null }).explanation && (
-                            <p className="mt-0.5 text-[11px] text-white/65 line-clamp-2">
+                            <p className={explanationClass}>
                               {(s as { explanation?: string | null }).explanation}
                             </p>
                           )}
@@ -515,9 +537,128 @@ export function EventModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const highlightRowRef = useRef<HTMLLIElement | null>(null);
   const [showEventsPanel, setShowEventsPanel] = useState(false);
+  const [mobileEventsPanelExpanded, setMobileEventsPanelExpanded] = useState(false);
+  const [desktopLayoutMode, setDesktopLayoutMode] = useState<DesktopLayoutMode>("focus-scadenze");
+  const [panelDensity, setPanelDensity] = useState<PanelDensity>("standard");
+  const [desktopSummaryWidthPct, setDesktopSummaryWidthPct] = useState<number>(44);
+  const [showLayoutResetFeedback, setShowLayoutResetFeedback] = useState(false);
+  const resizingRef = useRef(false);
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+  const resetFeedbackTimerRef = useRef<number | null>(null);
   /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
   const userHasClickedCalcolaRef = useRef(false);
   const pendingRinvioSaveHandlerRef = useRef<null | (() => Promise<PendingRinvioSaveResult>)>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedLayout = window.localStorage.getItem("eventModal.desktopLayoutMode");
+    const savedDensity = window.localStorage.getItem("eventModal.panelDensity");
+    const savedWidth = window.localStorage.getItem("eventModal.desktopSummaryWidthPct");
+    if (
+      savedLayout === "focus-scadenze" ||
+      savedLayout === "bilanciata" ||
+      savedLayout === "focus-dettagli"
+    ) {
+      setDesktopLayoutMode(savedLayout);
+    }
+    if (savedDensity === "compatta" || savedDensity === "standard" || savedDensity === "ampia") {
+      setPanelDensity(savedDensity);
+    }
+    if (savedWidth) {
+      const parsed = Number(savedWidth);
+      if (Number.isFinite(parsed)) {
+        setDesktopSummaryWidthPct(Math.min(55, Math.max(30, parsed)));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("eventModal.desktopLayoutMode", desktopLayoutMode);
+  }, [desktopLayoutMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("eventModal.panelDensity", panelDensity);
+  }, [panelDensity]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("eventModal.desktopSummaryWidthPct", String(desktopSummaryWidthPct));
+  }, [desktopSummaryWidthPct]);
+
+  const setLayoutPreset = useCallback((mode: DesktopLayoutMode) => {
+    setDesktopLayoutMode(mode);
+    if (mode === "focus-scadenze") {
+      setDesktopSummaryWidthPct(44);
+    } else if (mode === "bilanciata") {
+      setDesktopSummaryWidthPct(39);
+    } else {
+      setDesktopSummaryWidthPct(34);
+    }
+  }, []);
+
+  const handleResetLayoutPreferences = useCallback(() => {
+    setLayoutPreset("focus-scadenze");
+    setPanelDensity("standard");
+    setDesktopSummaryWidthPct(44);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("eventModal.desktopLayoutMode");
+      window.localStorage.removeItem("eventModal.panelDensity");
+      window.localStorage.removeItem("eventModal.desktopSummaryWidthPct");
+      if (resetFeedbackTimerRef.current) {
+        window.clearTimeout(resetFeedbackTimerRef.current);
+      }
+      setShowLayoutResetFeedback(true);
+      resetFeedbackTimerRef.current = window.setTimeout(() => {
+        setShowLayoutResetFeedback(false);
+      }, 2200);
+    }
+  }, [setLayoutPreset]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && resetFeedbackTimerRef.current) {
+        window.clearTimeout(resetFeedbackTimerRef.current);
+      }
+    };
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    resizingRef.current = false;
+    if (typeof document !== "undefined") {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+  }, []);
+
+  const handleResizeMove = useCallback((clientX: number) => {
+    const host = tabsContainerRef.current;
+    if (!host) return;
+    const rect = host.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const nextLeftPct = ((clientX - rect.left) / rect.width) * 100;
+    const nextRightPct = 100 - nextLeftPct;
+    const clamped = Math.min(55, Math.max(30, nextRightPct));
+    setDesktopSummaryWidthPct(clamped);
+  }, []);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!resizingRef.current) return;
+      handleResizeMove(e.clientX);
+    };
+    const onMouseUp = () => {
+      if (!resizingRef.current) return;
+      stopResizing();
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [handleResizeMove, stopResizing]);
 
   const loadEvent = useCallback(async (id: string) => {
     setLoading(true);
@@ -1131,11 +1272,84 @@ export function EventModal({
         </DialogHeader>
         <div className="flex-1 min-h-0 flex flex-col max-lg:overflow-y-auto max-lg:overflow-x-hidden event-modal-mobile-scroll">
         <Tabs
+          ref={tabsContainerRef}
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as ActiveTab)}
           className="flex flex-col lg:flex-row lg:gap-4 lg:flex-1 lg:min-h-0"
         >
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="min-w-0 flex flex-col flex-1" style={{ flexBasis: `${100 - desktopSummaryWidthPct}%` }}>
+            <div className="hidden lg:flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-1 rounded-md border border-zinc-200 p-1">
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    desktopLayoutMode === "focus-scadenze" ? "bg-[var(--navy)] text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setLayoutPreset("focus-scadenze")}
+                >
+                  Focus Scadenze
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    desktopLayoutMode === "bilanciata" ? "bg-[var(--navy)] text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setLayoutPreset("bilanciata")}
+                >
+                  Bilanciata
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    desktopLayoutMode === "focus-dettagli" ? "bg-[var(--navy)] text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setLayoutPreset("focus-dettagli")}
+                >
+                  Focus Dettagli
+                </button>
+              </div>
+              <div className="flex items-center gap-1 rounded-md border border-zinc-200 p-1">
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    panelDensity === "compatta" ? "bg-zinc-800 text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setPanelDensity("compatta")}
+                >
+                  Compatta
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    panelDensity === "standard" ? "bg-zinc-800 text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setPanelDensity("standard")}
+                >
+                  Standard
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${
+                    panelDensity === "ampia" ? "bg-zinc-800 text-white" : "text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                  onClick={() => setPanelDensity("ampia")}
+                >
+                  Ampia
+                </button>
+              </div>
+              <button
+                type="button"
+                className="rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100"
+                onClick={handleResetLayoutPreferences}
+              >
+                Reset layout
+              </button>
+            </div>
+            {showLayoutResetFeedback && (
+              <div className="hidden lg:flex absolute right-4 top-14 z-20 rounded-md border border-green-200 bg-green-50 px-3 py-1.5 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
+                <p className="text-xs font-medium text-green-800">Preferenze layout ripristinate.</p>
+              </div>
+            )}
             <TabsList className="bg-zinc-100 dark:bg-zinc-100 dark:text-zinc-600 p-1">
               <TabsTrigger
                 value="dettagli"
@@ -1829,22 +2043,37 @@ export function EventModal({
             </TabsContent>
           </div>
 
-          {/* Colonna Eventi & Scadenze desktop */}
-          <EventSummaryPanel
-            mode={mode}
-            form={form}
-            subEvents={subEvents}
-            previewSubEvents={previewSubEvents}
-            selectedSubEventId={selectedSubEventId}
-            setSelectedSubEventId={setSelectedSubEventId}
-            highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
-            highlightRowRef={highlightRowRef}
-            handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
-            onRigeneraSubEvents={handleRigenera}
-            onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
-            saving={saving}
-            readOnly={readOnly}
-          />
+          <div
+            className="hidden lg:flex lg:w-2 lg:cursor-col-resize lg:items-stretch lg:justify-center"
+            onMouseDown={(e) => {
+              resizingRef.current = true;
+              document.body.style.cursor = "col-resize";
+              document.body.style.userSelect = "none";
+              handleResizeMove(e.clientX);
+            }}
+          >
+            <span className="my-2 w-[2px] rounded bg-zinc-200" />
+          </div>
+
+          <div className="flex-1 hidden lg:flex min-w-0" style={{ flexBasis: `${desktopSummaryWidthPct}%` }}>
+            {/* Colonna Eventi & Scadenze desktop */}
+            <EventSummaryPanel
+              mode={mode}
+              form={form}
+              subEvents={subEvents}
+              previewSubEvents={previewSubEvents}
+              selectedSubEventId={selectedSubEventId}
+              setSelectedSubEventId={setSelectedSubEventId}
+              highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
+              highlightRowRef={highlightRowRef}
+              handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
+              onRigeneraSubEvents={handleRigenera}
+              onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
+              saving={saving}
+              readOnly={readOnly}
+              density={panelDensity}
+            />
+          </div>
         </Tabs>
 
         </div>
@@ -1865,7 +2094,11 @@ export function EventModal({
         {showEventsPanel && (
           <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/40 lg:hidden">
             <div
-              className="bg-white rounded-t-2xl shadow-xl w-full flex flex-col overflow-hidden max-h-[min(75vh,75dvh)]"
+              className={`bg-white shadow-xl w-full flex flex-col overflow-hidden ${
+                mobileEventsPanelExpanded
+                  ? "rounded-none max-h-[min(96vh,96dvh)]"
+                  : "rounded-t-2xl max-h-[min(75vh,75dvh)]"
+              }`}
               style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
             >
               <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-zinc-200 shrink-0">
@@ -1877,13 +2110,22 @@ export function EventModal({
                     {form.title?.trim() || "Pratica senza titolo"}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="text-sm text-zinc-500 hover:text-zinc-800 shrink-0 ml-2"
-                  onClick={() => setShowEventsPanel(false)}
-                >
-                  Chiudi
-                </button>
+                <div className="flex items-center gap-3 shrink-0 ml-2">
+                  <button
+                    type="button"
+                    className="text-sm text-zinc-500 hover:text-zinc-800"
+                    onClick={() => setMobileEventsPanelExpanded((v) => !v)}
+                  >
+                    {mobileEventsPanelExpanded ? "Riduci" : "Espandi"}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-sm text-zinc-500 hover:text-zinc-800"
+                    onClick={() => setShowEventsPanel(false)}
+                  >
+                    Chiudi
+                  </button>
+                </div>
               </div>
               <div className="flex-1 min-h-0 flex flex-col p-3 overflow-hidden">
                 <EventSummaryPanel
@@ -1901,6 +2143,7 @@ export function EventModal({
                   saving={saving}
                   readOnly={readOnly}
                   embedInSheet
+                  density={panelDensity}
                 />
               </div>
             </div>
