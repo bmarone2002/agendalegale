@@ -148,6 +148,46 @@ function composePracticeTitle(parts: {
     .join(" - ");
 }
 
+function extractPracticeIdentityFromAiTitle(title: string): {
+  parti: string;
+  rg: string;
+  autorita: string;
+  luogo: string;
+} {
+  const empty = { parti: "", rg: "", autorita: "", luogo: "" };
+  const raw = title.trim();
+  if (!raw) return empty;
+
+  // Formato atteso: PARTI: ... | RG: ... | AUTORITÀ: ... | LUOGO: ...
+  const normalized = raw.replace(/AUTORIT[ÀA]/gi, "AUTORITA");
+  const matchParti = normalized.match(/(?:^|\|)\s*PARTI\s*:\s*([^|]+)/i);
+  const matchRg = normalized.match(/(?:^|\|)\s*RG\s*:\s*([^|]+)/i);
+  const matchAutorita = normalized.match(/(?:^|\|)\s*AUTORITA\s*:\s*([^|]+)/i);
+  const matchLuogo = normalized.match(/(?:^|\|)\s*LUOGO\s*:\s*([^|]+)/i);
+
+  if (matchParti || matchRg || matchAutorita || matchLuogo) {
+    return {
+      parti: (matchParti?.[1] ?? "").trim(),
+      rg: (matchRg?.[1] ?? "").trim(),
+      autorita: (matchAutorita?.[1] ?? "").trim(),
+      luogo: (matchLuogo?.[1] ?? "").trim(),
+    };
+  }
+
+  // Fallback legacy: "Parti - RG - Autorità - Luogo"
+  const parts = raw.split(" - ").map((p) => p.trim());
+  if (parts.length >= 4) {
+    return {
+      parti: parts[0] ?? "",
+      rg: parts[1] ?? "",
+      autorita: parts[2] ?? "",
+      luogo: parts.slice(3).join(" - "),
+    };
+  }
+
+  return empty;
+}
+
 /** Serializza inputs per Server Actions: Date → ISO string così il server riceve valori validi. */
 function serializeInputsForServer(inputs: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -1295,6 +1335,7 @@ export function EventModal({
                             const result = await parseDocumentForEvent(formData);
                             if (result.success && result.data) {
                               const d = result.data;
+                              const parsedIdentityFromTitle = extractPracticeIdentityFromAiTitle(d.title ?? "");
                               let mergedInputs = (d.inputs ?? {}) as Record<string, unknown>;
                               if (Object.keys(mergedInputs).length > 0) {
                                 const dataComp = mergedInputs.dataUdienzaComparizione as string | undefined;
@@ -1309,8 +1350,26 @@ export function EventModal({
                               const legacyMapping = !aiMacroArea && d.actionType ? LEGACY_ACTION_TYPE_MAP[d.actionType] : null;
                               const legacyParte = !aiParte && d.actionMode ? LEGACY_ACTION_MODE_MAP[d.actionMode] : null;
                               setForm((f) => ({
-                                ...f,
-                                title: d.title ?? f.title,
+                                ...(() => {
+                                  const nextParti = parsedIdentityFromTitle.parti || f.parti;
+                                  const nextRg = parsedIdentityFromTitle.rg || f.rg;
+                                  const nextAutorita = parsedIdentityFromTitle.autorita || f.autorita;
+                                  const nextLuogo = parsedIdentityFromTitle.luogo || f.luogo;
+                                  const composedTitle = composePracticeTitle({
+                                    parti: nextParti,
+                                    rg: nextRg,
+                                    autorita: nextAutorita,
+                                    luogo: nextLuogo,
+                                  });
+                                  return {
+                                    ...f,
+                                    parti: nextParti,
+                                    rg: nextRg,
+                                    autorita: nextAutorita,
+                                    luogo: nextLuogo,
+                                    title: composedTitle || d.title || f.title,
+                                  };
+                                })(),
                                 description: d.description ?? f.description,
                                 type: (d.type as EventType) ?? f.type,
                                 notes: d.notes ?? f.notes,
