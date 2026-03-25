@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.archivagroup.legalcalendar"
+      "bundleIdentifier": "com.archivagroup.legalcalendar",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.archivagroup.legalcalendar",
@@ -39,10 +42,28 @@
     "extra": {
       "webBaseUrl": "https://legalcalendar-production.up.railway.app",
       "clerkPublishableKey": "pk_test_Z3JhbmQtbWFsbGFyZC03Ny5jbGVyay5hY2NvdW50cy5kZXYk",
-      "oneSignalAppId": "",
+      "oneSignalAppId": "199bdd57-be38-458f-93cc-41740bf7c34b",
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "57f63ad7-b269-4aae-9f56-85086fc52e47",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.archivagroup.legalcalendar.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.archivagroup.legalcalendar.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
-    }
+    },
+    "owner": "bmarone"
   }
 }
