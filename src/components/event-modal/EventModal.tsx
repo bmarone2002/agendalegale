@@ -33,12 +33,13 @@ import { AttoGiuridicoPanel } from "./AttoGiuridicoPanel";
 import { MacroAreaPanel } from "./MacroAreaPanel";
 import { ProsecuzionePanel } from "./ProsecuzionePanel";
 import type { MacroAreaCode, ProcedimentoCode, ParteProcessuale } from "@/types/macro-areas";
-import { LEGACY_ACTION_TYPE_MAP, LEGACY_ACTION_MODE_MAP, getMacroAreaForProcedimento } from "@/types/macro-areas";
+import { LEGACY_ACTION_TYPE_MAP, LEGACY_ACTION_MODE_MAP, getMacroAreaForProcedimento, getEventoByCode } from "@/types/macro-areas";
 import { DateTimePicker } from "./DateTimePicker";
 import { PopoverContainerContext } from "./popover-container-context";
 import { formatDateTime } from "@/lib/utils";
 import type { LinkedEventSpec } from "@/lib/linked-events";
 import { EVENT_TAG_COLORS } from "@/constants/event-tag-colors";
+import { DatePickerWithOptionalTime } from "./DatePickerWithOptionalTime";
 
 type ModalMode = "create" | "edit";
 
@@ -94,12 +95,25 @@ type EventFormState = {
   status: "pending" | "done";
 };
 
+function toDateOnlyStringLocal(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function strInput(inputs: Record<string, unknown>, key: string): string {
+  const v = inputs[key];
+  return typeof v === "string" ? v : "";
+}
+
 const defaultEvent = (start?: Date, end?: Date): EventFormState => {
   const now = new Date();
   const defaultStart = new Date(now);
   defaultStart.setHours(8, 0, 0, 0);
   const defaultEnd = new Date(defaultStart);
   defaultEnd.setHours(9, 0, 0, 0);
+  const practiceIdentityDate = toDateOnlyStringLocal(start ?? defaultStart);
   return {
     title: "",
     parti: "",
@@ -121,7 +135,10 @@ const defaultEvent = (start?: Date, end?: Date): EventFormState => {
     eventoCode: null,
     actionType: ACTION_TYPES[0],
     actionMode: ACTION_MODES[0],
-    inputs: {},
+    // Date predefinite: quando crei una pratica cliccando su un giorno,
+    // quel giorno deve essere sia l'identificazione pratica (info) sia la data base
+    // della fase 1 una volta selezionata.
+    inputs: { practiceIdentityDate },
     color: null,
     // Nessun promemoria di default: l'utente li aggiunge esplicitamente.
     reminderOffsets: [],
@@ -475,6 +492,7 @@ export function EventModal({
   highlightSubEventId: highlightSubEventIdProp = null,
 }: EventModalProps) {
   // Data evento: solo i valori attuali del form contano. initialStart/initialEnd servono solo come default iniziale se apri da click sul calendario; se modifichi data/ora in creazione, resta ciò che hai impostato.
+  const defaultAnchorDateStr = initialStart ? toDateOnlyStringLocal(initialStart) : "";
   const [form, setForm] = useState<EventFormState>(() => {
     const base = defaultEvent(initialStart, initialEnd);
     if (!initialDraft) return base;
@@ -631,7 +649,24 @@ export function EventModal({
       const rg = typeof ident.rg === "string" ? ident.rg : "";
       const autorita = typeof ident.autorita === "string" ? ident.autorita : "";
       const luogo = typeof ident.luogo === "string" ? ident.luogo : "";
-      setForm((prev) => ({ ...prev, parti, rg, autorita, luogo }));
+      setForm((prev) => {
+        const fallbackPracticeDate = toDateOnlyStringLocal(new Date(e.startAt));
+        const savedPid =
+          typeof savedInputs.practiceIdentityDate === "string" && savedInputs.practiceIdentityDate.trim().length > 0
+            ? savedInputs.practiceIdentityDate
+            : fallbackPracticeDate;
+        return {
+          ...prev,
+          parti,
+          rg,
+          autorita,
+          luogo,
+          inputs: {
+            ...(prev.inputs ?? {}),
+            practiceIdentityDate: savedPid,
+          },
+        };
+      });
       setSubEvents(e.subEvents ?? []);
       const subs = e.subEvents ?? [];
       if (highlightSubEventIdProp && subs.some((se) => se.id === highlightSubEventIdProp)) {
@@ -1294,6 +1329,22 @@ export function EventModal({
                     disabled
                   />
                 </div>
+
+                {form.macroType === "ATTO_GIURIDICO" && (
+                  <div>
+                    <Label className="font-bold">Data identificazione pratica</Label>
+                    <DatePickerWithOptionalTime
+                      value={strInput(form.inputs, "practiceIdentityDate")}
+                      onChange={(v) => {
+                        setForm((f) => ({
+                          ...f,
+                          inputs: { ...f.inputs, practiceIdentityDate: v },
+                        }));
+                      }}
+                      placeholder="Inserisci data"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* 2. Primo menu: Atto Giuridico oppure Evento generico */}
@@ -1309,8 +1360,22 @@ export function EventModal({
                       ruleTemplateId: isAtto ? "data-driven" : "reminder",
                       generateSubEvents: true,
                       ...(isAtto
-                        ? { macroArea: null, procedimento: null, parteProcessuale: null, eventoCode: null, inputs: {} }
-                        : { macroArea: null, procedimento: null, parteProcessuale: null, eventoCode: null, actionType: ACTION_TYPES[0], actionMode: ACTION_MODES[0], inputs: {} }),
+                        ? {
+                            macroArea: null,
+                            procedimento: null,
+                            parteProcessuale: null,
+                            eventoCode: null,
+                            inputs: { practiceIdentityDate: (f.inputs as Record<string, unknown> | undefined)?.practiceIdentityDate as unknown },
+                          }
+                        : {
+                            macroArea: null,
+                            procedimento: null,
+                            parteProcessuale: null,
+                            eventoCode: null,
+                            actionType: ACTION_TYPES[0],
+                            actionMode: ACTION_MODES[0],
+                            inputs: { practiceIdentityDate: (f.inputs as Record<string, unknown> | undefined)?.practiceIdentityDate as unknown },
+                          }),
                     }));
                   }}
                 >
@@ -1501,7 +1566,13 @@ export function EventModal({
                         procedimento: null,
                         parteProcessuale: null,
                         eventoCode: null,
-                        inputs: {},
+                        inputs: {
+                          practiceIdentityDate:
+                            (typeof (f.inputs as Record<string, unknown>)?.practiceIdentityDate === "string" &&
+                            String((f.inputs as Record<string, unknown>)?.practiceIdentityDate).trim().length > 0)
+                              ? String((f.inputs as Record<string, unknown>)?.practiceIdentityDate)
+                              : (defaultAnchorDateStr || toDateOnlyStringLocal(f.startAt)),
+                        },
                         ruleTemplateId: "data-driven",
                       }))
                     }
@@ -1514,15 +1585,61 @@ export function EventModal({
                           procedimento: p,
                           parteProcessuale: null,
                           eventoCode: null,
-                          inputs: {},
+                          inputs: {
+                            practiceIdentityDate:
+                              (typeof (f.inputs as Record<string, unknown>)?.practiceIdentityDate === "string" &&
+                              String((f.inputs as Record<string, unknown>)?.practiceIdentityDate).trim().length > 0)
+                                ? String((f.inputs as Record<string, unknown>)?.practiceIdentityDate)
+                                : (defaultAnchorDateStr || toDateOnlyStringLocal(f.startAt)),
+                          },
                         };
                       })
                     }
                     onParteProcessualeChange={(p) =>
-                      setForm((f) => ({ ...f, parteProcessuale: p, eventoCode: null, inputs: {} }))
+                      setForm((f) => ({
+                        ...f,
+                        parteProcessuale: p,
+                        eventoCode: null,
+                        inputs: {
+                          practiceIdentityDate:
+                            (typeof (f.inputs as Record<string, unknown>)?.practiceIdentityDate === "string" &&
+                            String((f.inputs as Record<string, unknown>)?.practiceIdentityDate).trim().length > 0)
+                              ? String((f.inputs as Record<string, unknown>)?.practiceIdentityDate)
+                              : (defaultAnchorDateStr || toDateOnlyStringLocal(f.startAt)),
+                        },
+                      }))
                     }
                     onEventoChange={(code) =>
-                      setForm((f) => ({ ...f, eventoCode: code, inputs: {} }))
+                      setForm((f) => {
+                        const prevInputs = (f.inputs ?? {}) as Record<string, unknown>;
+                        const practiceIdentityDate =
+                          (typeof prevInputs.practiceIdentityDate === "string" && String(prevInputs.practiceIdentityDate).trim().length > 0)
+                            ? String(prevInputs.practiceIdentityDate)
+                            : (defaultAnchorDateStr || toDateOnlyStringLocal(f.startAt));
+
+                        const MANUALE_CODE = "__MANUALE__";
+                        const isKnownEventCode = !!(code && f.procedimento && getEventoByCode(f.procedimento, code));
+
+                        const baseKey =
+                          code === MANUALE_CODE || !isKnownEventCode
+                            ? "dataManuale"
+                            : (f.procedimento ? getEventoByCode(f.procedimento, code)?.inputKey ?? "dataManuale" : "dataManuale");
+
+                        const existingBaseValue = prevInputs[baseKey];
+                        const baseValue =
+                          typeof existingBaseValue === "string" && existingBaseValue.trim().length > 0
+                            ? existingBaseValue
+                            : defaultAnchorDateStr || "";
+
+                        return {
+                          ...f,
+                          eventoCode: code,
+                          inputs: {
+                            practiceIdentityDate,
+                            ...(baseValue ? { [baseKey]: baseValue } : {}),
+                          },
+                        };
+                      })
                     }
                     onInputsChange={(inputs) => setForm((f) => ({ ...f, inputs }))}
                   />

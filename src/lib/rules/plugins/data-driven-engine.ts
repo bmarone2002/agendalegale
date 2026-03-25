@@ -291,7 +291,10 @@ function evaluateMultiRowFromEventoCode(
           reminderOffsets,
           selectedEventoInputKey,
         );
-        out.push(...result.subEvents);
+        // "Promuovi fase1": l'evento madre rappresenta la fase selezionata, quindi NON
+        // generiamo la voce principale (termine/attivita) come sottoevento.
+        // Manteniamo solo i promemoria (promemoria = sottoevento).
+        out.push(...result.subEvents.filter((se) => se.kind === "promemoria"));
         continue;
       }
       // Fase selezionata senza formula (es. Notifica): crea attività alla data manuale (no -120 gg).
@@ -301,26 +304,7 @@ function evaluateMultiRowFromEventoCode(
           baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue
         );
         if (!isNaN(baseDate.getTime())) {
-          const eventAt = applyDeadlineTime(baseDate, settings);
-          out.push({
-            title: rule.eventoLabel,
-            kind: "attivita",
-            dueAt: eventAt,
-            status: "pending",
-            priority: rule.ordine,
-            ruleId: "data-driven",
-            ruleParams: {
-              macroArea: rule.macroArea,
-              procedimento: rule.procedimento,
-              parteProcessuale: rule.parteProcessuale,
-              eventoBaseKey: selectedEventoInputKey,
-              tipoTermine: rule.tipoTermine,
-              norma: rule.norma,
-            },
-            explanation: rule.norma ? `${rule.eventoLabel} – ${rule.norma}` : rule.eventoLabel,
-            createdBy: "automatico",
-            isPlaceholder: false,
-          });
+          // "Promuovi fase1": non generiamo la voce principale come sottoevento.
           for (const daysBefore of reminderOffsets) {
             const offset = daysBefore > 0 ? -daysBefore : daysBefore;
             const reminderRaw = addDays(baseDate, offset);
@@ -427,3 +411,63 @@ export const dataDrivenRule: RuleDefinition = {
     return { subEvents };
   },
 };
+
+/**
+ * Calcola la "data madre" della fase1 promossa (la voce principale deve avere una data coerente
+ * con quanto sarebbe stato generato come sottoevento principale per l'ordine startOrdine).
+ *
+ * - Se la fase selezionata è nota nella tabella: usa formula / activity come in processRule.
+ * - Se è una fase manuale (codice non presente): usa dataManuale come base e applica le regole
+ *   di orario previste (applyDeadlineTime).
+ */
+export function computePhase1MainDueAt(params: {
+  macroArea: MacroAreaCode;
+  procedimento: ProcedimentoCode;
+  parteProcessuale: ParteProcessuale;
+  eventoCode: string;
+  inputs: Record<string, unknown>;
+  settings: AppSettings;
+}): Date | null {
+  const { macroArea, procedimento, parteProcessuale, eventoCode, inputs, settings } = params;
+
+  const ev = getEventoByCode(procedimento, eventoCode);
+  const allRules = getEventRulesFor(macroArea, procedimento, parteProcessuale);
+
+  // Fase manuale: nessuna regola in tabella → usiamo dataManuale come base.
+  if (!ev) {
+    const baseValue = inputs.dataManuale as string | undefined;
+    if (!baseValue || typeof baseValue !== "string" || !baseValue.trim()) return null;
+    const baseDate = new Date(baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue);
+    if (isNaN(baseDate.getTime())) return null;
+    return applyDeadlineTime(baseDate, settings);
+  }
+
+  const startOrdine = ev.ordine;
+  const selectedEventoInputKey = ev.inputKey;
+  const startRule = allRules.find((r) => r.ordine === startOrdine);
+  if (!startRule) return null;
+
+  const baseValue = startRule.eventoBaseKey
+    ? (inputs[startRule.eventoBaseKey] as string | undefined)
+    : (inputs[selectedEventoInputKey] as string | undefined);
+  if (!baseValue || typeof baseValue !== "string" || !baseValue.trim()) return null;
+
+  const baseDate = new Date(baseValue.length === 10 ? baseValue + "T12:00:00" : baseValue);
+  if (isNaN(baseDate.getTime())) return null;
+
+  const hasFormula = startRule.direzioneCalcolo != null && startRule.numero != null && startRule.unita != null;
+  if (!hasFormula) {
+    return applyDeadlineTime(baseDate, settings);
+  }
+
+  // Copia la logica di processRule sul ramo con formula per ottenere la dueAt della voce principale.
+  const direzione = startRule.direzioneCalcolo as "+" | "-";
+  const numero = startRule.numero as number;
+  const unita = startRule.unita as "giorni" | "mesi" | "anno";
+  let dueDate = computeDate(baseDate, direzione, numero, unita);
+  const direction: "forward" | "backward" = direzione === "+" ? "forward" : "backward";
+  if (startRule.unita === "giorni") {
+    dueDate = adjustFinalDeadline(dueDate, direction, settings);
+  }
+  return applyDeadlineTime(dueDate, settings);
+}

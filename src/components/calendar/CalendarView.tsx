@@ -606,7 +606,18 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
 
       const suggestions: SearchSuggestion[] = [];
       for (const ev of allEvents) {
-        const titleMatch = (ev.title ?? "").toLowerCase().includes(trimmed);
+        const rawTitle = (ev.title ?? "").toString();
+        const titleMatch = rawTitle.toLowerCase().includes(trimmed);
+
+        const savedInputs = ev.inputs as Record<string, unknown> | null | undefined;
+        const practiceIdentity = (savedInputs?.practiceIdentity as Record<string, unknown> | null | undefined) ?? {};
+        const parti = typeof practiceIdentity.parti === "string" ? (practiceIdentity.parti as string) : "";
+        const rg = typeof practiceIdentity.rg === "string" ? (practiceIdentity.rg as string) : "";
+        const autorita = typeof practiceIdentity.autorita === "string" ? (practiceIdentity.autorita as string) : "";
+        const luogo = typeof practiceIdentity.luogo === "string" ? (practiceIdentity.luogo as string) : "";
+        const practiceTitle = [parti, rg, autorita, luogo].map((v) => v.trim()).filter((v) => v.length > 0).join(" - ");
+        const practiceMatch = practiceTitle.toLowerCase().includes(trimmed);
+
         const promemoriaMatches =
           ev.subEvents?.filter(
             (se) =>
@@ -617,10 +628,18 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         if (titleMatch) {
           suggestions.push({
             eventId: ev.id,
-            label: ev.title ?? "",
+            label: rawTitle,
             matchType: "titolo",
           });
           continue;
+        }
+
+        if (practiceMatch) {
+          suggestions.push({
+            eventId: ev.id,
+            label: practiceTitle,
+            matchType: "titolo",
+          });
         }
 
         if (promemoriaMatches.length > 0) {

@@ -8,6 +8,9 @@ import { parseJsonField } from "@/lib/utils";
 import { toSubEvent } from "@/lib/mappers";
 import { resolveCalendarUser } from "@/lib/auth/calendar-access";
 import { sendOneSignalNotification } from "@/lib/notifications/onesignal";
+import { getSettings } from "../settings";
+import { getEventoByCode } from "@/types/macro-areas";
+import { computePhase1MainDueAt } from "../rules/plugins/data-driven-engine";
 
 function parseTags(tags: string): string[] {
   try {
@@ -136,13 +139,48 @@ export async function createEvent(data: CreateEventInput, targetUserId?: string)
   const p = parsed.data;
   try {
     const { userId } = await resolveCalendarUser(targetUserId, "FULL");
+
+    // "Promuovi fase1": l'evento madre rappresenta la fase selezionata (non la pratica come contenitore).
+    // Quindi impostiamo title/startAt/endAt sul "main dueAt" della fase1 calcolata dalle regole.
+    let eventTitle = p.title;
+    let startAt = p.startAt;
+    let endAt = p.endAt;
+    if (
+      p.macroType === "ATTO_GIURIDICO" &&
+      p.ruleTemplateId === "data-driven" &&
+      p.eventoCode &&
+      p.macroArea &&
+      p.procedimento &&
+      p.parteProcessuale &&
+      p.inputs
+    ) {
+      const settings = await getSettings();
+      const dueAt = computePhase1MainDueAt({
+        macroArea: p.macroArea as any,
+        procedimento: p.procedimento as any,
+        parteProcessuale: p.parteProcessuale as any,
+        eventoCode: p.eventoCode,
+        inputs: p.inputs as Record<string, unknown>,
+        settings,
+      });
+
+      const ev = getEventoByCode(p.procedimento as any, p.eventoCode);
+      if (ev) eventTitle = ev.label;
+      else eventTitle = p.eventoCode;
+
+      if (dueAt) {
+        startAt = dueAt;
+        endAt = new Date(dueAt.getTime() + 60 * 60 * 1000);
+      }
+    }
+
     const event = await prisma.event.create({
       data: {
         userId,
-        title: p.title,
+        title: eventTitle,
         description: p.description ?? null,
-        startAt: p.startAt,
-        endAt: p.endAt,
+        startAt,
+        endAt,
         type: p.type ?? "altro",
         tags: JSON.stringify(p.tags ?? []),
         caseId: p.caseId ?? null,
@@ -232,13 +270,47 @@ export async function updateEvent(
     }
     await resolveCalendarUser(targetUserId ?? existing.userId, "FULL");
 
+    // Promuovi fase1: se stiamo modificando una pratica data-driven, forziamo
+    // titolo + anchor della voce madre sull'effettiva dueAt della fase.
+    let titleOverride = p.title;
+    let startAtOverride = p.startAt;
+    let endAtOverride = p.endAt;
+    if (
+      p.macroType === "ATTO_GIURIDICO" &&
+      p.ruleTemplateId === "data-driven" &&
+      p.eventoCode &&
+      p.macroArea &&
+      p.procedimento &&
+      p.parteProcessuale &&
+      p.inputs
+    ) {
+      const settings = await getSettings();
+      const dueAt = computePhase1MainDueAt({
+        macroArea: p.macroArea as any,
+        procedimento: p.procedimento as any,
+        parteProcessuale: p.parteProcessuale as any,
+        eventoCode: p.eventoCode,
+        inputs: p.inputs as Record<string, unknown>,
+        settings,
+      });
+
+      const ev = getEventoByCode(p.procedimento as any, p.eventoCode);
+      if (ev) titleOverride = ev.label;
+      else titleOverride = p.eventoCode;
+
+      if (dueAt) {
+        startAtOverride = dueAt;
+        endAtOverride = new Date(dueAt.getTime() + 60 * 60 * 1000);
+      }
+    }
+
     const event = await prisma.event.update({
       where: { id },
       data: {
-        ...(p.title != null && { title: p.title }),
+        ...(titleOverride != null && { title: titleOverride }),
         ...(p.description !== undefined && { description: p.description }),
-        ...(p.startAt != null && { startAt: p.startAt }),
-        ...(p.endAt != null && { endAt: p.endAt }),
+        ...(startAtOverride != null && { startAt: startAtOverride }),
+        ...(endAtOverride != null && { endAt: endAtOverride }),
         ...(p.type != null && { type: p.type }),
         ...(p.tags != null && { tags: JSON.stringify(p.tags) }),
         ...(p.caseId !== undefined && { caseId: p.caseId }),
