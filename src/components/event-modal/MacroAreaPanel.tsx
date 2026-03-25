@@ -124,6 +124,15 @@ function getEffectivePartiLabels(
         CONVENUTO: "Appellato",
       };
     }
+
+    // Lavoro: Appello lavoro = Appellante/Appellato
+    if (macroArea === "LAVORO" && procedimento === "APPELLO_LAVORO") {
+      return {
+        ...base,
+        ATTORE: "Appellante",
+        CONVENUTO: "Appellato",
+      };
+    }
   }
   return base;
 }
@@ -168,6 +177,10 @@ export function MacroAreaPanel({
 
   const isNotificaCitazioneConDueDate =
     procedimento === "CITAZIONE_CIVILE" && eventoCode === "NOTIFICA_CITAZIONE";
+
+  const isNotificaRicorsoDecretoAppelloLavoroConDueDate =
+    procedimento === "APPELLO_LAVORO" &&
+    eventoCode === "NOTIFICA_RICORSO_DECRETO_APPELLO_LAVORO";
 
   /** Convenuto – Costituzione convenuto: due date (udienza comparizione per -70 gg, data prima udienza per Prima udienza e Memorie). */
   const isCostituzioneConvenutoConDueDate =
@@ -369,7 +382,11 @@ export function MacroAreaPanel({
           </div>
         </div>
       )}
-      {selectedEvento && !isNotificaCitazioneConDueDate && !soloDataPrimaUdienza && !isCostituzioneConvenutoConDueDate && (
+      {selectedEvento &&
+        !isNotificaCitazioneConDueDate &&
+        !isNotificaRicorsoDecretoAppelloLavoroConDueDate &&
+        !soloDataPrimaUdienza &&
+        !isCostituzioneConvenutoConDueDate && (
         <div className="pt-2 border-t border-zinc-200 space-y-4">
           <div>
             <Label className="text-sm font-semibold text-zinc-700">
@@ -430,6 +447,36 @@ export function MacroAreaPanel({
             <p className="text-xs text-zinc-500 mt-1">
               Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
               n.2, n.3.
+            </p>
+          </div>
+        </div>
+      )}
+      {selectedEvento && isNotificaRicorsoDecretoAppelloLavoroConDueDate && (
+        <div className="pt-2 border-t border-zinc-200 space-y-4">
+          <div>
+            <Label className="text-sm font-semibold text-zinc-700">
+              Data comunicazione decreto di fissazione udienza
+            </Label>
+            <DatePickerWithOptionalTime
+              value={strInput(inputs, "dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro")}
+              onChange={handleDateChange("dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro")}
+              placeholder="Inserisci data comunicazione decreto"
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Usata per il termine perentorio di 10 giorni per la notificazione del ricorso e del decreto (art. 435 c.p.c.).
+            </p>
+          </div>
+          <div>
+            <Label className="text-sm font-semibold text-zinc-700">
+              Data udienza
+            </Label>
+            <DatePickerWithOptionalTime
+              value={strInput(inputs, "dataUdienzaAppelloLavoro")}
+              onChange={handleDateChange("dataUdienzaAppelloLavoro")}
+              placeholder="Inserisci data udienza"
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Usata per il vincolo minimo: notificazione almeno 25 giorni prima dell&apos;udienza (art. 435 c.p.c.).
             </p>
           </div>
         </div>

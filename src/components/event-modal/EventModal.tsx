@@ -747,6 +747,9 @@ export function EventModal({
       if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
       const isNotificaCitazione =
         form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE";
+      const isNotificaRicorsoDecretoAppelloLavoro =
+        form.procedimento === "APPELLO_LAVORO" &&
+        form.eventoCode === "NOTIFICA_RICORSO_DECRETO_APPELLO_LAVORO";
       const eventiConDataPrimaUdienza = new Set([
         "NOTIFICA_CITAZIONE",
         "ISCRIZIONE_RUOLO",
@@ -763,6 +766,12 @@ export function EventModal({
       const hasDataPrimaUdienza =
         typeof form.inputs?.dataPrimaUdienza === "string" &&
         String(form.inputs.dataPrimaUdienza).trim().length > 0;
+      const hasDataComunicazioneDecretoAppelloLavoro =
+        typeof form.inputs?.dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro === "string" &&
+        String(form.inputs.dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro).trim().length > 0;
+      const hasDataUdienzaAppelloLavoro =
+        typeof form.inputs?.dataUdienzaAppelloLavoro === "string" &&
+        String(form.inputs.dataUdienzaAppelloLavoro).trim().length > 0;
       const soloDataPrimaUdienza = new Set([
         "ISCRIZIONE_RUOLO",
         "COSTITUZIONE_CONVENUTO",
@@ -775,6 +784,8 @@ export function EventModal({
         ? typeof form.inputs?.dataPrimaNotificaCitazione === "string" &&
           String(form.inputs.dataPrimaNotificaCitazione).trim().length > 0 &&
           hasDataPrimaUdienza
+        : isNotificaRicorsoDecretoAppelloLavoro
+          ? hasDataComunicazioneDecretoAppelloLavoro && hasDataUdienzaAppelloLavoro
         : richiedeDataPrimaUdienza
             ? soloDataPrimaUdienza
               ? hasDataPrimaUdienza
@@ -789,6 +800,8 @@ export function EventModal({
         setError(
           isNotificaCitazione
             ? "Inserisci entrambe le date: Data notifica atto di citazione e Data prima udienza, poi clicca Calcola."
+            : isNotificaRicorsoDecretoAppelloLavoro
+              ? "Inserisci entrambe le date: Data comunicazione decreto di fissazione udienza e Data udienza, poi clicca Calcola."
             : richiedeDataPrimaUdienza
                 ? soloDataPrimaUdienza
                   ? "Inserisci la Data prima udienza, poi clicca Calcola."

@@ -100,7 +100,7 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   OPPOSIZIONE_ATTI_ESECUTIVI: "Opposizione agli atti esecutivi - post Riforma Cartabia",
   // Lavoro
   RICORSO_LAVORO: "Ricorso lavoro",
-  APPELLO_LAVORO: "Appello lavoro",
+  APPELLO_LAVORO: "Appello lavoro - regole specifiche",
   // Tributario
   RICORSO_TRIBUTARIO: "Ricorso tributario",
   APPELLO_TRIBUTARIO: "Appello tributario",
@@ -886,6 +886,132 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
       code: "PONTE_GIUDIZIO_MERITO_FORME_ORDINARIE_618",
       label: "Il giudizio di merito prosegue nelle forme ordinarie",
       inputKey: "dataEsitoFaseSommariaOpposizioneAtti618",
+      parteProcessuale: "COMUNE",
+      ordine: 8,
+    },
+  ],
+  APPELLO_LAVORO: [
+    // APPELLANTE (ATTORE)
+    {
+      code: "DEPOSITO_RICORSO_APPELLO_LAVORO",
+      label: "Deposito del Ricorso in Appello",
+      inputKey: "dataDepositoRicorsoAppelloLavoro",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "NOTIFICA_RICORSO_DECRETO_APPELLO_LAVORO",
+      label: "Notificazione del Ricorso e del Decreto",
+      inputKey: "dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro",
+      parteProcessuale: "ATTORE",
+      ordine: 4,
+    },
+
+    // APPELLATO (CONVENUTO)
+    {
+      code: "COSTITUZIONE_APPELLATO_APPELLO_LAVORO",
+      label: "COSTITUZIONE DELL'APPELLATO",
+      inputKey: "dataUdienzaAppelloLavoro",
+      parteProcessuale: "CONVENUTO",
+      ordine: 6,
+    },
+
+    // COMUNE (eventi condivisi)
+    {
+      code: "DATA_COMUNICAZIONE_DECRETO_UDIENZA_APPELLO_LAVORO",
+      label: "DATA COMUNICAZIONE DECRETO Fissazione dell'Udienza di Discussione",
+      inputKey: "dataComunicazioneDecretoFissazioneUdienzaAppelloLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 2,
+    },
+    {
+      code: "DATA_UDIENZA_APPELLO_LAVORO",
+      label: "DATA UDIENZA",
+      inputKey: "dataUdienzaAppelloLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 3,
+    },
+    {
+      code: "PROSECUZIONE_MANUALE_APPELLO_LAVORO",
+      label: "PROSECUZIONE MANUALE",
+      inputKey: "dataProsecuzioneManualeAppelloLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+    {
+      code: "PUBBLICAZIONE_SENTENZA_RIC_CASS_LUNGO_APPELLO_LAVORO",
+      label: "Data pubblicazione Sentenza con calcolo termine lungo per Ricorso in Cassazione",
+      inputKey: "dataPubblicazioneSentenzaAppelloLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 8,
+    },
+    {
+      code: "NOTIFICA_SENTENZA_RIC_CASS_BREVE_APPELLO_LAVORO",
+      label: "Data notificazione Sentenza per calcolo termine breve per Ricorso in Cassazione",
+      inputKey: "dataNotificaSentenzaAppelloLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 9,
+    },
+  ],
+  RICORSO_LAVORO: [
+    // RICORRENTE (ATTORE)
+    {
+      code: "DEPOSITO_RICORSO_LAVORO",
+      label: "Deposito del Ricorso",
+      inputKey: "dataDepositoRicorsoLavoro",
+      parteProcessuale: "ATTORE",
+      ordine: 1,
+    },
+    {
+      code: "NOTIFICA_RICORSO_DECRETO_RICORSO_LAVORO",
+      label: "Notifica Ricorso e Decreto",
+      inputKey: "dataEmissioneDecretoFissazioneUdienzaRicorsoLavoro",
+      parteProcessuale: "ATTORE",
+      ordine: 4,
+    },
+
+    // CONVENUTO
+    {
+      code: "COSTITUZIONE_CONVENUTO_RICORSO_LAVORO",
+      label: "Costituzione del Convenuto",
+      inputKey: "dataUdienzaRicorsoLavoro",
+      parteProcessuale: "CONVENUTO",
+      ordine: 5,
+    },
+
+    // COMUNE (eventi condivisi)
+    {
+      code: "DECRETO_FISSAZIONE_UDIENZA_RICORSO_LAVORO",
+      label: "Decreto fissazione udienza",
+      inputKey: "dataEmissioneDecretoFissazioneUdienzaRicorsoLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 2,
+    },
+    {
+      code: "DATA_UDIENZA_RICORSO_LAVORO",
+      label: "Data Udienza",
+      inputKey: "dataUdienzaRicorsoLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 3,
+    },
+    {
+      code: "PROSECUZIONE_MANUALE_RICORSO_LAVORO",
+      label: "Prosecuzione manuale",
+      inputKey: "dataProsecuzioneManualeRicorsoLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 6,
+    },
+    {
+      code: "PUBBLICAZIONE_SENTENZA_TERMINE_LUNGO_APPELLO_RICORSO_LAVORO",
+      label: "Data pubblicazione Sentenza con calcolo termine lungo per Appello",
+      inputKey: "dataPubblicazioneSentenzaRicorsoLavoro",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+    {
+      code: "NOTIFICA_SENTENZA_TERMINE_BREVE_APPELLO_RICORSO_LAVORO",
+      label: "Data notificazione Sentenza per calcolo termine breve per Appello",
+      inputKey: "dataNotificaSentenzaRicorsoLavoro",
       parteProcessuale: "COMUNE",
       ordine: 8,
     },
