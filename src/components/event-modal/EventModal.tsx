@@ -388,10 +388,16 @@ function EventSummaryPanel({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">{s.title}</p>
-                          <p className="mt-0.5 text-[11px] text-white/75">
+                          <p
+                            className={`font-semibold leading-snug break-words ${
+                              isSelected ? "text-[var(--navy)]" : "text-white"
+                            }`}
+                          >
+                            {s.title}
+                          </p>
+                          <p className={`mt-0.5 text-[11px] ${isSelected ? "text-zinc-600" : "text-white/75"}`}>
                             {isPlaceholder ? (
-                              <span className="italic text-amber-200">
+                              <span className={`italic ${isSelected ? "text-amber-700" : "text-amber-200"}`}>
                                 Da schedulare
                               </span>
                             ) : (
@@ -399,7 +405,7 @@ function EventSummaryPanel({
                             )}
                           </p>
                           {(s as { explanation?: string | null }).explanation && (
-                            <p className="mt-0.5 text-[11px] text-white/65 line-clamp-2">
+                            <p className={`mt-0.5 text-[11px] break-words ${isSelected ? "text-zinc-500" : "text-white/65"}`}>
                               {(s as { explanation?: string | null }).explanation}
                             </p>
                           )}
