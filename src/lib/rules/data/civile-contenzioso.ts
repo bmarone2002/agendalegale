@@ -53,7 +53,8 @@ const CITAZIONE_CIVILE_RULES: EventRule[] = [
     macroArea: "CIVILE_CONTENZIOSO",
     procedimento: "CITAZIONE_CIVILE",
     parteProcessuale: "CONVENUTO",
-    eventoBaseKey: "dataPrimaUdienza",
+    // Due date: comparizione (base per -70) + prima udienza (base per Prima udienza + Memorie)
+    eventoBaseKey: "dataUdienzaComparizione",
     eventoLabel: "Costituzione convenuto",
     direzioneCalcolo: "-",
     numero: 70,
