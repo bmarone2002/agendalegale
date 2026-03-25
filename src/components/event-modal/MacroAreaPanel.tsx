@@ -428,7 +428,7 @@ export function MacroAreaPanel({
               placeholder="Inserisci data prima udienza"
             />
             <p className="text-xs text-zinc-500 mt-1">
-              Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+              Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
               n.2, n.3.
             </p>
           </div>
@@ -464,7 +464,7 @@ export function MacroAreaPanel({
                 placeholder="Inserisci data prima udienza"
               />
               <p className="text-xs text-zinc-500 mt-1">
-                Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+                Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
                 n.2, n.3.
               </p>
             </div>
@@ -497,7 +497,7 @@ export function MacroAreaPanel({
               placeholder="Inserisci data prima udienza"
             />
             <p className="text-xs text-zinc-500 mt-1">
-              Usata per l&apos;evento Eventuale slittamento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
+              Usata per l&apos;evento Prima udienza e per il calcolo delle Memorie 171-ter n.1,
               n.2, n.3.
             </p>
           </div>
