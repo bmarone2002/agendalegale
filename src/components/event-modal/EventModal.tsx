@@ -1397,6 +1397,29 @@ export function EventModal({
                   </SelectContent>
                 </Select>
               </div>
+              {form.macroType === null && (
+                <div className="rounded-md border border-zinc-200 bg-zinc-50/60 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="manual-hearing-toggle" className="text-sm text-zinc-800">
+                      E&apos; un&apos;udienza
+                    </Label>
+                    <Checkbox
+                      id="manual-hearing-toggle"
+                      checked={form.type === "udienza"}
+                      disabled={readOnly}
+                      onCheckedChange={(checked) =>
+                        setForm((f) => ({
+                          ...f,
+                          type: checked ? "udienza" : "altro",
+                        }))
+                      }
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Se attivo, l&apos;evento comparira&apos; anche nel filtro <strong>SOLO UDIENZE</strong>.
+                  </p>
+                </div>
+              )}
 
               {/* 3. Data e ora inizio/fine: solo per Evento generico. Per Atto Giuridico (e altre categorie in MACRO_TYPES_WITH_CALCULATION_DATE_ONLY) la data è quella del blocco "Dati per il calcolo" sotto. */}
               {!usesCalculationDateOnly(form.macroType) && (

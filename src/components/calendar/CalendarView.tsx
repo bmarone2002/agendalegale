@@ -502,6 +502,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 extendedProps: {
                   isSubEvent: false,
                   isDraft: true,
+                  type: (f.type as string | undefined) ?? "altro",
                   status: f.status ?? "pending",
                   filterColorKey: tag,
                   parentTagColor: null,
@@ -516,14 +517,17 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               if (!key) return true;
               return visibleTagColors.has(key);
             });
-            // Solo udienze: solo evento principale (no promemoria/adempimenti/sottoeventi); Fase con frasi previste
+            // Solo udienze: solo evento principale (no promemoria/adempimenti/sottoeventi).
+            // Criterio principale: type=udienza. Fallback legacy: frasi nel campo Fase.
             if (soloUdienze) {
               events = events.filter((ev) => {
                 const ext = ev.extendedProps as {
                   isSubEvent?: boolean;
+                  type?: string;
                   faseFiltroText?: string;
                 };
                 if (ext.isSubEvent) return false;
+                if (ext.type === "udienza") return true;
                 const fase = ext.faseFiltroText ?? "";
                 return matchesUdienzaPhrasesInFaseText(fase);
               });
