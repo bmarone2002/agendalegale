@@ -67,6 +67,13 @@ body {
   color: #ffffff;
 }
 .calendar-theme .fc .fc-list-event:hover td { background: var(--calendar-brown-pale); }
+.calendar-theme .fc .fc-list-event-dot {
+  width: 12px !important;
+  min-width: 12px;
+  height: 12px !important;
+  border-width: 2px !important;
+  border-radius: 9999px;
+}
 .calendar-theme .fc-theme-standard td, .calendar-theme .fc-theme-standard th { border-color: #d4d8e0; }
 .calendar-theme .fc-scrollgrid { background: #fff; }
 .calendar-theme .fc .fc-daygrid-day { background: #fff; }

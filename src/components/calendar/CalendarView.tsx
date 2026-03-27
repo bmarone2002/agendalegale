@@ -1090,7 +1090,11 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               </svg>
             </span>
           ) : (
-            <span aria-hidden className="mr-1" style={{ color: dotColor }}>•</span>
+            <span
+              aria-hidden
+              className="mr-1.5 inline-block h-3 w-3 rounded-full shrink-0"
+              style={{ backgroundColor: dotColor }}
+            />
           )}
           <span className={`truncate ${isDoneEv ? "line-through text-zinc-400" : ""}`} style={{ color: isDoneEv ? undefined : "#171717" }}>
             {arg.event.title}

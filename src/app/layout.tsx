@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist } from "next/font/google";
+import { WheelScrollSupport } from "@/components/layout/WheelScrollSupport";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
           afterSignInUrl="/"
           afterSignUpUrl="/"
         >
+          <WheelScrollSupport />
           {children}
         </ClerkProvider>
       </body>
