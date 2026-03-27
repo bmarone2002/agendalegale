@@ -15,16 +15,19 @@ import type {
   MacroAreaCode,
   ProcedimentoCode,
   ParteProcessuale,
+  UiMacroAreaCode,
 } from "@/types/macro-areas";
 import {
-  MACRO_AREAS,
-  MACRO_AREA_LABELS,
-  PROCEDIMENTI_PER_MACRO_AREA,
+  UI_MACRO_AREAS,
+  UI_MACRO_AREA_LABELS,
+  UI_PROCEDIMENTI_PER_MACRO_AREA,
   PROCEDIMENTO_LABELS,
   ALL_PROCEDIMENTI,
   PARTI_PROCESSUALI,
   PARTI_LABELS,
-  getMacroAreaForProcedimento,
+  getUiMacroAreaForProcedimento,
+  getUiMacroAreaFromInternal,
+  getDefaultInternalMacroAreaForUi,
   getEventiDisponibili,
   getEventoByCode,
 } from "@/types/macro-areas";
@@ -173,12 +176,17 @@ export function MacroAreaPanel({
   onInputsChange,
 }: MacroAreaPanelProps) {
   const MANUALE_CODE = "__MANUALE__";
+  const selectedUiMacroArea = procedimento
+    ? getUiMacroAreaForProcedimento(procedimento)
+    : macroArea
+      ? getUiMacroAreaFromInternal(macroArea)
+      : null;
 
   const procedimentiSelezionabili = useMemo(() => {
-    return macroArea
-      ? (PROCEDIMENTI_PER_MACRO_AREA[macroArea] as readonly ProcedimentoCode[])
+    return selectedUiMacroArea
+      ? UI_PROCEDIMENTI_PER_MACRO_AREA[selectedUiMacroArea]
       : ALL_PROCEDIMENTI;
-  }, [macroArea]);
+  }, [selectedUiMacroArea]);
 
   const [procedimentoQuery, setProcedimentoQuery] = useState("");
   useEffect(() => {
@@ -200,8 +208,8 @@ export function MacroAreaPanel({
 
     return procedimentiSelezionabili.filter((p) => {
       const baseLabel = PROCEDIMENTO_LABELS[p as ProcedimentoCode] ?? String(p);
-      const ma = getMacroAreaForProcedimento(p as ProcedimentoCode);
-      const maLabel = MACRO_AREA_LABELS[ma] ?? "";
+      const ma = getUiMacroAreaForProcedimento(p as ProcedimentoCode);
+      const maLabel = UI_MACRO_AREA_LABELS[ma] ?? "";
       return `${baseLabel} ${maLabel}`.toLowerCase().includes(q);
     });
   }, [procedimentoQuery, procedimentiSelezionabili]);
@@ -266,16 +274,16 @@ export function MacroAreaPanel({
       <div>
         <Label>Macro Area</Label>
         <Select
-          value={macroArea ?? ""}
-          onValueChange={(v) => onMacroAreaChange(v as MacroAreaCode)}
+          value={selectedUiMacroArea ?? ""}
+          onValueChange={(v) => onMacroAreaChange(getDefaultInternalMacroAreaForUi(v as UiMacroAreaCode))}
         >
           <SelectTrigger className="bg-white border-zinc-200 text-zinc-900 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none">
             <SelectValue placeholder="Seleziona macro area" />
           </SelectTrigger>
           <SelectContent className="max-h-none">
-            {MACRO_AREAS.map((ma) => (
+            {UI_MACRO_AREAS.map((ma) => (
               <SelectItem key={ma} value={ma}>
-                {MACRO_AREA_LABELS[ma]}
+                {UI_MACRO_AREA_LABELS[ma]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -310,9 +318,9 @@ export function MacroAreaPanel({
             {filteredProcedimenti.length > 0 ? (
               filteredProcedimenti.map((p) => {
                 const baseLabel = PROCEDIMENTO_LABELS[p as ProcedimentoCode] ?? String(p);
-                const ma = getMacroAreaForProcedimento(p as ProcedimentoCode);
+                const ma = getUiMacroAreaForProcedimento(p as ProcedimentoCode);
                 const needsMacroAreaSuffix = (labelCountsInCurrentOptions.get(baseLabel) ?? 0) > 1;
-                const displayLabel = needsMacroAreaSuffix ? `${baseLabel} (${MACRO_AREA_LABELS[ma]})` : baseLabel;
+                const displayLabel = needsMacroAreaSuffix ? `${baseLabel} (${UI_MACRO_AREA_LABELS[ma]})` : baseLabel;
                 return (
                   <SelectItem key={p} value={p}>
                     {displayLabel}

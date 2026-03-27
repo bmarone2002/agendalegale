@@ -71,12 +71,7 @@ export const PROCEDIMENTI_PER_MACRO_AREA = {
   ],
   AMMINISTRATIVO: [
     "RICORSO_TAR",
-    "MOTIVI_AGGIUNTI",
-    "RICORSO_INCIDENTALE",
     "APPELLO_CONSIGLIO_STATO",
-    "REVOCAZIONE",
-    "OPPOSIZIONE_TERZO",
-    "OTTEMPERANZA",
   ],
 } as const;
 
@@ -111,21 +106,21 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   APPELLO_CIVILE: "Appello civile",
   // Procedimenti speciali
   DECRETO_INGIUNTIVO: "Decreto ingiuntivo",
-  ATP: "Accertamento tecnico preventivo (ATP) 696 c.p.c.",
+  ATP: "Accertamento tecnico preventivo",
   // Esecuzioni
   PIGNORAMENTO_MOBILIARE: "Pignoramento mobiliare",
-  PIGNORAMENTO_IMMOBILIARE: "Pignoramento immobiliare - post Riforma Cartabia",
+  PIGNORAMENTO_IMMOBILIARE: "Pignoramento immobiliare",
   PIGNORAMENTO_PRESSO_TERZI: "Pignoramento presso terzi",
-  OPPOSIZIONE_ESECUZIONE: "Opposizione all'esecuzione - post Riforma Cartabia",
-  OPPOSIZIONE_ATTI_ESECUTIVI: "Opposizione agli atti esecutivi - post Riforma Cartabia",
+  OPPOSIZIONE_ESECUZIONE: "Opposizione all'esecuzione",
+  OPPOSIZIONE_ATTI_ESECUTIVI: "Opposizione agli atti esecutivi",
   // Lavoro
   RICORSO_LAVORO: "Ricorso lavoro",
-  APPELLO_LAVORO: "Appello lavoro - regole specifiche",
+  APPELLO_LAVORO: "Appello lavoro",
   // Tributario
-  RICORSO_TRIBUTARIO: "Ricorso tributario",
-  APPELLO_TRIBUTARIO: "Appello tributario",
+  RICORSO_TRIBUTARIO: "Ricorso",
+  APPELLO_TRIBUTARIO: "Appello",
   // Cassazione
-  RICORSO_CASSAZIONE: "Ricorso per cassazione",
+  RICORSO_CASSAZIONE: "Ricorso cassazione",
   CONTRORICORSO: "Controricorso",
   // Stragiudiziale
   DIFFIDA: "Diffida",
@@ -133,14 +128,84 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   NEGOZIAZIONE_ASSISTITA: "Negoziazione assistita",
   TRANSAZIONE: "Transazione",
   // Amministrativo
-  RICORSO_TAR: "Ricorso al TAR - regole specifiche",
-  MOTIVI_AGGIUNTI: "Motivi aggiunti",
-  RICORSO_INCIDENTALE: "Ricorso incidentale",
-  APPELLO_CONSIGLIO_STATO: "Appello al Consiglio di Stato - regole specifiche",
-  REVOCAZIONE: "Revocazione",
-  OPPOSIZIONE_TERZO: "Opposizione di terzo",
-  OTTEMPERANZA: "Ottemperanza",
+  RICORSO_TAR: "Ricorso al TAR",
+  APPELLO_CONSIGLIO_STATO: "Appello al Consiglio di Stato",
 };
+
+// ── Macro aree UI (solo presentazione) ──────────────────────────────
+
+export const UI_MACRO_AREAS = [
+  "CIVILE",
+  "TRIBUTARIO",
+  "AMMINISTRATIVO",
+  "CASSAZIONE",
+  "STRAGIUDIZIALE",
+] as const;
+
+export type UiMacroAreaCode = (typeof UI_MACRO_AREAS)[number];
+
+export const UI_MACRO_AREA_LABELS: Record<UiMacroAreaCode, string> = {
+  CIVILE: "Civile",
+  TRIBUTARIO: "Tributario",
+  AMMINISTRATIVO: "Amministrativo",
+  CASSAZIONE: "Cassazione",
+  STRAGIUDIZIALE: "Stragiudiziale",
+};
+
+export const UI_PROCEDIMENTI_PER_MACRO_AREA: Record<UiMacroAreaCode, readonly ProcedimentoCode[]> = {
+  CIVILE: [
+    "CITAZIONE_CIVILE",
+    "RICORSO_RITO_SEMPLIFICATO",
+    "APPELLO_CIVILE",
+    "DECRETO_INGIUNTIVO",
+    "ATP",
+    "PIGNORAMENTO_MOBILIARE",
+    "PIGNORAMENTO_IMMOBILIARE",
+    "PIGNORAMENTO_PRESSO_TERZI",
+    "OPPOSIZIONE_ESECUZIONE",
+    "OPPOSIZIONE_ATTI_ESECUTIVI",
+    "RICORSO_LAVORO",
+    "APPELLO_LAVORO",
+  ],
+  TRIBUTARIO: ["RICORSO_TRIBUTARIO", "APPELLO_TRIBUTARIO"],
+  AMMINISTRATIVO: ["RICORSO_TAR", "APPELLO_CONSIGLIO_STATO"],
+  CASSAZIONE: ["RICORSO_CASSAZIONE", "CONTRORICORSO"],
+  STRAGIUDIZIALE: ["DIFFIDA", "MEDIAZIONE", "NEGOZIAZIONE_ASSISTITA", "TRANSAZIONE"],
+};
+
+const INTERNAL_TO_UI_MACRO_AREA: Record<MacroAreaCode, UiMacroAreaCode> = {
+  CIVILE_CONTENZIOSO: "CIVILE",
+  PROCEDIMENTI_SPECIALI: "CIVILE",
+  ESECUZIONI: "CIVILE",
+  LAVORO: "CIVILE",
+  TRIBUTARIO: "TRIBUTARIO",
+  CASSAZIONE: "CASSAZIONE",
+  STRAGIUDIZIALE: "STRAGIUDIZIALE",
+  AMMINISTRATIVO: "AMMINISTRATIVO",
+};
+
+export function getUiMacroAreaForProcedimento(procedimento: ProcedimentoCode): UiMacroAreaCode {
+  return INTERNAL_TO_UI_MACRO_AREA[getMacroAreaForProcedimento(procedimento)];
+}
+
+export function getDefaultInternalMacroAreaForUi(uiMacroArea: UiMacroAreaCode): MacroAreaCode {
+  switch (uiMacroArea) {
+    case "CIVILE":
+      return "CIVILE_CONTENZIOSO";
+    case "TRIBUTARIO":
+      return "TRIBUTARIO";
+    case "AMMINISTRATIVO":
+      return "AMMINISTRATIVO";
+    case "CASSAZIONE":
+      return "CASSAZIONE";
+    case "STRAGIUDIZIALE":
+      return "STRAGIUDIZIALE";
+  }
+}
+
+export function getUiMacroAreaFromInternal(macroArea: MacroAreaCode): UiMacroAreaCode {
+  return INTERNAL_TO_UI_MACRO_AREA[macroArea];
+}
 
 // ── Parte processuale ───────────────────────────────────────────────
 
