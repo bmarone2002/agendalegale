@@ -996,6 +996,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status = arg.event.extendedProps.status as string | undefined;
       const isDone = status === "done";
       const isPromemoriaSub = kind === "promemoria";
+      const parentTagColorRaw = arg.event.extendedProps.parentTagColor as string | undefined;
+      const parentTagColor = parentTagColorRaw?.trim() ? parentTagColorRaw.trim() : null;
       const evStart = arg.event.start;
       const evDay = evStart ? new Date(typeof evStart === "string" ? evStart : evStart.getTime()) : null;
       if (evDay) evDay.setHours(0, 0, 0, 0);
@@ -1012,6 +1014,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           className="fc-event-main-frame flex items-center gap-1 rounded border-l-2 pl-1"
           style={{ borderLeftColor: borderColor ?? undefined }}
         >
+          {parentTagColor && (
+            <span
+              aria-hidden
+              className="inline-block h-2 w-2 rounded-full shrink-0"
+              style={{ backgroundColor: parentTagColor }}
+              title="Colore tag pratica"
+            />
+          )}
           <span className={`${arrowColorClass} shrink-0 text-[10px] leading-none opacity-90`} aria-hidden title="Promemoria">↳</span>
           <span className="truncate min-w-0 flex-1 text-[inherit]" style={{ color: "#171717" }}>{arg.event.title}</span>
         </div>
