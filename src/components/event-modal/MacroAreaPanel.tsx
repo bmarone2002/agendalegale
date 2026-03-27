@@ -135,6 +135,27 @@ function getEffectivePartiLabels(
         CONVENUTO: "Appellato",
       };
     }
+
+    // Amministrativo: Ricorso TAR = Ricorrente/Resistente
+    if (macroArea === "AMMINISTRATIVO" && procedimento === "RICORSO_TAR") {
+      return {
+        ...base,
+        ATTORE: "Ricorrente",
+        CONVENUTO: "Resistente",
+      };
+    }
+
+    // Amministrativo: Appello Consiglio di Stato = Appellante/Appellato
+    if (
+      macroArea === "AMMINISTRATIVO" &&
+      procedimento === "APPELLO_CONSIGLIO_STATO"
+    ) {
+      return {
+        ...base,
+        ATTORE: "Appellante",
+        CONVENUTO: "Appellato",
+      };
+    }
   }
   return base;
 }
