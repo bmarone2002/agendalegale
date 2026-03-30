@@ -121,17 +121,17 @@ type DraftEvent = {
   form: any;
 };
 
-/** Fase (testo UI): contiene «udienza» o «udienze» (il plurale non include «udienza» come sottostringa). */
 /**
- * True se il nome/testo della fase contiene «udienza» o «udienze» come parola, con qualsiasi
- * testo attorno (es. «Udienza Rossi», «Mario udienza», «prima udienza»). Confini di parola
- * per evitare suffissi tipo «udienzario».
+ * True se il nome/testo della fase contiene «udienza» o «udienze» come parola (es. «Prima udienza» o
+ * codice `PRIMA_UDIENZA`). Prima della prova, `_` → spazio: in JS `\b` considera `_` come lettera, quindi
+ * senza questo passaggio non c’è confine tra `_` e `udienza` e il match fallisce.
  */
 function faseContieneParolaUdienza(text: string | null | undefined): boolean {
   if (text == null) return false;
   const s = String(text).trim();
   if (!s) return false;
-  return /\b(udienza|udienze)\b/i.test(s);
+  const normalized = s.replace(/_/g, " ");
+  return /\b(udienza|udienze)\b/i.test(normalized);
 }
 
 /**
