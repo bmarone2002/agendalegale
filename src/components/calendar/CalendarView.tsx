@@ -32,7 +32,7 @@ import {
 import { getFaseDisplayString, getFaseDisplayFromFields } from "@/lib/event-fase";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { CalendarDays, Gavel, ListChecks, type LucideIcon } from "lucide-react";
+import { Gavel, ListChecks, type LucideIcon } from "lucide-react";
 
 /** Focus pannello intelligente (persistito in localStorage). Il calendario resta sempre completo. */
 export type PanelFocus = "udienze" | "adempimenti";
@@ -379,8 +379,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     today.setHours(0, 0, 0, 0);
     const todayTs = today.getTime();
 
-    const inRange = (_d: Date) => true;
-
     const dateLabel = (d: Date) =>
       d.toLocaleDateString("it-IT", {
         day: "numeric",
@@ -417,7 +415,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (!shouldShowByStatus(status)) return;
 
       const startAt = new Date(ev.startAt);
-      if (!inRange(startAt)) return;
 
       const fase = getFaseDisplayString(ev);
       out.push({
@@ -450,8 +447,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
 
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       if (!shouldShowByStatus(status)) return;
-
-      if (!inRange(se.dueAt)) return;
 
       const fase = getFaseDisplayString(parent);
       out.push({
@@ -486,8 +481,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
 
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       if (!shouldShowByStatus(status)) return;
-
-      if (!inRange(se.dueAt)) return;
 
       const fase = getFaseDisplayString(parent);
       out.push({
@@ -525,7 +518,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (da !== db) return da - db;
       return a.date.getTime() - b.date.getTime();
     });
-    return out.slice(0, 6);
+    return out.slice(0, 9);
   }, [allEvents, panelFocus, showPending, showDone, showPromemoriaTitle, visibleTagColors]);
 
   useEffect(() => {
@@ -700,7 +693,11 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const viewType =
         info.view?.type ?? calendarRef.current?.getApi()?.view?.type ?? "";
 
-      getEvents(info.start, info.end, targetUserId)
+      const now = new Date();
+      const halfYearMs = 180 * 24 * 60 * 60 * 1000;
+      const fetchStart = new Date(Math.min(info.start.getTime(), now.getTime() - halfYearMs));
+      const fetchEnd = new Date(Math.max(info.end.getTime(), now.getTime() + halfYearMs));
+      getEvents(fetchStart, fetchEnd, targetUserId)
         .then((result) => {
           if (result.success && result.data) {
             let eventsData = result.data;
@@ -1619,56 +1616,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </div>
         )}
 
-        {/* Focus pannello intelligente: selettore centrato (segmented control stile moderno) */}
-        <div
-          className="flex flex-col items-center gap-2 border-b border-zinc-200 pb-3 sm:pb-3.5 pt-0.5"
-          role="region"
-          aria-label="Focus pannello intelligente"
-        >
-          <div className="flex flex-col items-center gap-0.5 text-center px-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-              Focus pannello intelligente
-            </span>
-            <span className="text-base font-semibold text-[var(--navy)] sm:text-lg" aria-live="polite">
-              {CALENDAR_MODE_TABS.find((t) => t.id === panelFocus)?.headline}
-            </span>
-            <span className="max-w-lg text-[11px] text-zinc-500 leading-snug sm:text-xs">
-              {CALENDAR_MODE_TABS.find((t) => t.id === panelFocus)?.hint}
-            </span>
-          </div>
-          <div
-            className="flex w-full max-w-xl justify-center px-1"
-            role="tablist"
-            aria-label="Scegli cosa mostrare nel pannello intelligente"
-          >
-            <div className="inline-flex max-w-full overflow-x-auto rounded-full border border-zinc-200/90 bg-gradient-to-b from-zinc-50 to-zinc-100/90 p-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] [scrollbar-width:thin]">
-              {CALENDAR_MODE_TABS.map((tab) => {
-                const active = panelFocus === tab.id;
-                const Icon = tab.Icon;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    tabIndex={active ? 0 : -1}
-                    onClick={() => handleSetPanelFocus(tab.id)}
-                    title={`${tab.headline}. ${tab.hint}`}
-                    className={`inline-flex min-w-0 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-2 sm:px-4 sm:py-2.5 sm:text-sm ${
-                      active
-                        ? "bg-[var(--navy)] text-white shadow-md ring-1 ring-black/5"
-                        : "text-zinc-600 hover:bg-white/90 hover:text-zinc-900"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5 shrink-0 opacity-95 sm:h-4 sm:w-4" aria-hidden />
-                    <span className="truncate">{tab.shortLabel}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
         {/* Riga 2: Oggi + frecce + titolo + viste */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -1820,41 +1767,59 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         </div>
 
         {/* Pannello intelligente: prossimi elementi filtrati */}
-        <aside className="w-full flex justify-center">
-          <div className="space-y-4 w-full max-w-[360px]">
-            <div className="rounded-3xl bg-[var(--navy)] p-5 text-white shadow-sm">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-300">Pannello intelligente</p>
-              <h3 className="mt-2 text-xl font-semibold">
-                {panelFocus === "adempimenti" ? "Adempimenti" : "Udienze"}
-              </h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {panelFocus === "adempimenti"
-                  ? "Solo adempimenti collegati (nessun evento madre)."
-                  : "Udienze principali (e udienze da rinvio), con classificazione del pannello."}
-              </p>
+        <aside className="w-full">
+          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+            <div className="flex flex-col gap-3 bg-[var(--navy)] px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                  Pannello intelligente
+                </p>
+                <h3 className="mt-1 text-lg font-semibold">
+                  {panelFocus === "adempimenti" ? "Adempimenti collegati" : "Prossime udienze"}
+                </h3>
+              </div>
+              <div className="flex gap-1 rounded-full bg-white/10 p-1">
+                {CALENDAR_MODE_TABS.map((tab) => {
+                  const active = panelFocus === tab.id;
+                  const Icon = tab.Icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleSetPanelFocus(tab.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                        active
+                          ? "bg-white text-[var(--navy)] shadow-sm"
+                          : "text-white/70 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" aria-hidden />
+                      {tab.shortLabel}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-
-            <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+            <div className="p-4">
               {upcomingPanelItems.length === 0 ? (
-                <p className="text-sm text-slate-500">Nessun elemento da mostrare con i filtri attivi.</p>
+                <p className="py-4 text-center text-sm text-slate-500">
+                  Nessun elemento trovato per &ldquo;{panelFocus === "adempimenti" ? "Adempimenti" : "Udienze"}&rdquo; con i filtri attivi.
+                </p>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {upcomingPanelItems.map((item) => (
-                    <div key={item.id} className="rounded-2xl border border-slate-200 p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{item.dateLabel}</p>
-                          <p className={`mt-1 text-sm font-semibold text-slate-900 ${item.status === "done" ? "line-through text-slate-400" : ""}`}>
+                    <div key={item.id} className="rounded-xl border border-slate-200 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{item.dateLabel}</p>
+                          <p className={`mt-1 text-sm font-semibold ${item.status === "done" ? "line-through text-slate-400" : "text-slate-900"}`}>
                             {item.title}
                           </p>
                           {item.subtitle && (
-                            <p className="mt-1 text-xs text-slate-500">{item.subtitle}</p>
+                            <p className="mt-1 text-xs text-slate-500 truncate">{item.subtitle}</p>
                           )}
                         </div>
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
-                          aria-label={item.badgeLabel}
-                        >
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${item.badgeClass}`}>
                           {item.badgeLabel}
                         </span>
                       </div>
