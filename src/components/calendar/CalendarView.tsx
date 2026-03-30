@@ -372,17 +372,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   };
 
   const upcomingPanelItems = useMemo<UpcomingItem[]>(() => {
-    const horizonDays = 30;
+    // Il pannello intelligente deve mostrare passate/presenti/future.
+    // Per non inquinare la UI con elementi troppo vecchi (quando poi usiamo slice(0, 6)),
+    // ordiniamo per vicinanza a "oggi".
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const horizon = new Date(today);
-    horizon.setDate(horizon.getDate() + horizonDays);
+    const todayTs = today.getTime();
 
-    const inRange = (d: Date) => {
-      const dd = new Date(d);
-      dd.setHours(0, 0, 0, 0);
-      return dd.getTime() >= today.getTime() && dd.getTime() <= horizon.getTime();
-    };
+    const inRange = (_d: Date) => true;
 
     const dateLabel = (d: Date) =>
       d.toLocaleDateString("it-IT", {
@@ -437,6 +434,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     };
 
     const addUdienzaSubEvent = (parent: AppEvent, se: SubEvent) => {
+      if (se.isPlaceholder) return;
+      if (!se.dueAt || se.dueAt.getTime() === 0) return;
       const params = (se.ruleParams ?? {}) as Record<string, unknown>;
       const seTipo = typeof params.tipo === "string" ? params.tipo : null;
       const isRinvioUdienzaSubEvent = se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
@@ -469,6 +468,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     };
 
     const addAdempimentoLinkedSubEvent = (parent: AppEvent, se: SubEvent) => {
+      if (se.isPlaceholder) return;
+      if (!se.dueAt || se.dueAt.getTime() === 0) return;
       if (se.kind !== "attivita") return;
       const params = (se.ruleParams ?? {}) as Record<string, unknown>;
       const seTipo = typeof params.tipo === "string" ? params.tipo : null;
@@ -518,7 +519,12 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       }
     }
 
-    out.sort((a, b) => a.date.getTime() - b.date.getTime());
+    out.sort((a, b) => {
+      const da = Math.abs(a.date.getTime() - todayTs);
+      const db = Math.abs(b.date.getTime() - todayTs);
+      if (da !== db) return da - db;
+      return a.date.getTime() - b.date.getTime();
+    });
     return out.slice(0, 6);
   }, [allEvents, panelFocus, showPending, showDone, showPromemoriaTitle, visibleTagColors]);
 
@@ -1724,7 +1730,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </div>
         </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[1fr,320px] xl:items-start">
+      <div className="flex flex-col gap-6">
         <div
           ref={calendarContainerRef}
           className={
@@ -1814,23 +1820,23 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         </div>
 
         {/* Pannello intelligente: prossimi elementi filtrati */}
-        <aside className="hidden xl:block">
-          <div className="space-y-4">
+        <aside className="w-full flex justify-center">
+          <div className="space-y-4 w-full max-w-[360px]">
             <div className="rounded-3xl bg-[var(--navy)] p-5 text-white shadow-sm">
               <p className="text-xs uppercase tracking-[0.24em] text-slate-300">Pannello intelligente</p>
               <h3 className="mt-2 text-xl font-semibold">
-                {panelFocus === "adempimenti" ? "Prossimi adempimenti" : "Prossime udienze"}
+                {panelFocus === "adempimenti" ? "Adempimenti" : "Udienze"}
               </h3>
               <p className="mt-2 text-sm text-slate-300">
                 {panelFocus === "adempimenti"
-                  ? "Vista strutturale: nessun evento madre, solo adempimenti collegati."
-                  : "La vista filtrata ti aiuta a consultare velocemente i punti chiave."}
+                  ? "Solo adempimenti collegati (nessun evento madre)."
+                  : "Udienze principali (e udienze da rinvio), con classificazione del pannello."}
               </p>
             </div>
 
             <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
               {upcomingPanelItems.length === 0 ? (
-                <p className="text-sm text-slate-500">Nessun elemento nei prossimi 30 giorni.</p>
+                <p className="text-sm text-slate-500">Nessun elemento da mostrare con i filtri attivi.</p>
               ) : (
                 <div className="space-y-3">
                   {upcomingPanelItems.map((item) => (
