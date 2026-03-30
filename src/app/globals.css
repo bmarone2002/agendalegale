@@ -120,7 +120,8 @@ body {
 /* Vista Agenda: scroll nel blocco (header sito e barra strumenti restano visibili) */
 .calendar-theme .calendar-agenda-scroll-container {
   flex: 1 1 0%;
-  min-height: 0;
+  /* Più altezza per l’area che scorre (lista): ~metà viewport, con minimo/massimo ragionevoli */
+  min-height: clamp(22rem, 48vh, 42rem);
 }
 .calendar-theme .calendar-agenda-scroll-container .fc {
   flex: 1 1 auto;
