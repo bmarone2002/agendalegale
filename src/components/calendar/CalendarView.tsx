@@ -1000,6 +1000,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     const api = calendarRef.current?.getApi();
     if (!api) return;
     api.changeView(view);
+    /**
+     * Agenda (lista): l’intervallo visibile è centrato sulla data «corrente» del calendario, non su oggi.
+     * Se eri sul mese di anni fa e apri l’Agenda, spariscono pratiche tra pochi giorni (reali) perché
+     * cadono fuori dalla finestra. All’apertura dell’Agenda riallineiamo a oggi.
+     */
+    if (view === "listFromToday") {
+      api.gotoDate(new Date());
+    }
     if (typeof window !== "undefined") {
       window.localStorage.setItem("calendar:lastView", view);
     }
@@ -1675,14 +1683,20 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             },
             listFromToday: {
               type: "list",
-              duration: { years: 2 },
+              duration: { years: 8 },
+              /**
+               * Intervallo da `currentDate` (mese del calendario), non da «oggi» reale: se la data
+               * interna è anni indietro, spariscono anche eventi tra pochi giorni nel mondo reale.
+               * Mitigazione: all’apertura Agenda si chiama `gotoDate(oggi)` in `handleChangeView`.
+               * ±3 anni e fine giornata a destra (in FC `end` è spesso esclusivo a mezzanotte).
+               */
               visibleRange: (currentDate: Date) => {
                 const start = new Date(currentDate);
-                start.setFullYear(start.getFullYear() - 1);
+                start.setFullYear(start.getFullYear() - 3);
                 start.setHours(0, 0, 0, 0);
                 const end = new Date(currentDate);
-                end.setFullYear(end.getFullYear() + 1);
-                end.setHours(0, 0, 0, 0);
+                end.setFullYear(end.getFullYear() + 3);
+                end.setHours(23, 59, 59, 999);
                 return { start, end };
               },
               buttonText: "Agenda",
