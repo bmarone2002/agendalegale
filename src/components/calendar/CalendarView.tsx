@@ -134,6 +134,17 @@ function faseContieneParolaUdienza(text: string | null | undefined): boolean {
   return /\b(udienza|udienze)\b/i.test(normalized);
 }
 
+/** Pannello Udienze: sottoevento rilevante se il suo titolo (fase/etichetta della riga) contiene «udienza», o è rinvio udienza. */
+function sottoeventoPannelloUdienze(se: SubEvent): boolean {
+  if (se.kind === "promemoria") return false;
+  const params = (se.ruleParams ?? {}) as Record<string, unknown>;
+  const seTipo = typeof params.tipo === "string" ? params.tipo : null;
+  const isRinvioUdienza =
+    se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
+  if (isRinvioUdienza) return true;
+  return faseContieneParolaUdienza(se.title);
+}
+
 /**
  * «Aggiungi adempimento collegato» dalla modale pratica: i sottoeventi generati hanno
  * `ruleParams.linkedEvent: true` (ruleId `data-driven` o `reminder`, vedi `buildLinkedEventCandidates`).
@@ -545,14 +556,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     const addUdienzaSubEvent = (parent: AppEvent, se: SubEvent) => {
       if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
       if (isAdempimentoCollegatoLinkedSubEvent(se)) return;
-
-      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
-      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
-      const isRinvioUdienzaSubEvent =
-        se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
-
-      const parentUdienzaCtx = madreNelPannelloUdienze(parent);
-      if (!isRinvioUdienzaSubEvent && !parentUdienzaCtx) return;
+      if (!sottoeventoPannelloUdienze(se)) return;
 
       const title = (se.title ?? "").trim();
       if (!title) return;
