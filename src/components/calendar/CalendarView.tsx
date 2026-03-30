@@ -492,16 +492,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     const dateLabel = (d: Date) =>
       d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }).toUpperCase();
 
-    const shouldShowByStatus = (status: string | undefined) => {
-      if (status === "done") return showDone;
-      return showPending;
-    };
-
-    const shouldHideByPromemoria = (title: string) => {
-      if (showPromemoriaTitle) return false;
-      return title.toLowerCase().includes("promemoria");
-    };
-
     /** Qualsiasi occorrenza di «udienza» nella fase (anche dentro altre parole). */
     const faseContainsUdienza = (ev: AppEvent) =>
       (getFaseDisplayString(ev) ?? "").toLowerCase().includes("udienza");
@@ -509,23 +499,23 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     const motherInUdienzePanel = (ev: AppEvent) =>
       ev.type === "udienza" || faseContainsUdienza(ev);
 
+    /** Come in modale «Eventi collegati»; `ruleId` opzionale per dati legacy. */
     const isEventoCollegatoSubEvent = (se: SubEvent) => {
-      if (se.kind !== "attivita" || se.ruleId !== "rinvio-udienza") return false;
+      if (se.kind !== "attivita") return false;
       const params = (se.ruleParams ?? {}) as Record<string, unknown>;
       const seTipo = typeof params.tipo === "string" ? params.tipo : null;
-      return seTipo === "evento-collegato";
+      if (seTipo !== "evento-collegato") return false;
+      if (se.ruleId && se.ruleId !== "rinvio-udienza") return false;
+      return true;
     };
 
     const out: SmartPanelItem[] = [];
 
     const addUdienzaMother = (ev: AppEvent) => {
       if (!motherInUdienzePanel(ev)) return;
-      const motherColorKey = paletteKeyForFilter(ev.color);
-      if (motherColorKey && !visibleTagColors.has(motherColorKey)) return;
       const title = (ev.title ?? "").trim();
-      if (!title || shouldHideByPromemoria(title)) return;
+      if (!title) return;
       const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
       const startAt = new Date(ev.startAt);
       const fase = getFaseDisplayString(ev);
       out.push({
@@ -552,12 +542,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const parentUdienzaCtx = motherInUdienzePanel(parent);
       if (!isRinvioUdienzaSubEvent && !parentUdienzaCtx) return;
 
-      const parentColorKey = paletteKeyForFilter(parent.color);
-      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
       const title = (se.title ?? "").trim();
-      if (!title || shouldHideByPromemoria(title)) return;
+      if (!title) return;
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
       const fase = getFaseDisplayString(parent);
       out.push({
         id: `sp-u-se-${se.id}`,
@@ -574,12 +561,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     const addEventoCollegato = (parent: AppEvent, se: SubEvent) => {
       if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
       if (!isEventoCollegatoSubEvent(se)) return;
-      const parentColorKey = paletteKeyForFilter(parent.color);
-      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
       const title = (se.title ?? "").trim();
-      if (!title || shouldHideByPromemoria(title)) return;
+      if (!title) return;
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
       const fase = getFaseDisplayString(parent);
       const sotto = fase ? `Evento collegato · ${fase}` : "Evento collegato";
       out.push({
@@ -610,7 +594,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       return a.date.getTime() - b.date.getTime();
     });
     return out;
-  }, [allEvents, panelFocus, showPending, showDone, showPromemoriaTitle, visibleTagColors]);
+  }, [allEvents, panelFocus]);
 
   const filterColorKeyCount = allCalendarFilterColorKeys().length;
   const visibleTagColorCount = visibleTagColors.size;
@@ -643,10 +627,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const viewType =
         info.view?.type ?? calendarRef.current?.getApi()?.view?.type ?? "";
 
-      const nowTs = Date.now();
-      const halfYearMs = 180 * 24 * 60 * 60 * 1000;
-      const fetchStart = new Date(Math.min(info.start.getTime(), nowTs - halfYearMs));
-      const fetchEnd = new Date(Math.max(info.end.getTime(), nowTs + halfYearMs));
+      // Finestra ampia per `allEvents` (pannello intelligente + ricerca). getEvents() restituisce
+      // solo pratiche con almeno un’intersezione col range: se la finestra è stretta, spariscono
+      // udienze/adempimenti lontani nel tempo (anche se la pratica ha altre date dentro).
+      const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
+      const wideStart = new Date(Date.now() - 12 * YEAR_MS);
+      const wideEnd = new Date(Date.now() + 20 * YEAR_MS);
+      const fetchStart = new Date(Math.min(info.start.getTime(), wideStart.getTime()));
+      const fetchEnd = new Date(Math.max(info.end.getTime(), wideEnd.getTime()));
       getEvents(fetchStart, fetchEnd, targetUserId)
         .then((result) => {
           if (result.success && result.data) {
@@ -1752,7 +1740,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             <div className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4">
               {smartPanelItems.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-500">
-                  Nessun elemento in questo resoconto con i filtri attuali (colore tag, promemoria, stato).
+                  Nessuna voce in questo resoconto. Il pannello elenca tutte le udienze rilevate (fase o tipo) e tutti gli
+                  eventi collegati, senza i filtri colore/promemoria/stato del calendario. Se è vuoto, non ci sono voci che
+                  rientrano nei criteri oppure i dati non sono ancora stati ricaricati.
                 </p>
               ) : (
                 <ul className="space-y-3">
