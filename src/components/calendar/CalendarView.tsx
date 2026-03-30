@@ -27,7 +27,6 @@ import {
   allCalendarFilterColorKeys,
   COLOR_FILTER_NONE,
   COLOR_FILTER_OTHER,
-  matchesUdienzaPhrasesInFaseText,
 } from "@/constants/event-tag-colors";
 import { getFaseDisplayString, getFaseDisplayFromFields } from "@/lib/event-fase";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -480,7 +479,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     dateLabel: string;
     title: string;
     subtitle: string;
-    badgeLabel: "Udienza" | "Ademp.";
+    badgeLabel: string;
     badgeClass: string;
     status: "pending" | "done";
   };
@@ -503,15 +502,24 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       return title.toLowerCase().includes("promemoria");
     };
 
-    const classifyUdienzaMother = (ev: AppEvent) => {
-      if (ev.type === "udienza") return true;
-      return matchesUdienzaPhrasesInFaseText(getFaseDisplayString(ev));
+    /** Qualsiasi occorrenza di «udienza» nella fase (anche dentro altre parole). */
+    const faseContainsUdienza = (ev: AppEvent) =>
+      (getFaseDisplayString(ev) ?? "").toLowerCase().includes("udienza");
+
+    const motherInUdienzePanel = (ev: AppEvent) =>
+      ev.type === "udienza" || faseContainsUdienza(ev);
+
+    const isEventoCollegatoSubEvent = (se: SubEvent) => {
+      if (se.kind !== "attivita" || se.ruleId !== "rinvio-udienza") return false;
+      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
+      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
+      return seTipo === "evento-collegato";
     };
 
     const out: SmartPanelItem[] = [];
 
     const addUdienzaMother = (ev: AppEvent) => {
-      if (!classifyUdienzaMother(ev)) return;
+      if (!motherInUdienzePanel(ev)) return;
       const motherColorKey = paletteKeyForFilter(ev.color);
       if (motherColorKey && !visibleTagColors.has(motherColorKey)) return;
       const title = (ev.title ?? "").trim();
@@ -534,11 +542,16 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
 
     const addUdienzaSubEvent = (parent: AppEvent, se: SubEvent) => {
       if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
+      if (isEventoCollegatoSubEvent(se)) return;
+
       const params = (se.ruleParams ?? {}) as Record<string, unknown>;
       const seTipo = typeof params.tipo === "string" ? params.tipo : null;
       const isRinvioUdienzaSubEvent =
         se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
-      if (!isRinvioUdienzaSubEvent) return;
+
+      const parentUdienzaCtx = motherInUdienzePanel(parent);
+      if (!isRinvioUdienzaSubEvent && !parentUdienzaCtx) return;
+
       const parentColorKey = paletteKeyForFilter(parent.color);
       if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
       const title = (se.title ?? "").trim();
@@ -558,14 +571,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       });
     };
 
-    const addAdempimentoCollegato = (parent: AppEvent, se: SubEvent) => {
+    const addEventoCollegato = (parent: AppEvent, se: SubEvent) => {
       if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
-      if (se.kind !== "attivita") return;
-      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
-      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
-      const isCollegato =
-        se.ruleId === "rinvio-udienza" && se.kind === "attivita" && seTipo === "evento-collegato";
-      if (!isCollegato) return;
+      if (!isEventoCollegatoSubEvent(se)) return;
       const parentColorKey = paletteKeyForFilter(parent.color);
       if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
       const title = (se.title ?? "").trim();
@@ -573,13 +581,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       if (!shouldShowByStatus(status)) return;
       const fase = getFaseDisplayString(parent);
+      const sotto = fase ? `Evento collegato · ${fase}` : "Evento collegato";
       out.push({
         id: `sp-a-se-${se.id}`,
         date: se.dueAt,
         dateLabel: dateLabel(se.dueAt),
         title,
-        subtitle: fase || "Adempimento collegato",
-        badgeLabel: "Ademp.",
+        subtitle: sotto,
+        badgeLabel: "Ev. collegato",
         badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
         status,
       });
@@ -590,7 +599,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         addUdienzaMother(ev);
         for (const se of ev.subEvents ?? []) addUdienzaSubEvent(ev, se);
       } else {
-        for (const se of ev.subEvents ?? []) addAdempimentoCollegato(ev, se);
+        for (const se of ev.subEvents ?? []) addEventoCollegato(ev, se);
       }
     }
 
@@ -1713,7 +1722,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   Pannello intelligente
                 </p>
                 <h3 className="mt-1 text-lg font-semibold tracking-tight">
-                  {panelFocus === "adempimenti" ? "Adempimenti collegati" : "Prossime udienze"}
+                  {panelFocus === "adempimenti" ? "Eventi collegati" : "Prossime udienze"}
                 </h3>
               </div>
               <div className="flex shrink-0 gap-1 rounded-full bg-white/10 p-1" role="tablist" aria-label="Tipo di resoconto">
