@@ -34,30 +34,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Gavel, ListChecks, type LucideIcon } from "lucide-react";
 
-/** Focus pannello intelligente (persistito in localStorage). Il calendario resta sempre completo. */
-export type PanelFocus = "udienze" | "adempimenti";
+/** Focus del resoconto sotto calendario/agenda (non filtra la vista principale). */
+type SmartPanelFocus = "udienze" | "adempimenti";
 
-const CALENDAR_MODE_TABS: Array<{
-  id: PanelFocus;
-  shortLabel: string;
-  headline: string;
-  hint: string;
-  Icon: LucideIcon;
-}> = [
-  {
-    id: "udienze",
-    shortLabel: "Udienze",
-    headline: "Solo udienze",
-    hint: "Focus del pannello intelligente: solo udienze.",
-    Icon: Gavel,
-  },
-  {
-    id: "adempimenti",
-    shortLabel: "Adempimenti",
-    headline: "Solo adempimenti collegati",
-    hint: "Focus del pannello intelligente: solo adempimenti collegati.",
-    Icon: ListChecks,
-  },
+const SMART_PANEL_TABS: Array<{ id: SmartPanelFocus; shortLabel: string; Icon: LucideIcon }> = [
+  { id: "udienze", shortLabel: "Udienze", Icon: Gavel },
+  { id: "adempimenti", shortLabel: "Adempimenti", Icon: ListChecks },
 ];
 
 // Sottoeventi: rosso (pending), verde (done), neutro per promemoria futuri (prima del giorno).
@@ -337,189 +319,19 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     return new Set(all);
   });
 
-  const [panelFocus, setPanelFocus] = useState<PanelFocus>(() => {
+  const [panelFocus, setPanelFocus] = useState<SmartPanelFocus>(() => {
     if (typeof window === "undefined") return "udienze";
-    const rawNew = window.localStorage.getItem("calendar:panelFocus");
-    if (rawNew === "udienze" || rawNew === "adempimenti") return rawNew;
-
-    // Backward compatibility:
-    // - vecchio toggle solo udienze -> "udienze"
-    // - vecchia "calendarMode" (includeva "complete") -> mappiamo: complete => "udienze"
-    const legacySoloUdienze = window.localStorage.getItem("calendar:soloUdienze") === "true";
-    if (legacySoloUdienze) return "udienze";
-
-    const legacyMode = window.localStorage.getItem("calendar:calendarMode");
-    if (legacyMode === "udienze" || legacyMode === "adempimenti") return legacyMode;
+    const stored = window.localStorage.getItem("calendar:smartPanelFocus");
+    if (stored === "udienze" || stored === "adempimenti") return stored;
+    const legacyPanel = window.localStorage.getItem("calendar:panelFocus");
+    if (legacyPanel === "udienze" || legacyPanel === "adempimenti") return legacyPanel;
+    if (window.localStorage.getItem("calendar:soloUdienze") === "true") return "udienze";
     return "udienze";
   });
   const [tagColorLabels, setTagColorLabels] = useState<Record<string, string>>(() => loadTagColorLabels());
   const [draftEvents, setDraftEvents] = useState<DraftEvent[]>([]);
   const [showPending, setShowPending] = useState<boolean>(true);
   const [showDone, setShowDone] = useState<boolean>(false);
-
-  type UpcomingKind = "udienza" | "adempimento";
-  type UpcomingBadgeLabel = "Udienza" | "Ademp.";
-  type UpcomingItem = {
-    id: string;
-    date: Date;
-    dateLabel: string;
-    title: string;
-    subtitle: string;
-    kind: UpcomingKind;
-    badgeLabel: UpcomingBadgeLabel;
-    badgeClass: string;
-    status: "pending" | "done";
-  };
-
-  const upcomingPanelItems = useMemo<UpcomingItem[]>(() => {
-    // Il pannello intelligente deve mostrare passate/presenti/future.
-    // Per non inquinare la UI con elementi troppo vecchi (quando poi usiamo slice(0, 6)),
-    // ordiniamo per vicinanza a "oggi".
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTs = today.getTime();
-
-    const dateLabel = (d: Date) =>
-      d.toLocaleDateString("it-IT", {
-        day: "numeric",
-        month: "short",
-      });
-
-    const shouldShowByStatus = (status: string | undefined) => {
-      if (status === "done") return showDone;
-      return showPending;
-    };
-
-    const shouldHideByPromemoria = (title: string) => {
-      if (showPromemoriaTitle) return false;
-      return title.toLowerCase().includes("promemoria");
-    };
-
-    const classifyUdienzaMother = (ev: AppEvent) => {
-      if (ev.type === "udienza") return true;
-      return matchesUdienzaPhrasesInFaseText(getFaseDisplayString(ev));
-    };
-
-    const out: UpcomingItem[] = [];
-
-    const addUdienzaMother = (ev: AppEvent) => {
-      if (!classifyUdienzaMother(ev)) return;
-      const motherColorKey = paletteKeyForFilter(ev.color);
-      if (motherColorKey && !visibleTagColors.has(motherColorKey)) return;
-
-      const title = (ev.title ?? "").trim();
-      if (!title) return;
-      if (shouldHideByPromemoria(title)) return;
-
-      const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
-
-      const startAt = new Date(ev.startAt);
-
-      const fase = getFaseDisplayString(ev);
-      out.push({
-        id: `u-m-${ev.id}`,
-        date: startAt,
-        dateLabel: dateLabel(startAt),
-        title,
-        subtitle: fase,
-        kind: "udienza",
-        badgeLabel: "Udienza",
-        badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
-        status,
-      });
-    };
-
-    const addUdienzaSubEvent = (parent: AppEvent, se: SubEvent) => {
-      if (se.isPlaceholder) return;
-      if (!se.dueAt || se.dueAt.getTime() === 0) return;
-      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
-      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
-      const isRinvioUdienzaSubEvent = se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
-      if (!isRinvioUdienzaSubEvent) return;
-
-      const parentColorKey = paletteKeyForFilter(parent.color);
-      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
-
-      const title = (se.title ?? "").trim();
-      if (!title) return;
-      if (shouldHideByPromemoria(title)) return;
-
-      const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
-
-      const fase = getFaseDisplayString(parent);
-      out.push({
-        id: `u-se-${se.id}`,
-        date: se.dueAt,
-        dateLabel: dateLabel(se.dueAt),
-        title,
-        subtitle: fase,
-        kind: "udienza",
-        badgeLabel: "Udienza",
-        badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
-        status,
-      });
-    };
-
-    const addAdempimentoLinkedSubEvent = (parent: AppEvent, se: SubEvent) => {
-      if (se.isPlaceholder) return;
-      if (!se.dueAt || se.dueAt.getTime() === 0) return;
-      if (se.kind !== "attivita") return;
-      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
-      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
-      const isAdempimentoCollegatoSubEvent =
-        se.ruleId === "rinvio-udienza" && se.kind === "attivita" && seTipo === "evento-collegato";
-      if (!isAdempimentoCollegatoSubEvent) return;
-
-      const parentColorKey = paletteKeyForFilter(parent.color);
-      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
-
-      const title = (se.title ?? "").trim();
-      if (!title) return;
-      if (shouldHideByPromemoria(title)) return;
-
-      const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
-      if (!shouldShowByStatus(status)) return;
-
-      const fase = getFaseDisplayString(parent);
-      out.push({
-        id: `a-se-${se.id}`,
-        date: se.dueAt,
-        dateLabel: dateLabel(se.dueAt),
-        title,
-        subtitle: fase,
-        kind: "adempimento",
-        badgeLabel: "Ademp.",
-        badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
-        status,
-      });
-    };
-
-    const shouldUseUdienzePanel = panelFocus === "udienze";
-
-    for (const ev of allEvents) {
-      if (shouldUseUdienzePanel) {
-        addUdienzaMother(ev);
-        for (const se of ev.subEvents ?? []) {
-          addUdienzaSubEvent(ev, se);
-        }
-      } else {
-        // Solo adempimenti (opzione A): nessun evento madre, solo sottoeventi collegati.
-        for (const se of ev.subEvents ?? []) {
-          addAdempimentoLinkedSubEvent(ev, se);
-        }
-      }
-    }
-
-    out.sort((a, b) => {
-      const da = Math.abs(a.date.getTime() - todayTs);
-      const db = Math.abs(b.date.getTime() - todayTs);
-      if (da !== db) return da - db;
-      return a.date.getTime() - b.date.getTime();
-    });
-    return out.slice(0, 9);
-  }, [allEvents, panelFocus, showPending, showDone, showPromemoriaTitle, visibleTagColors]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -655,12 +467,141 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     });
   }, []);
 
-  const handleSetPanelFocus = useCallback((next: PanelFocus) => {
+  const handleSetPanelFocus = useCallback((next: SmartPanelFocus) => {
     setPanelFocus(next);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("calendar:panelFocus", next);
+      window.localStorage.setItem("calendar:smartPanelFocus", next);
     }
   }, []);
+
+  type SmartPanelItem = {
+    id: string;
+    date: Date;
+    dateLabel: string;
+    title: string;
+    subtitle: string;
+    badgeLabel: "Udienza" | "Ademp.";
+    badgeClass: string;
+    status: "pending" | "done";
+  };
+
+  const smartPanelItems = useMemo<SmartPanelItem[]>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTs = today.getTime();
+
+    const dateLabel = (d: Date) =>
+      d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }).toUpperCase();
+
+    const shouldShowByStatus = (status: string | undefined) => {
+      if (status === "done") return showDone;
+      return showPending;
+    };
+
+    const shouldHideByPromemoria = (title: string) => {
+      if (showPromemoriaTitle) return false;
+      return title.toLowerCase().includes("promemoria");
+    };
+
+    const classifyUdienzaMother = (ev: AppEvent) => {
+      if (ev.type === "udienza") return true;
+      return matchesUdienzaPhrasesInFaseText(getFaseDisplayString(ev));
+    };
+
+    const out: SmartPanelItem[] = [];
+
+    const addUdienzaMother = (ev: AppEvent) => {
+      if (!classifyUdienzaMother(ev)) return;
+      const motherColorKey = paletteKeyForFilter(ev.color);
+      if (motherColorKey && !visibleTagColors.has(motherColorKey)) return;
+      const title = (ev.title ?? "").trim();
+      if (!title || shouldHideByPromemoria(title)) return;
+      const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
+      if (!shouldShowByStatus(status)) return;
+      const startAt = new Date(ev.startAt);
+      const fase = getFaseDisplayString(ev);
+      out.push({
+        id: `sp-u-m-${ev.id}`,
+        date: startAt,
+        dateLabel: dateLabel(startAt),
+        title,
+        subtitle: fase,
+        badgeLabel: "Udienza",
+        badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
+        status,
+      });
+    };
+
+    const addUdienzaSubEvent = (parent: AppEvent, se: SubEvent) => {
+      if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
+      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
+      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
+      const isRinvioUdienzaSubEvent =
+        se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
+      if (!isRinvioUdienzaSubEvent) return;
+      const parentColorKey = paletteKeyForFilter(parent.color);
+      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
+      const title = (se.title ?? "").trim();
+      if (!title || shouldHideByPromemoria(title)) return;
+      const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
+      if (!shouldShowByStatus(status)) return;
+      const fase = getFaseDisplayString(parent);
+      out.push({
+        id: `sp-u-se-${se.id}`,
+        date: se.dueAt,
+        dateLabel: dateLabel(se.dueAt),
+        title,
+        subtitle: fase,
+        badgeLabel: "Udienza",
+        badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
+        status,
+      });
+    };
+
+    const addAdempimentoCollegato = (parent: AppEvent, se: SubEvent) => {
+      if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
+      if (se.kind !== "attivita") return;
+      const params = (se.ruleParams ?? {}) as Record<string, unknown>;
+      const seTipo = typeof params.tipo === "string" ? params.tipo : null;
+      const isCollegato =
+        se.ruleId === "rinvio-udienza" && se.kind === "attivita" && seTipo === "evento-collegato";
+      if (!isCollegato) return;
+      const parentColorKey = paletteKeyForFilter(parent.color);
+      if (parentColorKey && !visibleTagColors.has(parentColorKey)) return;
+      const title = (se.title ?? "").trim();
+      if (!title || shouldHideByPromemoria(title)) return;
+      const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
+      if (!shouldShowByStatus(status)) return;
+      const fase = getFaseDisplayString(parent);
+      out.push({
+        id: `sp-a-se-${se.id}`,
+        date: se.dueAt,
+        dateLabel: dateLabel(se.dueAt),
+        title,
+        subtitle: fase || "Adempimento collegato",
+        badgeLabel: "Ademp.",
+        badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
+        status,
+      });
+    };
+
+    for (const ev of allEvents) {
+      if (panelFocus === "udienze") {
+        addUdienzaMother(ev);
+        for (const se of ev.subEvents ?? []) addUdienzaSubEvent(ev, se);
+      } else {
+        for (const se of ev.subEvents ?? []) addAdempimentoCollegato(ev, se);
+      }
+    }
+
+    out.sort((a, b) => {
+      const da = Math.abs(a.date.getTime() - todayTs);
+      const db = Math.abs(b.date.getTime() - todayTs);
+      if (da !== db) return da - db;
+      return a.date.getTime() - b.date.getTime();
+    });
+    return out;
+  }, [allEvents, panelFocus, showPending, showDone, showPromemoriaTitle, visibleTagColors]);
 
   const filterColorKeyCount = allCalendarFilterColorKeys().length;
   const visibleTagColorCount = visibleTagColors.size;
@@ -693,10 +634,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const viewType =
         info.view?.type ?? calendarRef.current?.getApi()?.view?.type ?? "";
 
-      const now = new Date();
+      const nowTs = Date.now();
       const halfYearMs = 180 * 24 * 60 * 60 * 1000;
-      const fetchStart = new Date(Math.min(info.start.getTime(), now.getTime() - halfYearMs));
-      const fetchEnd = new Date(Math.max(info.end.getTime(), now.getTime() + halfYearMs));
+      const fetchStart = new Date(Math.min(info.start.getTime(), nowTs - halfYearMs));
+      const fetchEnd = new Date(Math.max(info.end.getTime(), nowTs + halfYearMs));
       getEvents(fetchStart, fetchEnd, targetUserId)
         .then((result) => {
           if (result.success && result.data) {
@@ -749,8 +690,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               if (!key) return true;
               return visibleTagColors.has(key);
             });
-            // Nota: il calendario resta sempre completo. Il filtro "solo udienze / solo adempimenti"
-            // agisce solo sul pannello intelligente a destra.
             // Titolo con «Promemoria»: se disattivato, nascondi quelle voci
             if (!showPromemoriaTitle) {
               events = events.filter((ev) => {
@@ -1677,15 +1616,15 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-6">
-        <div
-          ref={calendarContainerRef}
-          className={
-            currentView === "listFromToday"
-              ? "calendar-agenda-scroll-container calendar-month-container flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-x-auto"
-              : "calendar-month-container w-full min-w-0 max-w-full overflow-x-auto"
-          }
-        >
+      <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-6">
+      <div
+        ref={calendarContainerRef}
+        className={
+          currentView === "listFromToday"
+            ? "calendar-agenda-scroll-container calendar-month-container flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-x-auto"
+            : "calendar-month-container w-full min-w-0 max-w-full shrink-0 overflow-x-auto"
+        }
+      >
         {currentView === "listFromToday" && (
           <div className="mb-1 px-1 sm:hidden">
             <p className="text-[11px] text-zinc-500 flex items-center gap-1">
@@ -1766,66 +1705,80 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         )}
         </div>
 
-        {/* Pannello intelligente: prossimi elementi filtrati */}
-        <aside className="w-full">
-          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+        <aside className="w-full shrink-0" aria-label="Pannello intelligente: resoconto udienze o adempimenti">
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="flex flex-col gap-3 bg-[var(--navy)] px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
                   Pannello intelligente
                 </p>
-                <h3 className="mt-1 text-lg font-semibold">
+                <h3 className="mt-1 text-lg font-semibold tracking-tight">
                   {panelFocus === "adempimenti" ? "Adempimenti collegati" : "Prossime udienze"}
                 </h3>
               </div>
-              <div className="flex gap-1 rounded-full bg-white/10 p-1">
-                {CALENDAR_MODE_TABS.map((tab) => {
+              <div className="flex shrink-0 gap-1 rounded-full bg-white/10 p-1" role="tablist" aria-label="Tipo di resoconto">
+                {SMART_PANEL_TABS.map((tab) => {
                   const active = panelFocus === tab.id;
                   const Icon = tab.Icon;
                   return (
                     <button
                       key={tab.id}
                       type="button"
+                      role="tab"
+                      aria-selected={active}
                       onClick={() => handleSetPanelFocus(tab.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition-all sm:px-4 ${
                         active
                           ? "bg-white text-[var(--navy)] shadow-sm"
-                          : "text-white/70 hover:text-white hover:bg-white/10"
+                          : "text-white/80 hover:bg-white/10 hover:text-white"
                       }`}
                     >
-                      <Icon className="h-3.5 w-3.5" aria-hidden />
+                      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
                       {tab.shortLabel}
                     </button>
                   );
                 })}
               </div>
             </div>
-            <div className="p-4">
-              {upcomingPanelItems.length === 0 ? (
-                <p className="py-4 text-center text-sm text-slate-500">
-                  Nessun elemento trovato per &ldquo;{panelFocus === "adempimenti" ? "Adempimenti" : "Udienze"}&rdquo; con i filtri attivi.
+            <div className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4">
+              {smartPanelItems.length === 0 ? (
+                <p className="py-6 text-center text-sm text-slate-500">
+                  Nessun elemento in questo resoconto con i filtri attuali (colore tag, promemoria, stato).
                 </p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {upcomingPanelItems.map((item) => (
-                    <div key={item.id} className="rounded-xl border border-slate-200 p-3">
-                      <div className="flex items-start justify-between gap-2">
+                <ul className="space-y-3">
+                  {smartPanelItems.map((item) => (
+                    <li
+                      key={item.id}
+                      className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{item.dateLabel}</p>
-                          <p className={`mt-1 text-sm font-semibold ${item.status === "done" ? "line-through text-slate-400" : "text-slate-900"}`}>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                            {item.dateLabel}
+                          </p>
+                          <p
+                            className={`mt-1 text-sm font-semibold text-slate-900 ${
+                              item.status === "done" ? "line-through text-slate-400" : ""
+                            }`}
+                          >
                             {item.title}
                           </p>
-                          {item.subtitle && (
-                            <p className="mt-1 text-xs text-slate-500 truncate">{item.subtitle}</p>
-                          )}
+                          {item.subtitle ? (
+                            <p className="mt-1 truncate text-xs text-slate-500" title={item.subtitle}>
+                              {item.subtitle}
+                            </p>
+                          ) : null}
                         </div>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${item.badgeClass}`}>
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
+                        >
                           {item.badgeLabel}
                         </span>
                       </div>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
             </div>
           </div>
