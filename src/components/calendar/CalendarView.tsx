@@ -134,7 +134,22 @@ function faseContieneParolaUdienza(text: string | null | undefined): boolean {
   return /\b(udienza|udienze)\b/i.test(normalized);
 }
 
-/** Pannello Udienze: sottoevento rilevante se il suo titolo (fase/etichetta della riga) contiene «udienza», o è rinvio udienza. */
+/**
+ * Toglie i blocchi tra parentesi tonde (ripetutamente): spesso sono la formula del calcolo
+ * (es. «40 gg prima udienza»), non il nome della fase — altrimenti «udienza» matcha a torto.
+ */
+function titoloSenzaParentesiFormula(text: string | null | undefined): string {
+  if (text == null) return "";
+  let s = String(text).trim();
+  let prev = "";
+  while (s !== prev) {
+    prev = s;
+    s = s.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+  }
+  return s;
+}
+
+/** Pannello Udienze: sottoevento rilevante se il titolo (fuori parentesi di calcolo) contiene «udienza», o è rinvio udienza. */
 function sottoeventoPannelloUdienze(se: SubEvent): boolean {
   if (se.kind === "promemoria") return false;
   const params = (se.ruleParams ?? {}) as Record<string, unknown>;
@@ -142,7 +157,7 @@ function sottoeventoPannelloUdienze(se: SubEvent): boolean {
   const isRinvioUdienza =
     se.ruleId === "rinvio-udienza" && se.kind === "termine" && seTipo === "udienza";
   if (isRinvioUdienza) return true;
-  return faseContieneParolaUdienza(se.title);
+  return faseContieneParolaUdienza(titoloSenzaParentesiFormula(se.title));
 }
 
 /**
