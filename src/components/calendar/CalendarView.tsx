@@ -526,6 +526,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
 
   type SmartPanelItem = {
     id: string;
+    /** Pratica madre (modale modifica). */
+    parentEventId: string;
+    /** Sottoevento da evidenziare in modale, se la riga è un termine/attività. */
+    subEventId?: string;
     date: Date;
     dateLabel: string;
     title: string;
@@ -558,6 +562,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const fase = getFaseDisplayString(ev);
       out.push({
         id: `sp-u-m-${ev.id}`,
+        parentEventId: ev.id,
         date: startAt,
         dateLabel: dateLabel(startAt),
         title,
@@ -579,6 +584,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const fase = getFaseDisplayString(parent);
       out.push({
         id: `sp-u-se-${se.id}`,
+        parentEventId: parent.id,
+        subEventId: se.id,
         date: se.dueAt,
         dateLabel: dateLabel(se.dueAt),
         title,
@@ -599,6 +606,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const sotto = fase ? `Evento collegato · ${fase}` : "Evento collegato";
       out.push({
         id: `sp-a-se-${se.id}`,
+        parentEventId: parent.id,
+        subEventId: se.id,
         date: se.dueAt,
         dateLabel: dateLabel(se.dueAt),
         title,
@@ -939,6 +948,22 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       setModalState({ mode: "edit", eventId, highlightSubEventId });
     },
     [draftEvents]
+  );
+
+  /** Pannello intelligente: apre la pratica in modale (con sottoevento evidenziato) e centra il calendario sulla data. */
+  const handleSmartPanelItemActivate = useCallback(
+    (parentEventId: string, subEventId: string | undefined, anchorDate: Date) => {
+      setModalState({
+        mode: "edit",
+        eventId: parentEventId,
+        highlightSubEventId: subEventId,
+      });
+      const api = calendarRef.current?.getApi();
+      if (api) {
+        api.gotoDate(anchorDate);
+      }
+    },
+    []
   );
 
   const handleEventDrop = useCallback(
@@ -1755,7 +1780,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   Pannello intelligente
                 </p>
                 <h3 className="mt-1 text-lg font-semibold tracking-tight">
-                  {panelFocus === "adempimenti" ? "Eventi collegati" : "Prossime udienze"}
+                  {panelFocus === "adempimenti" ? "Adempimenti" : "Prossime udienze"}
                 </h3>
               </div>
               <div className="flex shrink-0 gap-1 rounded-full bg-white/10 p-1" role="tablist" aria-label="Tipo di resoconto">
@@ -1785,41 +1810,47 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             <div className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4">
               {smartPanelItems.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-500">
-                  Nessuna voce in questo resoconto. Il pannello elenca tutte le udienze rilevate (fase o tipo) e tutti gli
-                  eventi collegati, senza i filtri colore/promemoria/stato del calendario. Se è vuoto, non ci sono voci che
-                  rientrano nei criteri oppure i dati non sono ancora stati ricaricati.
+                  Nessuna voce in questo resoconto. Il pannello elenca le udienze rilevate (fase o tipo) e gli adempimenti
+                  collegati alle pratiche, senza i filtri colore/promemoria/stato del calendario. Se è vuoto, non ci sono
+                  voci che rientrano nei criteri oppure i dati non sono ancora stati ricaricati.
                 </p>
               ) : (
                 <ul className="space-y-3">
                   {smartPanelItems.map((item) => (
-                    <li
-                      key={item.id}
-                      className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                            {item.dateLabel}
-                          </p>
-                          <p
-                            className={`mt-1 text-sm font-semibold text-slate-900 ${
-                              item.status === "done" ? "line-through text-slate-400" : ""
-                            }`}
-                          >
-                            {item.title}
-                          </p>
-                          {item.subtitle ? (
-                            <p className="mt-1 truncate text-xs text-slate-500" title={item.subtitle}>
-                              {item.subtitle}
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)]/35 focus-visible:ring-offset-2"
+                        onClick={() =>
+                          handleSmartPanelItemActivate(item.parentEventId, item.subEventId, item.date)
+                        }
+                        title="Apri la pratica in modale e centra il calendario su questa data"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                              {item.dateLabel}
                             </p>
-                          ) : null}
+                            <p
+                              className={`mt-1 text-sm font-semibold text-slate-900 ${
+                                item.status === "done" ? "line-through text-slate-400" : ""
+                              }`}
+                            >
+                              {item.title}
+                            </p>
+                            {item.subtitle ? (
+                              <p className="mt-1 truncate text-xs text-slate-500" title={item.subtitle}>
+                                {item.subtitle}
+                              </p>
+                            ) : null}
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
+                          >
+                            {item.badgeLabel}
+                          </span>
                         </div>
-                        <span
-                          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
-                        >
-                          {item.badgeLabel}
-                        </span>
-                      </div>
+                      </button>
                     </li>
                   ))}
                 </ul>
