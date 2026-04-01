@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -70,6 +70,20 @@ function isListViewType(viewType: string): boolean {
     viewType === "listMonth" ||
     viewType === "listFromToday"
   );
+}
+
+/** YYYY-MM-DD locale (come `data-date` sulle righe `.fc-list-day` di FullCalendar). */
+function formatLocalYmd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function dayStartLocalTs(d: Date): number {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x.getTime();
 }
 
 function blendWithWhite(hex: string, whiteAmount: number): string {
@@ -332,6 +346,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const canEdit = !targetUserId || permission === "FULL";
   const calendarRef = useRef<InstanceType<typeof FullCalendar> | null>(null);
   const calendarContainerRef = useRef<HTMLDivElement | null>(null);
+  const smartPanelScrollRef = useRef<HTMLDivElement | null>(null);
   const listEventRowElsRef = useRef<Map<string, HTMLElement>>(new Map());
   const skipFilterEffectRef = useRef(true);
   const [initialView, setInitialView] = useState<string | null>(null);
@@ -383,6 +398,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const [showPending, setShowPending] = useState<boolean>(true);
   const [showDone, setShowDone] = useState<boolean>(false);
 
+  useLayoutEffect(() => {
+    smartPanelScrollRef.current?.scrollTo({ top: 0 });
+  }, [panelFocus]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem("calendar:lastView");
@@ -400,20 +419,43 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     setModalState({ mode: "edit", eventId: deepLinkEventId });
   }, []);
 
-  /** Scroll interno vista Agenda: porta in vista la riga del giorno corrente (FullCalendar non espone scrollTo per list view). */
-  const scrollAgendaToToday = useCallback(() => {
+  /**
+   * Vista Agenda: porta in vista il primo giorno con eventi da oggi in poi (`data-date` sulle righe list).
+   * Se oggi non ha righe (nessun evento), FullCalendar non crea `.fc-day-today` — senza questo si resta in cima all’intervallo.
+   * Se non ci sono eventi futuri, si ancorà all’ultimo giorno elencato (attività recenti); il passato resta raggiungibile scrollando verso l’alto.
+   */
+  const scrollAgendaToFirstUsefulDay = useCallback(() => {
     const api = calendarRef.current?.getApi();
     if (!api || api.view.type !== "listFromToday") return;
     const root = calendarContainerRef.current;
     if (!root) return;
     const scroller = root.querySelector(".fc-scroller") as HTMLElement | null;
-    const todayRow =
-      (root.querySelector(".fc-list-day.fc-day-today") as HTMLElement | null) ??
-      (root.querySelector("tr.fc-list-day.fc-day-today") as HTMLElement | null);
-    if (!scroller || !todayRow) return;
+    if (!scroller) return;
+
+    const todayStr = formatLocalYmd(new Date());
+    const dayRows = root.querySelectorAll("tr.fc-list-day[data-date]");
+
+    let target: HTMLElement | null = null;
+    for (const row of dayRows) {
+      const ds = row.getAttribute("data-date");
+      if (ds && ds >= todayStr) {
+        target = row as HTMLElement;
+        break;
+      }
+    }
+    if (!target && dayRows.length > 0) {
+      target = dayRows[dayRows.length - 1] as HTMLElement;
+    }
+    if (!target) {
+      target =
+        (root.querySelector("tr.fc-list-day.fc-day-today") as HTMLElement | null) ??
+        (root.querySelector(".fc-list-day.fc-day-today") as HTMLElement | null);
+    }
+    if (!target) return;
+
     requestAnimationFrame(() => {
       const sRect = scroller.getBoundingClientRect();
-      const tRect = todayRow.getBoundingClientRect();
+      const tRect = target!.getBoundingClientRect();
       const nextTop = scroller.scrollTop + (tRect.top - sRect.top) - 8;
       scroller.scrollTop = Math.max(0, nextTop);
     });
@@ -429,17 +471,17 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (arg.view.type === "listFromToday") {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            scrollAgendaToToday();
+            scrollAgendaToFirstUsefulDay();
           });
         });
       }
     },
-    [scrollAgendaToToday]
+    [scrollAgendaToFirstUsefulDay]
   );
 
   const handleEventsSet = useCallback(() => {
-    scrollAgendaToToday();
-  }, [scrollAgendaToToday]);
+    scrollAgendaToFirstUsefulDay();
+  }, [scrollAgendaToFirstUsefulDay]);
 
   const handleEventDidMount = useCallback((info: EventMountArg) => {
     if (!isListViewType(info.view.type)) return;
@@ -627,11 +669,19 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       }
     }
 
+    // Da oggi in poi per primi (cronologico); sotto le voci passate (dal più recente), così si allinea all’ancora dell’agenda.
     out.sort((a, b) => {
-      const da = Math.abs(a.date.getTime() - todayTs);
-      const db = Math.abs(b.date.getTime() - todayTs);
-      if (da !== db) return da - db;
-      return a.date.getTime() - b.date.getTime();
+      const aFuture = dayStartLocalTs(a.date) >= todayTs;
+      const bFuture = dayStartLocalTs(b.date) >= todayTs;
+      if (aFuture !== bFuture) return aFuture ? -1 : 1;
+      if (aFuture) {
+        const c = a.date.getTime() - b.date.getTime();
+        if (c !== 0) return c;
+      } else {
+        const c = b.date.getTime() - a.date.getTime();
+        if (c !== 0) return c;
+      }
+      return a.id.localeCompare(b.id);
     });
     return out;
   }, [allEvents, panelFocus]);
@@ -1807,7 +1857,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 })}
               </div>
             </div>
-            <div className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4">
+            <div
+              ref={smartPanelScrollRef}
+              className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4"
+            >
               {smartPanelItems.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-500">
                   Nessuna voce in questo resoconto. Il pannello elenca le udienze rilevate (fase o tipo) e gli adempimenti
