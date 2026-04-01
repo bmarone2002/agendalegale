@@ -532,7 +532,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "ATTORE",
     eventoBaseKey: null,
-    eventoLabel: "Notifica atto di citazione",
+    eventoLabel: "Notifica atto di Appello",
     direzioneCalcolo: null,
     numero: null,
     unita: null,
@@ -550,7 +550,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "ATTORE",
     eventoBaseKey: "dataNotificaAppelloCivile",
-    eventoLabel: "Iscrizione a ruolo/Costituzione attore",
+    eventoLabel: "Iscrizione a ruolo/Costituzione Appellante",
     direzioneCalcolo: "+",
     numero: 10,
     unita: "giorni",
@@ -560,7 +560,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     isPromemoriaFestivi: true,
     norma: "Art. 347 c.p.c. in relazione all'art. 165 c.p.c.",
     noteOperative:
-      "L'appellante si costituisce in giudizio entro 10 giorni dalla prima notificazione dell'atto di appello.",
+      "L'appellante si costituisce in giudizio secondo le forme e i termini del procedimento davanti al tribunale: entro 10 giorni dalla prima notificazione dell'atto di appello.",
     ordine: 2,
   },
 
@@ -570,7 +570,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "CONVENUTO",
     eventoBaseKey: "dataUdienzaAppelloCivile",
-    eventoLabel: "Costituzione convenuto",
+    eventoLabel: "Costituzione Appellato",
     direzioneCalcolo: "-",
     numero: 20,
     unita: "giorni",
@@ -599,7 +599,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     isSospensioneFeriale: false,
     isPromemoriaFestivi: false,
     norma: "Artt. 342 e 350 c.p.c.",
-    noteOperative: "Data àncora del procedimento di appello.",
+    noteOperative: "Data ancora del procedimento di appello.",
     ordine: 4,
   },
   {
@@ -625,7 +625,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataUdienzaConclusioniAppelloCivile",
-    eventoLabel: "Note conclusionali (60 gg prima udienza conclusioni)",
+    eventoLabel: "Note conclusionali (fino a 60 giorni prima dell'udienza)",
     direzioneCalcolo: "-",
     numero: 60,
     unita: "giorni",
@@ -635,7 +635,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     isPromemoriaFestivi: true,
     norma: "Art. 352 c.p.c.",
     noteOperative:
-      "Se il giudice assegna i termini scritti, il termine per le note/conclusionali è non superiore a 60 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
+      "Se il giudice assegna i termini scritti, il termine per le comparse conclusionali è non superiore a 60 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
     ordine: 6,
   },
   {
@@ -643,7 +643,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataUdienzaConclusioniAppelloCivile",
-    eventoLabel: "Note conclusionali (30 gg prima udienza conclusioni)",
+    eventoLabel: "Note conclusionali (fino a 30 giorni prima dell'udienza)",
     direzioneCalcolo: "-",
     numero: 30,
     unita: "giorni",
@@ -653,7 +653,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     isPromemoriaFestivi: true,
     norma: "Art. 352 c.p.c.",
     noteOperative:
-      "Eventuale secondo termine per note/conclusionali fino a 30 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
+      "Se il giudice assegna i termini scritti, il termine per le comparse conclusionali è non superiore a 30 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
     ordine: 7,
   },
   {
@@ -661,7 +661,7 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "COMUNE",
     eventoBaseKey: "dataUdienzaConclusioniAppelloCivile",
-    eventoLabel: "Memoria di replica (15 gg prima udienza conclusioni)",
+    eventoLabel: "Memoria di replica",
     direzioneCalcolo: "-",
     numero: 15,
     unita: "giorni",
@@ -671,14 +671,14 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     isPromemoriaFestivi: true,
     norma: "Art. 352 c.p.c.",
     noteOperative:
-      "Termine per la memoria di replica fino a 15 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
+      "Se il giudice assegna i termini scritti, il termine per le memorie di replica è non superiore a 15 giorni prima dell'udienza. In Excel è indicato il massimo legale come base parametrica.",
     ordine: 8,
   },
   {
     macroArea: "CIVILE_CONTENZIOSO",
     procedimento: "APPELLO_CIVILE",
     parteProcessuale: "COMUNE",
-    eventoBaseKey: "dataPubblicazioneSentenzaAppelloCivile",
+    eventoBaseKey: "dataDepositoSentenzaAppelloCivile",
     eventoLabel:
       "Sentenza (per calcolare termini Ric Cassazione)",
     direzioneCalcolo: "+",
@@ -686,8 +686,8 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     unita: "mesi",
     tipoTermine: "perentorio",
     isTermine: true,
-    isSospensioneFeriale: false,
-    isPromemoriaFestivi: false,
+    isSospensioneFeriale: true,
+    isPromemoriaFestivi: true,
     norma: "Artt. 325, 327 e 360 c.p.c.",
     noteOperative:
       "Data base per il termine lungo del ricorso per cassazione: in generale 6 mesi dalla pubblicazione se la sentenza non è notificata.",
@@ -705,8 +705,8 @@ const APPELLO_CIVILE_RULES: EventRule[] = [
     unita: "giorni",
     tipoTermine: "perentorio",
     isTermine: true,
-    isSospensioneFeriale: false,
-    isPromemoriaFestivi: false,
+    isSospensioneFeriale: true,
+    isPromemoriaFestivi: true,
     norma: "Artt. 325 e 326 c.p.c.",
     noteOperative:
       "Data base per il termine breve del ricorso per cassazione: in generale 60 giorni dalla notificazione della sentenza di appello.",

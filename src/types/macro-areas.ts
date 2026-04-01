@@ -103,7 +103,7 @@ export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   // Civile – Contenzioso ordinario
   CITAZIONE_CIVILE: "Citazione civile",
   RICORSO_RITO_SEMPLIFICATO: "Ricorso (rito semplificato)",
-  APPELLO_CIVILE: "Appello civile",
+  APPELLO_CIVILE: "Appello civile – post Riforma Cartabia",
   // Procedimenti speciali
   DECRETO_INGIUNTIVO: "Decreto ingiuntivo",
   ATP: "Accertamento tecnico preventivo",
@@ -476,14 +476,14 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     // ATTORE / APPELLANTE
     {
       code: "NOTIFICA_APPELLO_CIVILE",
-      label: "Notifica atto di citazione",
+      label: "Notifica atto di Appello",
       inputKey: "dataNotificaAppelloCivile",
       parteProcessuale: "ATTORE",
       ordine: 1,
     },
     {
       code: "ISCRIZIONE_RUOLO_APPELLO_CIVILE",
-      label: "Iscrizione a ruolo/Costituzione attore",
+      label: "Iscrizione a ruolo/Costituzione Appellante",
       inputKey: "dataNotificaAppelloCivile",
       parteProcessuale: "ATTORE",
       ordine: 2,
@@ -492,7 +492,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     // CONVENUTO / APPELLATO
     {
       code: "COSTITUZIONE_APPELLATO_CIVILE",
-      label: "Costituzione appellato",
+      label: "Costituzione Appellato",
       inputKey: "dataUdienzaAppelloCivile",
       parteProcessuale: "CONVENUTO",
       ordine: 3,
@@ -515,21 +515,21 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     },
     {
       code: "NOTE_CONCLUSIONI_APPELLO_CIVILE_60",
-      label: "Note conclusionali (60 gg prima udienza conclusioni)",
+      label: "Note conclusionali (fino a 60 giorni prima dell'udienza)",
       inputKey: "dataUdienzaConclusioniAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 6,
     },
     {
       code: "NOTE_CONCLUSIONI_APPELLO_CIVILE_30",
-      label: "Note conclusionali (30 gg prima udienza conclusioni)",
+      label: "Note conclusionali (fino a 30 giorni prima dell'udienza)",
       inputKey: "dataUdienzaConclusioniAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 7,
     },
     {
       code: "MEMORIA_REPLICA_APPELLO_CIVILE_15",
-      label: "Memoria di replica (15 gg prima udienza conclusioni)",
+      label: "Memoria di replica",
       inputKey: "dataUdienzaConclusioniAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 8,
@@ -537,7 +537,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     {
       code: "SENTENZA_APPELLO_CIVILE",
       label: "Sentenza (per calcolare termini Ric Cassazione)",
-      inputKey: "dataPubblicazioneSentenzaAppelloCivile",
+      inputKey: "dataDepositoSentenzaAppelloCivile",
       parteProcessuale: "COMUNE",
       ordine: 9,
     },
