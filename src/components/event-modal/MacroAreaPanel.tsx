@@ -130,6 +130,18 @@ function getEffectivePartiLabels(
       };
     }
 
+    // Civile – contenzioso ordinario: Ricorso rito semplificato = Ricorrente/Resistente
+    if (
+      macroArea === "CIVILE_CONTENZIOSO" &&
+      procedimento === "RICORSO_RITO_SEMPLIFICATO"
+    ) {
+      return {
+        ...base,
+        ATTORE: "Ricorrente",
+        CONVENUTO: "Resistente",
+      };
+    }
+
     // Lavoro: Appello lavoro = Appellante/Appellato
     if (macroArea === "LAVORO" && procedimento === "APPELLO_LAVORO") {
       return {

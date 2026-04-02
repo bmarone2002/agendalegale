@@ -102,7 +102,7 @@ export function getMacroAreaForProcedimento(procedimento: ProcedimentoCode): Mac
 export const PROCEDIMENTO_LABELS: Record<ProcedimentoCode, string> = {
   // Civile – Contenzioso ordinario
   CITAZIONE_CIVILE: "Citazione civile",
-  RICORSO_RITO_SEMPLIFICATO: "Ricorso (rito semplificato)",
+  RICORSO_RITO_SEMPLIFICATO: "Ricorso (rito semplificato) – post Riforma Cartabia",
   APPELLO_CIVILE: "Appello civile – post Riforma Cartabia",
   // Procedimenti speciali
   DECRETO_INGIUNTIVO: "Decreto ingiuntivo",
@@ -310,20 +310,25 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
     // COMUNE (eventi condivisi tra le parti)
     { code: "PRIMA_UDIENZA_RICORSO", label: "Prima udienza", inputKey: "dataPrimaUdienzaRicorso", parteProcessuale: "COMUNE", ordine: 4 },
 
-    // Eventuali memorie 171-ter su richiesta del giudice (inserimento manuale)
-    { code: "MEMORIA_171TER_1_RICORSO", label: "Memoria 171 ter n.1", inputKey: "dataMemoria171ter1Ricorso", parteProcessuale: "COMUNE", ordine: 5 },
-    { code: "MEMORIA_171TER_2_RICORSO", label: "Memoria 171 ter n.2", inputKey: "dataMemoria171ter2Ricorso", parteProcessuale: "COMUNE", ordine: 6 },
-    { code: "MEMORIA_171TER_3_RICORSO", label: "Memoria 171 ter n.3", inputKey: "dataMemoria171ter3Ricorso", parteProcessuale: "COMUNE", ordine: 7 },
+    { code: "UDIENZA_ISTRUTTORIA_RICORSO", label: "Udienza istruttoria", inputKey: "dataUdienzaIstruttoriaRicorso", parteProcessuale: "COMUNE", ordine: 5 },
+    { code: "UDIENZA_CONCLUSIONI_RICORSO", label: "Udienza conclusioni", inputKey: "dataUdienzaConclusioniRicorso", parteProcessuale: "COMUNE", ordine: 6 },
+    {
+      code: "NOTE_CONCLUSIONI_RICORSO",
+      label: "Note conclusionali",
+      inputKey: "dataProvvedimentoTerminiRitoSemplificato",
+      parteProcessuale: "COMUNE",
+      ordine: 7,
+    },
+    {
+      code: "MEMORIA_REPLICA_RICORSO",
+      label: "Memoria di replica",
+      inputKey: "dataProvvedimentoTerminiRitoSemplificato",
+      parteProcessuale: "COMUNE",
+      ordine: 8,
+    },
 
-    // Udienze e fasi successive
-    { code: "UDIENZA_ISTRUTTORIA_RICORSO", label: "Udienza istruttoria", inputKey: "dataUdienzaIstruttoriaRicorso", parteProcessuale: "COMUNE", ordine: 8 },
-    { code: "UDIENZA_CONCLUSIONI_RICORSO", label: "Udienza conclusioni", inputKey: "dataUdienzaConclusioniRicorso", parteProcessuale: "COMUNE", ordine: 9 },
-    { code: "NOTE_CONCLUSIONI_RICORSO", label: "Note conclusionali", inputKey: "dataNoteConclusionaliRicorso", parteProcessuale: "COMUNE", ordine: 10 },
-    { code: "MEMORIA_REPLICA_RICORSO", label: "Memoria di replica", inputKey: "dataMemoriaReplicaRicorso", parteProcessuale: "COMUNE", ordine: 11 },
-
-    // Sentenza e notifica sentenza
-    { code: "SENTENZA_RICORSO", label: "Sentenza (per calcolare termini appello/Ric Cassazione)", inputKey: "dataPubblicazioneSentenzaRicorso", parteProcessuale: "COMUNE", ordine: 12 },
-    { code: "NOTIFICA_SENTENZA_RICORSO", label: "Notifica Sentenza (per calcolare termini appello/Ric Cassazione)", inputKey: "dataNotificaSentenzaRicorso", parteProcessuale: "COMUNE", ordine: 13 },
+    { code: "SENTENZA_RICORSO", label: "Sentenza (per calcolare termini appello)", inputKey: "dataDepositoSentenzaRicorso", parteProcessuale: "COMUNE", ordine: 9 },
+    { code: "NOTIFICA_SENTENZA_RICORSO", label: "Notifica Sentenza (per calcolare termini appello)", inputKey: "dataNotificaSentenzaRicorso", parteProcessuale: "COMUNE", ordine: 10 },
   ],
   RICORSO_TRIBUTARIO: [
     // RICORRENTE
@@ -1728,7 +1733,7 @@ export const EVENTI_PER_PROCEDIMENTO: Partial<Record<ProcedimentoCode, EventoDis
 /** Ordine minimo per eventi in Prosecuzione (solo fasi successive alle memorie 171-ter n.1/2/3). */
 export const ORDINE_MIN_PROSECUZIONE: Partial<Record<ProcedimentoCode, number>> = {
   CITAZIONE_CIVILE: 8,
-  RICORSO_RITO_SEMPLIFICATO: 8,
+  RICORSO_RITO_SEMPLIFICATO: 5,
 };
 
 /** Restituisce gli eventi disponibili nel dropdown, filtrati per parte + COMUNE, ordinati. */
