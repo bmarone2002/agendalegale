@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { Bell, Gavel, Link2, Sparkles, Trash2, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1578,26 +1578,36 @@ export function EventModal({
                 </Select>
               </div>
               {form.macroType === null && (
-                <div className="rounded-md border border-zinc-200 bg-zinc-50/60 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="manual-hearing-toggle" className="text-sm text-zinc-800">
-                      E&apos; un&apos;udienza
-                    </Label>
-                    <Checkbox
-                      id="manual-hearing-toggle"
-                      checked={form.type === "udienza"}
-                      disabled={readOnly}
-                      onCheckedChange={(checked) =>
-                        setForm((f) => ({
-                          ...f,
-                          type: checked ? "udienza" : "altro",
-                        }))
-                      }
-                    />
+                <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 p-3.5">
+                  <div className="flex gap-2.5">
+                    <Gavel className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label
+                          htmlFor="manual-hearing-toggle"
+                          className="cursor-pointer text-xs font-medium leading-snug text-zinc-800"
+                        >
+                          È un&apos;udienza
+                        </Label>
+                        <Checkbox
+                          id="manual-hearing-toggle"
+                          checked={form.type === "udienza"}
+                          disabled={readOnly}
+                          onCheckedChange={(checked) =>
+                            setForm((f) => ({
+                              ...f,
+                              type: checked ? "udienza" : "altro",
+                            }))
+                          }
+                        />
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-zinc-500">
+                        Se attivo, compare solo nel{" "}
+                        <span className="font-medium text-zinc-700">Pannello intelligente</span>, scheda{" "}
+                        <span className="font-medium text-zinc-700">Prossime udienze</span>.
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    Se attivo, l&apos;evento comparira&apos; anche nel filtro <strong>SOLO UDIENZE</strong>.
-                  </p>
                 </div>
               )}
 
@@ -1658,15 +1668,21 @@ export function EventModal({
                 <>
                   {/* Compila da documento: solo in creazione */}
                   {mode === "create" && !readOnly && (
-                    <div className="rounded-md border border-dashed border-zinc-300 bg-zinc-50/80 p-4 space-y-2">
-                      <Label className="text-sm font-medium text-zinc-700">Compila da documento</Label>
-                      <p className="text-xs text-zinc-500">
-                        Allega il PDF: l&apos;AI estrarrà titolo, tipo, date e campi relativi alla tua pratica. Verifica i dati e salva.
-                      </p>
-                      <p className="text-[11px] text-zinc-500">
-                        Sono supportati solo file PDF leggibili dal computer (non immagini o scansioni).
-                      </p>
-                      <input
+                    <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 p-3.5">
+                      <div className="flex gap-2.5">
+                        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden />
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-xs font-medium text-zinc-700">Compila da documento</p>
+                          <p className="text-[11px] leading-relaxed text-zinc-500">
+                            Allega il PDF: l&apos;AI estrarrà titolo, tipo, date e campi utili. Controlla e salva.
+                          </p>
+                          <p className="text-[11px] leading-relaxed text-zinc-400">
+                            Solo PDF con testo selezionabile (non immagini o scansioni).
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        <input
                         ref={fileInputRef}
                         type="file"
                         accept=".pdf,application/pdf"
@@ -1738,24 +1754,25 @@ export function EventModal({
                             e.target.value = "";
                           }
                         }}
-                      />
-                      <div className="flex items-center gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="border-[var(--navy)] text-[var(--navy)] bg-white hover:bg-[var(--calendar-brown-pale)]"
-                          disabled={parsingDocument || saving || calculating}
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          {parsingDocument ? "Analisi in corso…" : "Allega file e compila con AI"}
-                        </Button>
-                        {!parsingDocument && !error && form.inputs && Object.keys(form.inputs).length > 0 && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700 border border-green-200">
-                            <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-                            Fatto
-                          </span>
-                        )}
+                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 border-zinc-200 bg-white text-xs font-normal text-zinc-700 hover:bg-zinc-50"
+                            disabled={parsingDocument || saving || calculating}
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            {parsingDocument ? "Analisi in corso…" : "Allega PDF"}
+                          </Button>
+                          {!parsingDocument && !error && form.inputs && Object.keys(form.inputs).length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[11px] text-zinc-600">
+                              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Dati estratti
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1830,60 +1847,87 @@ export function EventModal({
                 </>
               )}
 
-              {/* 4b. Promemoria (tutte le sezioni: Pratiche in Corso, Atto Giuridico, future). Default: un solo promemoria a 7 giorni; frecce per i giorni, aggiungi/rimuovi a piacimento. */}
-              <div>
-                <Label>Promemoria</Label>
-                <div className="space-y-2 mt-1.5">
-                  {form.reminderOffsets.map((days, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => {
-                            const next = [...f.reminderOffsets];
-                            next[i] = Math.max(1, next[i] - 1);
-                            return { ...f, reminderOffsets: next };
-                          })
-                        }
-                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                        aria-label="Diminuisci giorni"
-                      >
-                        −
-                      </button>
-                      <span className="w-10 text-center text-sm font-medium text-zinc-900 select-none">
-                        {days}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => {
-                            const next = [...f.reminderOffsets];
-                            next[i] = next[i] + 1;
-                            return { ...f, reminderOffsets: next };
-                          })
-                        }
-                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                        aria-label="Aumenta giorni"
-                      >
-                        +
-                      </button>
-                      <span className="text-sm text-zinc-600">giorni prima</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => ({
-                            ...f,
-                            reminderOffsets: f.reminderOffsets.filter((_, idx) => idx !== i),
-                          }))
-                        }
-                        className="text-red-500 hover:text-red-700 text-lg leading-none px-1"
-                        aria-label="Rimuovi promemoria"
-                      >
-                        ×
-                      </button>
+              {/* 4b. Promemoria + eventi collegati: due blocchi visivi separati; azioni «aggiungi» vicine al rispettivo contenuto. */}
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+                  <div className="flex gap-3 border-b border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--navy)]/10 text-[var(--navy)]">
+                      <Bell className="h-4 w-4" aria-hidden />
                     </div>
-                  ))}
-                  <div className="flex flex-wrap gap-2 mt-1">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-zinc-900">Promemoria</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
+                        Notifiche sulla pratica: quanti giorni prima della data di riferimento vuoi il promemoria.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 p-4">
+                    {form.reminderOffsets.length === 0 ? (
+                      <p className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50/80 px-3 py-2.5 text-xs text-zinc-500">
+                        Nessun promemoria. Aggiungi almeno uno se vuoi un avviso anticipato.
+                      </p>
+                    ) : null}
+                    {form.reminderOffsets.map((days, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-100 bg-zinc-50/60 px-3 py-2 sm:flex-nowrap sm:justify-between"
+                      >
+                        <span className="text-xs font-medium text-zinc-500 sm:hidden">Promemoria {i + 1}</span>
+                        <div className="flex flex-1 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+                          <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setForm((f) => {
+                                  const next = [...f.reminderOffsets];
+                                  next[i] = Math.max(1, next[i] - 1);
+                                  return { ...f, reminderOffsets: next };
+                                })
+                              }
+                              className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                              aria-label="Diminuisci giorni"
+                              disabled={readOnly}
+                            >
+                              −
+                            </button>
+                            <span className="flex min-w-[2.75rem] items-center justify-center bg-zinc-50/80 px-2 text-sm font-semibold tabular-nums text-zinc-900">
+                              {days}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setForm((f) => {
+                                  const next = [...f.reminderOffsets];
+                                  next[i] = next[i] + 1;
+                                  return { ...f, reminderOffsets: next };
+                                })
+                              }
+                              className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                              aria-label="Aumenta giorni"
+                              disabled={readOnly}
+                            >
+                              +
+                            </button>
+                          </div>
+                          <span className="text-sm text-zinc-600">giorni prima della data di riferimento</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              reminderOffsets: f.reminderOffsets.filter((_, idx) => idx !== i),
+                            }))
+                          }
+                          className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                          aria-label="Rimuovi promemoria"
+                          disabled={readOnly}
+                          title="Rimuovi"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
                     <Button
                       type="button"
                       variant="outline"
@@ -1894,10 +1938,116 @@ export function EventModal({
                           reminderOffsets: [...f.reminderOffsets, 7],
                         }))
                       }
-                      className="border-zinc-300 text-zinc-700 hover:bg-zinc-50"
+                      className="mt-1 w-full border-dashed border-zinc-300 text-zinc-700 hover:border-[var(--navy)]/40 hover:bg-[var(--calendar-brown-pale)] sm:w-auto"
+                      disabled={readOnly}
                     >
                       + Aggiungi promemoria
                     </Button>
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+                  <div className="flex gap-3 border-b border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--navy)]/10 text-[var(--navy)]">
+                      <Link2 className="h-4 w-4" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-zinc-900">Eventi collegati</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
+                        Sottoeventi con titolo libero e data calcolata in giorni solari rispetto alla data di riferimento
+                        (come i promemoria: festivi e weekend seguono le stesse regole dell’app).
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-3 p-4">
+                    {form.linkedEvents.length === 0 ? (
+                      <p className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50/80 px-3 py-2.5 text-xs text-zinc-500">
+                        Nessun adempimento collegato. Aggiungi voci per creare scadenze o attività legate alla pratica.
+                      </p>
+                    ) : null}
+                    {form.linkedEvents.map((row, i) => (
+                      <div
+                        key={i}
+                        className="space-y-3 rounded-lg border border-zinc-100 bg-zinc-50/60 p-3"
+                      >
+                        <Input
+                          className="w-full border-zinc-200 bg-white sm:max-w-none"
+                          placeholder="Titolo dell'adempimento collegato"
+                          value={row.title}
+                          onChange={(e) =>
+                            setForm((f) => {
+                              const next = [...f.linkedEvents];
+                              next[i] = { ...next[i], title: e.target.value };
+                              return { ...f, linkedEvents: next };
+                            })
+                          }
+                          disabled={readOnly}
+                        />
+                        <div className="flex flex-wrap items-center gap-2 sm:justify-between">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-medium text-zinc-500">Scostamento</span>
+                            <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setForm((f) => {
+                                    const next = [...f.linkedEvents];
+                                    next[i] = {
+                                      ...next[i],
+                                      offsetDays: Math.max(-365, next[i].offsetDays - 1),
+                                    };
+                                    return { ...f, linkedEvents: next };
+                                  })
+                                }
+                                className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                                aria-label="Diminuisci giorni"
+                                disabled={readOnly}
+                              >
+                                −
+                              </button>
+                              <span className="flex min-w-[3rem] items-center justify-center bg-zinc-50/80 px-2 text-sm font-semibold tabular-nums text-zinc-900">
+                                {row.offsetDays >= 0 ? "+" : ""}
+                                {row.offsetDays}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setForm((f) => {
+                                    const next = [...f.linkedEvents];
+                                    next[i] = {
+                                      ...next[i],
+                                      offsetDays: Math.min(365, next[i].offsetDays + 1),
+                                    };
+                                    return { ...f, linkedEvents: next };
+                                  })
+                                }
+                                className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                                aria-label="Aumenta giorni"
+                                disabled={readOnly}
+                              >
+                                +
+                              </button>
+                            </div>
+                            <span className="text-xs text-zinc-500">giorni dalla data di riferimento (anche negativi)</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setForm((f) => ({
+                                ...f,
+                                linkedEvents: f.linkedEvents.filter((_, idx) => idx !== i),
+                              }))
+                            }
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40 sm:ml-0"
+                            aria-label="Rimuovi adempimento collegato"
+                            disabled={readOnly}
+                            title="Rimuovi"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                     <Button
                       type="button"
                       variant="outline"
@@ -1908,93 +2058,12 @@ export function EventModal({
                           linkedEvents: [...f.linkedEvents, { title: "", offsetDays: 7 }],
                         }))
                       }
-                      className="border-zinc-300 text-zinc-700 hover:bg-zinc-50"
+                      className="w-full border-dashed border-zinc-300 text-zinc-700 hover:border-[var(--navy)]/40 hover:bg-[var(--calendar-brown-pale)] sm:w-auto"
+                      disabled={readOnly}
                     >
                       + Aggiungi adempimento collegato
                     </Button>
                   </div>
-                </div>
-              </div>
-
-              {/* Eventi collegati: data = data di riferimento fase (gest. autom.: tra più date, quella con più sottoeventi); gest. manuale: data evento. */}
-              <div>
-                <Label>Eventi collegati</Label>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Sottoeventi con titolo a scelta; la data si calcola con giorni solari aggiunti o tolti rispetto alla data di riferimento (come i promemoria: se cade su festivo o weekend si sposta secondo le regole già usate in app).
-                </p>
-                <div className="space-y-2 mt-1.5">
-                  {form.linkedEvents.map((row, i) => (
-                    <div key={i} className="flex flex-wrap items-center gap-2">
-                      <Input
-                        className="min-w-[160px] flex-1 max-w-md"
-                        placeholder={"Titolo dell'adempimento collegato"}
-                        value={row.title}
-                        onChange={(e) =>
-                          setForm((f) => {
-                            const next = [...f.linkedEvents];
-                            next[i] = { ...next[i], title: e.target.value };
-                            return { ...f, linkedEvents: next };
-                          })
-                        }
-                        disabled={readOnly}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => {
-                            const next = [...f.linkedEvents];
-                            next[i] = {
-                              ...next[i],
-                              offsetDays: Math.max(-365, next[i].offsetDays - 1),
-                            };
-                            return { ...f, linkedEvents: next };
-                          })
-                        }
-                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                        aria-label="Diminuisci giorni"
-                        disabled={readOnly}
-                      >
-                        −
-                      </button>
-                      <span className="w-12 text-center text-sm font-medium text-zinc-900 select-none tabular-nums">
-                        {row.offsetDays >= 0 ? "+" : ""}
-                        {row.offsetDays}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => {
-                            const next = [...f.linkedEvents];
-                            next[i] = {
-                              ...next[i],
-                              offsetDays: Math.min(365, next[i].offsetDays + 1),
-                            };
-                            return { ...f, linkedEvents: next };
-                          })
-                        }
-                        className="h-8 w-8 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                        aria-label="Aumenta giorni"
-                        disabled={readOnly}
-                      >
-                        +
-                      </button>
-                      <span className="text-sm text-zinc-600">giorni (± dalla data di riferimento)</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => ({
-                            ...f,
-                            linkedEvents: f.linkedEvents.filter((_, idx) => idx !== i),
-                          }))
-                        }
-                        className="text-red-500 hover:text-red-700 text-lg leading-none px-1"
-                        aria-label="Rimuovi adempimento collegato"
-                        disabled={readOnly}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
                 </div>
               </div>
 

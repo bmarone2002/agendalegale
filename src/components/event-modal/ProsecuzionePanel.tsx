@@ -3,7 +3,16 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import {
+  Bell,
+  CalendarPlus,
+  ChevronDown,
+  ChevronRight,
+  History,
+  Link2,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -540,7 +549,15 @@ export function ProsecuzionePanel({
   }, [onRegisterSavePendingRinvio, trySavePendingRinvio]);
 
   if (loading) {
-    return <p className="text-sm text-zinc-500 py-4">Caricamento rinvii...</p>;
+    return (
+      <div className="flex items-center gap-2 py-8 text-sm text-zinc-500">
+        <span
+          className="inline-block size-4 animate-pulse rounded-full bg-zinc-200"
+          aria-hidden
+        />
+        Caricamento rinvii…
+      </div>
+    );
   }
 
   return (
@@ -554,240 +571,274 @@ export function ProsecuzionePanel({
           onChange={handleParseRinvioFile}
         />
       )}
-      <p className="text-sm text-zinc-600">
-        Cronologia delle udienze successive all&apos;atto iniziale. Aggiungi i rinvii di udienza e i
-        promemoria; gli adempimenti collegati puoi gestirli dalla scheda Dettagli (eventi collegati alla
-        pratica).
-      </p>
 
-      {/* Existing rinvii list */}
-      {rinvii.length > 0 && (
-        <ScrollArea className="max-h-[240px] rounded-md">
-          <div className="space-y-2">
-            {rinvii.map((r) => (
-              <RinvioCard
-                key={r.id}
-                rinvio={r}
-                onDelete={readOnly ? undefined : handleDeleteRinvio}
-                onEdit={readOnly ? undefined : handleEditRinvio}
-                deleting={saving}
-              />
-            ))}
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="flex gap-3 border-b border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-4 py-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--navy)]/10 text-[var(--navy)]">
+            <History className="h-4 w-4" aria-hidden />
           </div>
-        </ScrollArea>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-zinc-900">Rinvii e udienze successive</h3>
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+              Registra fase, data udienza e promemoria. Per altre scadenze legate alla pratica usa la scheda{" "}
+              <span className="font-medium text-zinc-700">Dettagli</span> (eventi collegati).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {rinvii.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            Registrati ({rinvii.length})
+          </p>
+          <ScrollArea className="max-h-[240px] rounded-lg border border-zinc-100 bg-zinc-50/30 p-2">
+            <div className="space-y-2 pr-1">
+              {rinvii.map((r) => (
+                <RinvioCard
+                  key={r.id}
+                  rinvio={r}
+                  onDelete={readOnly ? undefined : handleDeleteRinvio}
+                  onEdit={readOnly ? undefined : handleEditRinvio}
+                  deleting={saving}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
       )}
 
       {rinvii.length === 0 && !showForm && (
-        <p className="text-xs text-zinc-400 py-2">
-          Nessun rinvio di udienza inserito. Usa il pulsante sotto per aggiungere
-          il primo rinvio.
-        </p>
+        <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/60 px-4 py-8 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-zinc-100">
+            <CalendarPlus className="h-5 w-5 text-zinc-400" aria-hidden />
+          </div>
+          <p className="text-sm font-medium text-zinc-800">Nessun rinvio ancora</p>
+          <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-zinc-500">
+            Aggiungi il primo rinvio a mano, oppure allega un verbale per far estrarre i dati con l&apos;AI.
+          </p>
+        </div>
       )}
 
       {/* New rinvio form */}
       {!readOnly && showForm && (
-        <div className="space-y-3 rounded-md border border-dashed border-[var(--navy)] bg-zinc-50/50 p-4">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <h4 className="text-sm font-medium text-zinc-700">
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <h4 className="text-sm font-semibold text-zinc-900">
               {editingRinvioId ? "Modifica rinvio di udienza" : "Nuovo rinvio di udienza"}
             </h4>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-xs text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
+              className="h-8 shrink-0 gap-1.5 border-zinc-200 bg-white text-xs text-zinc-700 hover:bg-zinc-50"
               disabled={parsingRinvio}
               onClick={() => rinvioFileInputRef.current?.click()}
             >
-              {parsingRinvio ? "Analisi…" : "Allega verbale e compila con AI"}
+              <Sparkles className="h-3.5 w-3.5 text-zinc-500" aria-hidden />
+              {parsingRinvio ? "Analisi…" : "Compila da verbale (AI)"}
             </Button>
           </div>
 
-          {/* Fase del giudizio: input diretto se non ci sono fasi predefinite, altrimenti dropdown con possibilita' di scrivere a mano */}
-          <div>
-            <Label className="text-xs">Fase del giudizio</Label>
-            {availableEventi.length === 0 || selectedEventoCode === MANUALE_CODE ? (
-              <>
-                <Input
-                  value={faseManuale}
-                  onChange={(e) => setFaseManuale(e.target.value)}
-                  placeholder="Es. Udienza successiva / Termine di deposito..."
-                  className="h-8 text-sm bg-white"
-                  autoFocus={selectedEventoCode === MANUALE_CODE}
-                />
-                {availableEventi.length > 0 && (
-                  <button
-                    type="button"
-                    className="text-xs text-[var(--navy)] hover:underline mt-1"
-                    onClick={() => {
-                      setSelectedEventoCode("");
-                      setFaseManuale("");
+          <div className="space-y-4 p-4">
+            <div className="space-y-3 rounded-lg border border-zinc-100 bg-zinc-50/50 p-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Dati udienza</p>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-zinc-700">Fase del giudizio</Label>
+                {availableEventi.length === 0 || selectedEventoCode === MANUALE_CODE ? (
+                  <>
+                    <Input
+                      value={faseManuale}
+                      onChange={(e) => setFaseManuale(e.target.value)}
+                      placeholder="Es. Udienza successiva / Termine di deposito…"
+                      className="h-9 bg-white text-sm"
+                      autoFocus={selectedEventoCode === MANUALE_CODE}
+                    />
+                    {availableEventi.length > 0 && (
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-[var(--navy)] hover:underline"
+                        onClick={() => {
+                          setSelectedEventoCode("");
+                          setFaseManuale("");
+                        }}
+                      >
+                        ← Torna alla lista fasi
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <Select
+                    value={selectedEventoCode || "__empty"}
+                    onValueChange={(v) => {
+                      const val = v === "__empty" ? "" : v;
+                      setSelectedEventoCode(val);
+                      if (val !== MANUALE_CODE) {
+                        setFaseManuale("");
+                      }
                     }}
                   >
-                    &larr; Torna alla lista
-                  </button>
+                    <SelectTrigger className="h-9 bg-white text-sm">
+                      <SelectValue placeholder="Seleziona evento/fase…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__empty" disabled>
+                        Seleziona evento/fase…
+                      </SelectItem>
+                      {availableEventi.map((ev) => (
+                        <SelectItem key={ev.code} value={ev.code}>
+                          {ev.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value={MANUALE_CODE}>Altro (scrivi a mano)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
-              </>
-            ) : (
-              <Select
-                value={selectedEventoCode || "__empty"}
-                onValueChange={(v) => {
-                  const val = v === "__empty" ? "" : v;
-                  setSelectedEventoCode(val);
-                  if (val !== MANUALE_CODE) {
-                    setFaseManuale("");
-                  }
-                }}
-              >
-                <SelectTrigger className="bg-white text-sm">
-                  <SelectValue placeholder="Seleziona evento/fase..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__empty" disabled>
-                    Seleziona evento/fase...
-                  </SelectItem>
-                  {availableEventi.map((ev) => (
-                    <SelectItem key={ev.code} value={ev.code}>
-                      {ev.label}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value={MANUALE_CODE}>Altro (scrivi fase manualmente)</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          {/* Data udienza */}
-          <div>
-            <Label className="text-xs">Data udienza</Label>
-            <DatePicker
-              value={dataUdienza}
-              onChange={setDataUdienza}
-              placeholder="Scegli data udienza"
-            />
-          </div>
-          {isManualPractice && (
-            <div className="rounded-md border border-zinc-200 bg-white p-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="rinvio-is-udienza" className="text-xs text-zinc-700">
-                  E&apos; un&apos;udienza
-                </Label>
-                <input
-                  id="rinvio-is-udienza"
-                  type="checkbox"
-                  checked={isUdienza}
-                  onChange={(e) => setIsUdienza(e.target.checked)}
-                  className="h-4 w-4 accent-[var(--navy)]"
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-zinc-700">Data udienza</Label>
+                <DatePicker
+                  value={dataUdienza}
+                  onChange={setDataUdienza}
+                  placeholder="Scegli data udienza"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-zinc-500">
-                Se disattivato, questo rinvio non comparira&apos; nel filtro SOLO UDIENZE.
-              </p>
-            </div>
-          )}
-
-          {/* Note */}
-          <div>
-            <Label className="text-xs">Note (opzionale)</Label>
-            <textarea
-              className="flex min-h-[60px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-2"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Note o disposizioni del giudice..."
-            />
-          </div>
-
-          {/* Promemoria udienza (opzionali, personalizzabili) */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-zinc-700">
-              Promemoria per l&apos;udienza (opzionali)
-            </Label>
-            <p className="text-xs text-zinc-500">
-              Se non imposti nulla, non verrà creato alcun promemoria automatico per l&apos;udienza. Puoi aggiungere uno o più promemoria a X giorni prima.
-            </p>
-            {reminderOffsets.map((days, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setReminderOffsets((prev) => {
-                      const next = [...prev];
-                      next[i] = Math.max(1, next[i] - 1);
-                      return next;
-                    })
-                  }
-                  className="h-7 w-7 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                  aria-label="Diminuisci giorni"
-                >
-                  −
-                </button>
-                <span className="w-10 text-center text-xs font-medium text-zinc-900 select-none">
-                  {days}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setReminderOffsets((prev) => {
-                      const next = [...prev];
-                      next[i] = next[i] + 1;
-                      return next;
-                    })
-                  }
-                  className="h-7 w-7 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                  aria-label="Aumenta giorni"
-                >
-                  +
-                </button>
-                <span className="text-xs text-zinc-600">giorni prima</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setReminderOffsets((prev) => prev.filter((_, idx) => idx !== i))
-                  }
-                  className="text-red-500 hover:text-red-700 text-sm leading-none px-1"
-                  aria-label="Rimuovi promemoria"
-                >
-                  ×
-                </button>
+              {isManualPractice && (
+                <div className="rounded-lg border border-zinc-200/80 bg-white p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="rinvio-is-udienza" className="cursor-pointer text-xs font-medium text-zinc-800">
+                      È un&apos;udienza
+                    </Label>
+                    <input
+                      id="rinvio-is-udienza"
+                      type="checkbox"
+                      checked={isUdienza}
+                      onChange={(e) => setIsUdienza(e.target.checked)}
+                      className="h-4 w-4 accent-[var(--navy)]"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                    Se disattivato, non compare nel{" "}
+                    <span className="font-medium text-zinc-700">Pannello intelligente</span> (Prossime udienze).
+                  </p>
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-zinc-700">Note (opzionale)</Label>
+                <textarea
+                  className="flex min-h-[72px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--navy)] focus-visible:ring-offset-2"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Disposizioni del giudice, rinvio motivato…"
+                />
               </div>
-            ))}
-            <div className="flex flex-wrap gap-2 mt-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setReminderOffsets((prev) => [...prev, DEFAULT_GIORNI_ALERT_UDIENZA])
-                }
-                className="h-7 text-xs border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-              >
-                + Aggiungi promemoria udienza
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setLinkedEvents((prev) => [...prev, { title: "", offsetDays: 7 }])
-                }
-                className="h-7 text-xs border-zinc-300 text-zinc-700 hover:bg-zinc-50"
-              >
-                + Aggiungi adempimento collegato
-              </Button>
             </div>
-            {linkedEvents.length > 0 && (
-              <div className="space-y-2 pt-1 border-t border-zinc-100">
-                <Label className="text-xs font-medium text-zinc-700">
-                  Adempimenti collegati (data = data udienza di questo rinvio)
-                </Label>
-                <p className="text-[11px] text-zinc-500">
-                  Titolo a scelta; giorni ± dalla data udienza (stesse regole sui festivi dei promemoria).
-                </p>
+
+            <div className="overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50/40">
+              <div className="flex gap-2 border-b border-zinc-100 bg-white/80 px-3 py-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--navy)]/10 text-[var(--navy)]">
+                  <Bell className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-zinc-800">Promemoria (opzionali)</p>
+                  <p className="text-[11px] leading-snug text-zinc-500">
+                    Solo se aggiungi righe: promemoria X giorni prima della data udienza di questo rinvio.
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2 p-3">
+                {reminderOffsets.length === 0 ? (
+                  <p className="rounded-md border border-dashed border-zinc-200 bg-white/80 px-3 py-2 text-[11px] text-zinc-500">
+                    Nessun promemoria. Aggiungi una riga se vuoi un avviso prima dell&apos;udienza.
+                  </p>
+                ) : null}
+                {reminderOffsets.map((days, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-100 bg-white px-2 py-2"
+                  >
+                    <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReminderOffsets((prev) => {
+                            const next = [...prev];
+                            next[i] = Math.max(1, next[i] - 1);
+                            return next;
+                          })
+                        }
+                        className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                        aria-label="Diminuisci giorni"
+                      >
+                        −
+                      </button>
+                      <span className="flex min-w-[2.5rem] items-center justify-center bg-zinc-50/80 text-sm font-semibold tabular-nums text-zinc-900">
+                        {days}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReminderOffsets((prev) => {
+                            const next = [...prev];
+                            next[i] = next[i] + 1;
+                            return next;
+                          })
+                        }
+                        className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                        aria-label="Aumenta giorni"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-xs text-zinc-600">giorni prima dell&apos;udienza</span>
+                    <button
+                      type="button"
+                      onClick={() => setReminderOffsets((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 hover:bg-red-50 hover:text-red-600"
+                      aria-label="Rimuovi promemoria"
+                      title="Rimuovi"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setReminderOffsets((prev) => [...prev, DEFAULT_GIORNI_ALERT_UDIENZA])
+                  }
+                  className="h-8 w-full border-dashed border-zinc-300 text-xs text-zinc-700 hover:border-[var(--navy)]/30 hover:bg-[var(--calendar-brown-pale)] sm:w-auto"
+                >
+                  + Aggiungi promemoria
+                </Button>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50/40">
+              <div className="flex gap-2 border-b border-zinc-100 bg-white/80 px-3 py-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--navy)]/10 text-[var(--navy)]">
+                  <Link2 className="h-3.5 w-3.5" aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-zinc-800">Adempimenti collegati al rinvio</p>
+                  <p className="text-[11px] leading-snug text-zinc-500">
+                    Scadenze aggiuntive con data = udienza di questo rinvio ± giorni (stesse regole sui festivi dei promemoria).
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3 p-3">
+                {linkedEvents.length === 0 ? (
+                  <p className="rounded-md border border-dashed border-zinc-200 bg-white/80 px-3 py-2 text-[11px] text-zinc-500">
+                    Opzionale. Utile per termini collegati alla stessa data udienza.
+                  </p>
+                ) : null}
                 {linkedEvents.map((row, i) => (
-                  <div key={i} className="flex flex-wrap items-center gap-2">
+                  <div key={i} className="space-y-2 rounded-md border border-zinc-100 bg-white p-3">
                     <Input
-                      className="h-8 min-w-[140px] flex-1 text-sm"
-                      placeholder="Titolo"
+                      className="h-9 w-full text-sm"
+                      placeholder="Titolo adempimento"
                       value={row.title}
                       onChange={(e) =>
                         setLinkedEvents((prev) => {
@@ -797,115 +848,120 @@ export function ProsecuzionePanel({
                         })
                       }
                     />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLinkedEvents((prev) => {
-                          const next = [...prev];
-                          next[i] = {
-                            ...next[i],
-                            offsetDays: Math.max(-365, next[i].offsetDays - 1),
-                          };
-                          return next;
-                        })
-                      }
-                      className="h-7 w-7 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                      aria-label="Diminuisci giorni"
-                    >
-                      −
-                    </button>
-                    <span className="w-11 text-center text-xs font-medium text-zinc-900 select-none tabular-nums">
-                      {row.offsetDays >= 0 ? "+" : ""}
-                      {row.offsetDays}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLinkedEvents((prev) => {
-                          const next = [...prev];
-                          next[i] = {
-                            ...next[i],
-                            offsetDays: Math.min(365, next[i].offsetDays + 1),
-                          };
-                          return next;
-                        })
-                      }
-                      className="h-7 w-7 rounded border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 text-lg font-bold leading-none flex items-center justify-center"
-                      aria-label="Aumenta giorni"
-                    >
-                      +
-                    </button>
-                    <span className="text-xs text-zinc-600">giorni (±)</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLinkedEvents((prev) => prev.filter((_, idx) => idx !== i))
-                      }
-                      className="text-red-500 hover:text-red-700 text-sm leading-none px-1"
-                      aria-label="Rimuovi"
-                    >
-                      ×
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-medium text-zinc-500">Scostamento</span>
+                      <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLinkedEvents((prev) => {
+                              const next = [...prev];
+                              next[i] = {
+                                ...next[i],
+                                offsetDays: Math.max(-365, next[i].offsetDays - 1),
+                              };
+                              return next;
+                            })
+                          }
+                          className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                          aria-label="Diminuisci giorni"
+                        >
+                          −
+                        </button>
+                        <span className="flex min-w-[3rem] items-center justify-center bg-zinc-50/80 text-sm font-semibold tabular-nums text-zinc-900">
+                          {row.offsetDays >= 0 ? "+" : ""}
+                          {row.offsetDays}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLinkedEvents((prev) => {
+                              const next = [...prev];
+                              next[i] = {
+                                ...next[i],
+                                offsetDays: Math.min(365, next[i].offsetDays + 1),
+                              };
+                              return next;
+                            })
+                          }
+                          className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                          aria-label="Aumenta giorni"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="text-[11px] text-zinc-500">giorni rispetto alla data udienza</span>
+                      <button
+                        type="button"
+                        onClick={() => setLinkedEvents((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 hover:bg-red-50 hover:text-red-600"
+                        aria-label="Rimuovi adempimento"
+                        title="Rimuovi"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLinkedEvents((prev) => [...prev, { title: "", offsetDays: 7 }])}
+                  className="h-8 w-full border-dashed border-zinc-300 text-xs text-zinc-700 hover:border-[var(--navy)]/30 hover:bg-[var(--calendar-brown-pale)] sm:w-auto"
+                >
+                  + Aggiungi adempimento collegato
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Form actions */}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={resetForm}
-              disabled={saving}
-            >
-              Annulla
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="btn-save-primary"
-              onClick={() => {
-                void handleSaveRinvio();
-              }}
-              disabled={saving}
-            >
-              {saving ? "Salvataggio..." : "Salva rinvio"}
-            </Button>
+            <div className="flex flex-col-reverse gap-2 border-t border-zinc-100 pt-4 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" size="sm" className="h-9" onClick={resetForm} disabled={saving}>
+                Annulla
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="btn-save-primary h-9 min-w-[8.5rem] font-medium"
+                onClick={() => {
+                  void handleSaveRinvio();
+                }}
+                disabled={saving}
+              >
+                {saving ? "Salvataggio…" : "Salva rinvio"}
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {/* Add rinvio: file upload + manual button */}
       {!readOnly && !showForm && (
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="flex-1 border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
-              disabled={parsingRinvio}
-              onClick={() => rinvioFileInputRef.current?.click()}
-            >
-              {parsingRinvio ? "Analisi in corso…" : "Allega file e compila con AI"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 border-dashed border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--calendar-brown-pale)]"
-              onClick={() => {
-                setEditingRinvioId(null);
-                setShowForm(true);
-              }}
-            >
-              + Aggiungi rinvio di udienza
-            </Button>
-          </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+          <Button
+            type="button"
+            size="sm"
+            className="h-10 w-full gap-2 bg-[var(--navy)] text-white shadow-sm hover:bg-[var(--navy-light)] sm:flex-1 sm:min-w-0"
+            onClick={() => {
+              setEditingRinvioId(null);
+              setShowForm(true);
+            }}
+          >
+            <CalendarPlus className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+            Aggiungi rinvio di udienza
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 w-full gap-2 border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 sm:flex-1 sm:min-w-0"
+            disabled={parsingRinvio}
+            onClick={() => rinvioFileInputRef.current?.click()}
+          >
+            <Sparkles className="h-4 w-4 shrink-0 text-zinc-400" aria-hidden />
+            {parsingRinvio ? "Analisi in corso…" : "Compila da verbale (AI)"}
+          </Button>
         </div>
       )}
     </div>
