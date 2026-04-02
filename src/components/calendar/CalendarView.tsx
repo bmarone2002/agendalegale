@@ -29,6 +29,7 @@ import {
   COLOR_FILTER_OTHER,
 } from "@/constants/event-tag-colors";
 import { getFaseDisplayString, getFaseDisplayFromFields } from "@/lib/event-fase";
+import { getPracticeTitleFromEvent } from "@/lib/practice-title";
 import { matchesUdienzaPanelPhaseLabel } from "@/lib/udienza-panel-phases";
 import { useListboxArrowKeys } from "@/hooks/useListboxArrowKeys";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -195,11 +196,14 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
   const titleWithoutNumber = rawTitle.replace(/^\d+\s*[-–.)]?\s*/, "").trimStart();
   const mainTitleCore = titleWithoutNumber.length > 0 ? titleWithoutNumber : rawTitle;
   const mainTitle = mainTitleCore;
-  const practiceTitleFull = (e.title ?? "").trim();
+  const faseLabel = getFaseDisplayString(e).trim();
+  /** Riga principale in calendario/agenda: fase processuale se nota, altrimenti titolo evento. */
+  const calendarTitleParent = faseLabel || mainTitle;
+  const practiceTitleFull = getPracticeTitleFromEvent(e);
   const out: Array<Record<string, unknown>> = [
     {
       id: e.id,
-      title: mainTitle,
+      title: calendarTitleParent,
       start: e.startAt,
       end: e.endAt,
       allDay: false,
@@ -269,7 +273,7 @@ function toFullCalendarEvents(e: AppEvent): Array<Record<string, unknown>> {
         isRinvioUdienzaSubEvent,
         isAdempimentoCollegatoSubEvent,
         parentEventId: e.id,
-        parentTitle: mainTitle,
+        parentTitle: practiceTitleFull || mainTitle,
         parentTagColor: tagColor,
         filterColorKey,
         faseFiltroText,
@@ -732,15 +736,22 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   ? new Date(f.endAt)
                   : new Date(start.getTime() + 60 * 60 * 1000);
               const rawTitle = (f.title as string | undefined)?.trim() || "Evento senza titolo";
+              const draftPracticeLine = [f.parti, f.rg, f.autorita, f.luogo]
+                .map((x) => (typeof x === "string" ? x.trim() : ""))
+                .filter((v) => v.length > 0)
+                .join(" - ");
+              const practiceTitleFullDraft = (draftPracticeLine || rawTitle).trim();
               const draftColor = f.color as string | null | undefined;
               const tag = paletteKeyForFilter(draftColor);
               const faseFiltroText = getFaseDisplayFromFields(
                 (f.eventoCode as string | null | undefined) ?? null,
                 (f.procedimento as string | null | undefined) ?? null
               );
+              const faseDraftLabel = faseFiltroText.trim();
+              const draftAgendaTitle = faseDraftLabel || rawTitle;
               return {
                 id: draft.id,
-                title: `BOZZA – ${rawTitle}`,
+                title: `BOZZA – ${draftAgendaTitle}`,
                 start,
                 end,
                 allDay: false,
@@ -754,6 +765,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   filterColorKey: tag,
                   parentTagColor: null,
                   faseFiltroText,
+                  practiceTitleFull: practiceTitleFullDraft,
                 },
               } as Record<string, unknown>;
             });
@@ -1143,7 +1155,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const showPracticeLabel = Boolean(practiceLabel && practiceLabel !== subTitleShown);
       return (
         <div
-          className="fc-event-main-frame flex flex-wrap items-center gap-x-2 gap-y-1 rounded border-l-4 pl-1"
+          className="fc-event-main-frame flex items-center gap-2 rounded border-l-4 pl-1"
           style={{ borderLeftColor: borderColor ?? undefined }}
         >
           {canEdit && !isFutureReminder ? (
@@ -1215,22 +1227,20 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               }
             />
           )}
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
-            <span className="fc-list-event-title min-w-0 truncate sm:max-w-[min(100%,28rem)]" style={{ color: "#171717" }}>
-              {arg.event.title}
+          <span className="fc-list-event-title min-w-0 flex-1 truncate" style={{ color: "#171717" }}>
+            {arg.event.title}
+          </span>
+          {kind && (
+            <span className="text-calendar-muted text-xs shrink-0">{kind}</span>
+          )}
+          {showPracticeLabel ? (
+            <span
+              className="text-calendar-muted max-w-[min(42vw,12rem)] shrink-0 truncate text-xs text-right"
+              title={practiceLabel}
+            >
+              ← {practiceLabel}
             </span>
-            {kind && (
-              <span className="text-calendar-muted text-xs shrink-0">{kind}</span>
-            )}
-            {showPracticeLabel ? (
-              <span
-                className="text-calendar-muted w-full basis-full truncate text-xs sm:w-auto sm:max-w-[min(42vw,12rem)] sm:basis-auto sm:text-right"
-                title={practiceLabel}
-              >
-                {practiceLabel}
-              </span>
-            ) : null}
-          </div>
+          ) : null}
           {canEdit && (
             <button
               type="button"
@@ -1302,7 +1312,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const showPracticeAside = Boolean(practiceTitleFull && practiceTitleFull !== eventTitleShown);
       const titleSafe = practiceTitleFull || eventTitleShown || "questa pratica";
       return (
-        <div className="fc-event-main-frame flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="fc-event-main-frame flex items-center gap-2">
           {isDoneEv && (
             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 shrink-0">
               <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
@@ -1310,22 +1320,20 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               </svg>
             </span>
           )}
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
+          <span
+            className={`fc-list-event-title min-w-0 flex-1 truncate font-medium ${isDoneEv ? "line-through text-zinc-400" : ""}`}
+            style={{ color: isDoneEv ? undefined : "#171717" }}
+          >
+            {arg.event.title}
+          </span>
+          {showPracticeAside ? (
             <span
-              className={`fc-list-event-title min-w-0 truncate font-medium sm:max-w-[min(100%,28rem)] ${isDoneEv ? "line-through text-zinc-400" : ""}`}
-              style={{ color: isDoneEv ? undefined : "#171717" }}
+              className="text-calendar-muted max-w-[min(42vw,12rem)] shrink-0 truncate text-xs text-right"
+              title={practiceTitleFull}
             >
-              {arg.event.title}
+              {practiceTitleFull}
             </span>
-            {showPracticeAside ? (
-              <span
-                className="text-calendar-muted w-full basis-full truncate text-xs sm:w-auto sm:max-w-[min(42vw,12rem)] sm:basis-auto sm:text-right"
-                title={practiceTitleFull}
-              >
-                {practiceTitleFull}
-              </span>
-            ) : null}
-          </div>
+          ) : null}
           {canEdit && (
             <button
               type="button"
