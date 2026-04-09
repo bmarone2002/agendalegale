@@ -142,7 +142,8 @@ function processRule(
     for (const daysBefore of reminderOffsets) {
       const offset = daysBefore > 0 ? -daysBefore : daysBefore;
       const reminderRaw = addDays(dueDate, offset);
-      const reminderDirection: "forward" | "backward" = offset >= 0 ? "forward" : "backward";
+      const reminderDirection: "forward" | "backward" =
+        offset > 0 ? "forward" : "backward";
       const reminderAdjusted = adjustFinalDeadline(reminderRaw, reminderDirection, settings);
       const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
       out.push({
@@ -193,7 +194,8 @@ function processRule(
   for (const daysBefore of reminderOffsets) {
     const offset = daysBefore > 0 ? -daysBefore : daysBefore;
     const reminderRaw = addDays(baseDate, offset);
-    const reminderDirection: "forward" | "backward" = offset >= 0 ? "forward" : "backward";
+    const reminderDirection: "forward" | "backward" =
+      offset > 0 ? "forward" : "backward";
     const reminderAdjusted = adjustFinalDeadline(reminderRaw, reminderDirection, settings);
     const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
     out.push({
@@ -347,7 +349,8 @@ function evaluateMultiRowFromEventoCode(
           for (const daysBefore of reminderOffsets) {
             const offset = daysBefore > 0 ? -daysBefore : daysBefore;
             const reminderRaw = addDays(baseDate, offset);
-            const reminderDirection: "forward" | "backward" = offset >= 0 ? "forward" : "backward";
+            const reminderDirection: "forward" | "backward" =
+              offset > 0 ? "forward" : "backward";
             const reminderAdjusted = adjustFinalDeadline(reminderRaw, reminderDirection, settings);
             const reminderAt = applyDeadlineTime(reminderAdjusted, settings);
             out.push({

@@ -585,6 +585,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     dateLabel: string;
     title: string;
     subtitle: string;
+    /** Titolo pratica (identity o titolo evento), come in vista Agenda. */
+    practiceLabel: string;
     badgeLabel: string;
     badgeClass: string;
     status: "pending" | "done";
@@ -611,6 +613,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
       const startAt = new Date(ev.startAt);
       const fase = getFaseDisplayString(ev);
+      const practiceLabel = getPracticeTitleFromEvent(ev);
       out.push({
         id: `sp-u-m-${ev.id}`,
         parentEventId: ev.id,
@@ -618,6 +621,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         dateLabel: dateLabel(startAt),
         title,
         subtitle: fase,
+        practiceLabel,
         badgeLabel: "Udienza",
         badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
         status,
@@ -633,6 +637,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (!title) return;
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       const fase = getFaseDisplayString(parent);
+      const practiceLabel = getPracticeTitleFromEvent(parent);
       out.push({
         id: `sp-u-se-${se.id}`,
         parentEventId: parent.id,
@@ -641,6 +646,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         dateLabel: dateLabel(se.dueAt),
         title,
         subtitle: fase,
+        practiceLabel,
         badgeLabel: "Udienza",
         badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
         status,
@@ -655,6 +661,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       const fase = getFaseDisplayString(parent);
       const sotto = fase ? `Evento collegato · ${fase}` : "Evento collegato";
+      const practiceLabel = getPracticeTitleFromEvent(parent);
       out.push({
         id: `sp-a-se-${se.id}`,
         parentEventId: parent.id,
@@ -663,6 +670,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         dateLabel: dateLabel(se.dueAt),
         title,
         subtitle: sotto,
+        practiceLabel,
         badgeLabel: "Ev. collegato",
         badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
         status,
@@ -1942,7 +1950,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                         title="Apri la pratica in modale e centra il calendario su questa data"
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                               {item.dateLabel}
                             </p>
@@ -1959,11 +1967,24 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                               </p>
                             ) : null}
                           </div>
-                          <span
-                            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
-                          >
-                            {item.badgeLabel}
-                          </span>
+                          <div className="flex shrink-0 items-start justify-end gap-2">
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${item.badgeClass}`}
+                            >
+                              {item.badgeLabel}
+                            </span>
+                            {item.practiceLabel &&
+                            item.practiceLabel.trim() !== item.title.trim() ? (
+                              <span
+                                className="text-calendar-muted max-w-[min(42vw,12rem)] shrink-0 truncate text-right text-xs"
+                                title={item.practiceLabel}
+                              >
+                                {item.subEventId
+                                  ? `← ${item.practiceLabel}`
+                                  : item.practiceLabel}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </button>
                     </li>

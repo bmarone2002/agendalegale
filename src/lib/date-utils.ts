@@ -134,11 +134,10 @@ export function isNonBusinessDay(date: Date, settings: AppSettings): boolean {
 }
 
 /**
- * Regola art. 155 c.p.c. (solo controllo sulla scadenza FINALE):
- * - direction="forward": se la scadenza finale cade su sabato/domenica o festività,
- *   si proroga al primo giorno successivo non festivo.
- * - direction="backward": se la scadenza finale cade su sabato/domenica o festività,
- *   si anticipa al primo giorno precedente non festivo.
+ * Slittamento solo sulla data finale (dopo il conteggio dei giorni solari, sabato incluso):
+ * - forward (termini in avanti): sabato/domenica o festivo → primo giorno successivo non festivo;
+ * - backward (termini a ritroso, es. promemoria N gg prima): sabato/domenica o festivo →
+ *   primo giorno precedente non festivo (mai in avanti).
  */
 export function isNonWorkingFinalDay(
   date: Date,

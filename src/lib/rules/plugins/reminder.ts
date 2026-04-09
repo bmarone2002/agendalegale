@@ -1,5 +1,6 @@
 import type { RuleDefinition } from "../types";
 import { addDays, setHours, setMinutes } from "date-fns";
+import { adjustFinalDeadline } from "@/lib/date-utils";
 import { buildLinkedEventCandidates, parseLinkedEvents } from "@/lib/linked-events";
 
 function parseTime(timeStr: string): { hours: number; minutes: number } {
@@ -28,7 +29,8 @@ export const reminderRule: RuleDefinition = {
       eventStart.getDate()
     );
     const subEvents = offsets.map((daysBefore) => {
-      const dueDate = addDays(eventDateOnly, -daysBefore);
+      const raw = addDays(eventDateOnly, -daysBefore);
+      const dueDate = adjustFinalDeadline(raw, "backward", input.settings);
       const dueAt = setMinutes(setHours(dueDate, hours), minutes);
       return {
         title: `Promemoria: ${input.event.title} (T-${daysBefore})`,
