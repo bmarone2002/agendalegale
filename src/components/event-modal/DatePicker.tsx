@@ -18,6 +18,7 @@ interface DatePickerProps {
   onChange: (date: Date | null) => void;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function DatePicker({
@@ -25,16 +26,23 @@ export function DatePicker({
   onChange,
   className,
   placeholder = "Scegli data",
+  disabled = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const date = value ?? undefined;
   const popoverContainer = usePopoverContainer();
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={disabled ? false : open}
+      onOpenChange={(next) => {
+        if (!disabled) setOpen(next);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           type="button"
+          disabled={disabled}
           className={cn(
             "flex h-10 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-left ring-offset-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[var(--navy)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
             className

@@ -34,6 +34,7 @@ import type { MacroAreaCode, ProcedimentoCode, ParteProcessuale } from "@/types/
 import { getMacroAreaForProcedimento, getEventoByCode } from "@/types/macro-areas";
 import { DateTimePicker } from "./DateTimePicker";
 import { PopoverContainerContext } from "./popover-container-context";
+import { LinkedEventOffsetDateControls } from "./LinkedEventOffsetDateControls";
 import { formatDateTime } from "@/lib/utils";
 import type { LinkedEventSpec } from "@/lib/linked-events";
 import { EVENT_TAG_COLORS } from "@/constants/event-tag-colors";
@@ -925,6 +926,22 @@ export function EventModal({
     form.reminderOffsets,
     form.linkedEvents,
   ]);
+
+  const linkedEventReferenceDate = useMemo(() => {
+    const src =
+      phase1Preview.dueAt ??
+      getPrimaryDateFromInputs(form.inputs) ??
+      form.startAt;
+    if (!src || isNaN(src.getTime())) return null;
+    return new Date(
+      src.getFullYear(),
+      src.getMonth(),
+      src.getDate(),
+      12,
+      0,
+      0,
+    );
+  }, [phase1Preview.dueAt, form.inputs, form.startAt]);
 
   const handleCalcola = useCallback(async () => {
     setError(null);
@@ -1986,48 +2003,20 @@ export function EventModal({
                         <div className="flex flex-wrap items-center gap-2 sm:justify-between">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-medium text-zinc-500">Scostamento</span>
-                            <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setForm((f) => {
-                                    const next = [...f.linkedEvents];
-                                    next[i] = {
-                                      ...next[i],
-                                      offsetDays: Math.max(-365, next[i].offsetDays - 1),
-                                    };
-                                    return { ...f, linkedEvents: next };
-                                  })
-                                }
-                                className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
-                                aria-label="Diminuisci giorni"
-                                disabled={readOnly}
-                              >
-                                −
-                              </button>
-                              <span className="flex min-w-[3rem] items-center justify-center bg-zinc-50/80 px-2 text-sm font-semibold tabular-nums text-zinc-900">
-                                {row.offsetDays >= 0 ? "+" : ""}
-                                {row.offsetDays}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setForm((f) => {
-                                    const next = [...f.linkedEvents];
-                                    next[i] = {
-                                      ...next[i],
-                                      offsetDays: Math.min(365, next[i].offsetDays + 1),
-                                    };
-                                    return { ...f, linkedEvents: next };
-                                  })
-                                }
-                                className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
-                                aria-label="Aumenta giorni"
-                                disabled={readOnly}
-                              >
-                                +
-                              </button>
-                            </div>
+                            <LinkedEventOffsetDateControls
+                              offsetDays={row.offsetDays}
+                              onOffsetChange={(next) =>
+                                setForm((f) => {
+                                  const ev = [...f.linkedEvents];
+                                  ev[i] = { ...ev[i], offsetDays: next };
+                                  return { ...f, linkedEvents: ev };
+                                })
+                              }
+                              referenceDate={linkedEventReferenceDate}
+                              readOnly={readOnly}
+                              minusButtonClassName="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                              plusButtonClassName="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold leading-none text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-40"
+                            />
                             <span className="text-xs text-zinc-500">giorni dalla data di riferimento (anche negativi)</span>
                           </div>
                           <button

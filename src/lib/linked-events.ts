@@ -1,4 +1,4 @@
-import { addDays } from "date-fns";
+import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 import type { AppSettings } from "@/lib/rules/types";
 import { adjustFinalDeadline, applyDeadlineTime } from "@/lib/date-utils";
 import type { SubEventCandidate } from "@/lib/rules/types";
@@ -33,6 +33,31 @@ export function computeLinkedEventDueAt(
     offsetDays >= 0 ? "forward" : "backward";
   const adjusted = adjustFinalDeadline(raw, direction, settings);
   return applyDeadlineTime(adjusted, settings);
+}
+
+/**
+ * Trova lo scostamento in giorni (nel range consentito) la cui data risultante
+ * (stessa logica di `computeLinkedEventDueAt`) è più vicina al giorno scelto in calendario.
+ */
+export function bestOffsetDaysForLinkedTargetDate(
+  refDate: Date,
+  targetCalendarDate: Date,
+  settings: AppSettings,
+  minOff = -365,
+  maxOff = 365,
+): number {
+  const targetDay = startOfDay(targetCalendarDate);
+  let bestO = 0;
+  let bestDist = Infinity;
+  for (let o = minOff; o <= maxOff; o++) {
+    const due = computeLinkedEventDueAt(refDate, o, settings);
+    const dist = Math.abs(differenceInCalendarDays(startOfDay(due), targetDay));
+    if (dist < bestDist || (dist === bestDist && Math.abs(o) < Math.abs(bestO))) {
+      bestDist = dist;
+      bestO = o;
+    }
+  }
+  return bestO;
 }
 
 export function buildLinkedEventCandidates(

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DatePicker } from "./DatePicker";
+import { LinkedEventOffsetDateControls } from "./LinkedEventOffsetDateControls";
 import {
   getRinviiByEventId,
   createRinvio,
@@ -272,6 +273,18 @@ export function ProsecuzionePanel({
   const [faseManuale, setFaseManuale] = useState<string>("");
   const [reminderOffsets, setReminderOffsets] = useState<number[]>([]);
   const [linkedEvents, setLinkedEvents] = useState<LinkedEventSpec[]>([]);
+
+  const linkedEventReferenceDate = useMemo(() => {
+    if (!dataUdienza || isNaN(dataUdienza.getTime())) return null;
+    return new Date(
+      dataUdienza.getFullYear(),
+      dataUdienza.getMonth(),
+      dataUdienza.getDate(),
+      12,
+      0,
+      0,
+    );
+  }, [dataUdienza]);
 
   const loadRinvii = useCallback(async () => {
     setLoading(true);
@@ -850,46 +863,20 @@ export function ProsecuzionePanel({
                     />
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-medium text-zinc-500">Scostamento</span>
-                      <div className="inline-flex items-stretch overflow-hidden rounded-lg border border-zinc-200 shadow-sm">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setLinkedEvents((prev) => {
-                              const next = [...prev];
-                              next[i] = {
-                                ...next[i],
-                                offsetDays: Math.max(-365, next[i].offsetDays - 1),
-                              };
-                              return next;
-                            })
-                          }
-                          className="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
-                          aria-label="Diminuisci giorni"
-                        >
-                          −
-                        </button>
-                        <span className="flex min-w-[3rem] items-center justify-center bg-zinc-50/80 text-sm font-semibold tabular-nums text-zinc-900">
-                          {row.offsetDays >= 0 ? "+" : ""}
-                          {row.offsetDays}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setLinkedEvents((prev) => {
-                              const next = [...prev];
-                              next[i] = {
-                                ...next[i],
-                                offsetDays: Math.min(365, next[i].offsetDays + 1),
-                              };
-                              return next;
-                            })
-                          }
-                          className="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
-                          aria-label="Aumenta giorni"
-                        >
-                          +
-                        </button>
-                      </div>
+                      <LinkedEventOffsetDateControls
+                        offsetDays={row.offsetDays}
+                        onOffsetChange={(next) =>
+                          setLinkedEvents((prev) => {
+                            const ev = [...prev];
+                            ev[i] = { ...ev[i], offsetDays: next };
+                            return ev;
+                          })
+                        }
+                        referenceDate={linkedEventReferenceDate}
+                        minusButtonClassName="flex h-9 w-9 items-center justify-center border-r border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                        plusButtonClassName="flex h-9 w-9 items-center justify-center border-l border-zinc-200 text-lg font-semibold text-zinc-700 hover:bg-zinc-50"
+                        counterClassName="flex min-w-[3rem] items-center justify-center bg-zinc-50/80 text-sm font-semibold tabular-nums text-zinc-900"
+                      />
                       <span className="text-[11px] text-zinc-500">giorni rispetto alla data udienza</span>
                       <button
                         type="button"

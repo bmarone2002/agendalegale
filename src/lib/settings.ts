@@ -1,20 +1,8 @@
 import type { AppSettings } from "./rules/types";
 import { prisma } from "./db";
+import { DEFAULT_APP_SETTINGS } from "./default-app-settings";
 
-const DEFAULT_SETTINGS: AppSettings = {
-  defaultReminderTime: "09:00",
-  defaultReminderOffsets: [7],
-  weekendHandling: undefined,
-  holidays: undefined,
-  defaultTimeForDeadlines: "08:00",
-  defaultReminderOffsetsAtto: [7],
-  notificaEsteroDefault: false,
-  termineComparizioneCitazioneItalia: 120,
-  termineComparizioneCitazioneEstero: 150,
-  ferialeSuspensionStart: "08-01",
-  ferialeSuspensionEnd: "08-31",
-  italianHolidays: [],
-};
+const DEFAULT_SETTINGS: AppSettings = DEFAULT_APP_SETTINGS;
 
 const SETTINGS_KEY = "app_settings";
 const CACHE_TTL_MS = 60_000;
