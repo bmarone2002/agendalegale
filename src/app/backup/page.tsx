@@ -1,10 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  AlertTriangle,
+  Archive,
+  CheckCircle2,
+  Download,
+  FileJson,
+  Loader2,
+  RotateCcw,
+  ShieldAlert,
+} from "lucide-react";
 
 export default function BackupPage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [confirmOverwrite, setConfirmOverwrite] = useState(false);
@@ -52,8 +66,7 @@ export default function BackupPage() {
     event.preventDefault();
     setMessage(null);
 
-    const form = event.currentTarget;
-    const fileInput = form.elements.namedItem("backupFile") as HTMLInputElement | null;
+    const fileInput = fileInputRef.current;
     const file = fileInput?.files?.[0];
 
     if (!file) {
@@ -99,6 +112,9 @@ export default function BackupPage() {
         type: "success",
         text: `Backup ripristinato con successo. Eventi importati: ${json.importedEvents ?? 0}.`,
       });
+      setConfirmOverwrite(false);
+      setSelectedFileName(null);
+      if (fileInput) fileInput.value = "";
     } catch (error) {
       console.error(error);
       setMessage({
@@ -124,147 +140,238 @@ export default function BackupPage() {
   return (
     <AppShell headerTitle={<span>Backup</span>}>
       <SignedIn>
-        <div className="mx-auto max-w-2xl space-y-8">
-          <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h1 className="mb-2 text-xl font-semibold text-[var(--navy)]">
-              Backup del calendario
-            </h1>
-            <p className="text-sm text-zinc-700">
-              Questa sezione ti permette di salvare una copia di sicurezza del tuo calendario
-              sul tuo computer e di ripristinarla in qualsiasi momento. Il file contiene tutti
-              gli eventi e sottoeventi presenti nel tuo account al momento del salvataggio.
-            </p>
-          </section>
+        <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6 overflow-x-hidden pb-6 sm:space-y-8 sm:pb-8">
+          <header className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--navy)]/10 text-[var(--navy)]">
+              <Archive className="h-5 w-5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1 space-y-1">
+              <h1 className="text-xl font-semibold tracking-tight text-[var(--navy)] sm:text-2xl">
+                Backup del calendario
+              </h1>
+              <p className="text-sm leading-relaxed text-zinc-600">
+                Salva una copia JSON sul computer e ripristinala quando serve. Il file include eventi e
+                sottoeventi presenti nell&apos;account al momento del download.
+              </p>
+            </div>
+          </header>
 
           {message && (
             <div
-              className={`rounded-md border px-4 py-3 text-sm ${
+              role="status"
+              className={`flex gap-3 rounded-xl border px-4 py-3 text-sm leading-relaxed ${
                 message.type === "success"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : "border-red-200 bg-red-50 text-red-800"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                  : "border-red-200 bg-red-50 text-red-900"
               }`}
             >
-              {message.text}
+              {message.type === "success" ? (
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden />
+              ) : (
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden />
+              )}
+              <p className="min-w-0 break-words">{message.text}</p>
             </div>
           )}
 
-          <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold text-[var(--navy)]">
-                Scarica un backup del tuo calendario
-              </h2>
-              <p className="text-sm text-zinc-700">
-                Cliccando su questo pulsante scaricherai un file JSON con tutti gli eventi e
-                sottoeventi attualmente presenti nel tuo calendario. Conserva questo file in un
-                luogo sicuro: potrai usarlo per ripristinare il calendario in caso di problemi o
-                perdita di dati.
-              </p>
+          <section
+            className="rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm sm:p-6"
+            aria-labelledby="backup-download-heading"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+              <div className="min-w-0 space-y-2">
+                <div className="flex items-center gap-2 text-[var(--navy)]">
+                  <Download className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                  <h2 id="backup-download-heading" className="text-base font-semibold sm:text-lg">
+                    Scarica backup
+                  </h2>
+                </div>
+                <p className="text-sm leading-relaxed text-zinc-600">
+                  Ottieni un file <span className="font-medium text-zinc-800">.json</span> con lo stato attuale
+                  del calendario. Conservalo in un posto sicuro.
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleDownloadBackup}
+                disabled={isDownloading}
+                className="h-11 min-h-[44px] w-full shrink-0 gap-2 bg-[var(--navy)] text-white hover:bg-[var(--navy-light)] touch-manipulation disabled:opacity-100 sm:h-10 sm:min-h-0 sm:w-auto sm:px-5"
+              >
+                {isDownloading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    Generazione…
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" aria-hidden />
+                    Scarica backup (JSON)
+                  </>
+                )}
+              </Button>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center rounded-md bg-[var(--navy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--navy-light)]"
-              onClick={handleDownloadBackup}
-              disabled={isDownloading}
-            >
-              {isDownloading ? "Generazione in corso..." : "Scarica backup (JSON)"}
-            </button>
-            <p className="text-xs text-zinc-600">
-              Per creare un nuovo backup, ripeti semplicemente il download quando il calendario è
-              aggiornato. Il file scaricato fotografa la situazione al momento dello
-              scaricamento.
+            <p className="mt-4 flex items-start gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
+              <FileJson className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" aria-hidden />
+              <span>
+                Per aggiornare il backup, scarica di nuovo dopo le modifiche: ogni download riflette i dati in
+                quel momento.
+              </span>
             </p>
           </section>
 
-          <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold text-[var(--navy)]">
-                Ripristina il calendario da un backup
+          <section
+            className="rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-sm sm:p-6"
+            aria-labelledby="backup-restore-heading"
+          >
+            <div className="mb-4 flex items-center gap-2 text-[var(--navy)]">
+              <RotateCcw className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              <h2 id="backup-restore-heading" className="text-base font-semibold sm:text-lg">
+                Ripristina da backup
               </h2>
-              <p className="text-sm text-zinc-700">
-                Se hai precedentemente scaricato un file di backup (JSON), puoi caricarlo per
-                ripristinare il tuo calendario. Il sistema leggerà il file e sostituirà gli
-                eventi attuali con quelli contenuti nel backup.
-              </p>
-              <p className="text-sm font-medium text-red-700">
-                Attenzione: il ripristino da backup sovrascrive completamente il calendario
-                attuale. Gli eventi e sottoeventi presenti oggi verranno sostituiti con quelli
-                presenti nel file di backup.
-              </p>
+            </div>
+            <p className="mb-4 text-sm leading-relaxed text-zinc-600">
+              Carica un file JSON precedentemente scaricato da questo account per ripristinare eventi e
+              sottoeventi.
+            </p>
+
+            <div
+              className="mb-5 flex gap-3 rounded-xl border border-red-200 bg-red-50/90 px-3 py-3 sm:px-4"
+              role="alert"
+            >
+              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden />
+              <div className="min-w-0 text-sm leading-relaxed text-red-950">
+                <p className="font-semibold text-red-900">Operazione irreversibile</p>
+                <p className="mt-1 text-red-900/90">
+                  Il ripristino <strong>sostituisce tutto</strong> il calendario attuale con il contenuto del
+                  file. Gli eventi presenti ora verranno persi se non sono nel backup.
+                </p>
+              </div>
             </div>
 
-            <form className="space-y-4" onSubmit={handleRestore}>
+            <form className="space-y-5" onSubmit={handleRestore}>
               <div className="space-y-2">
-              <label className="block text-sm font-medium text-[var(--navy)]">
-                File di backup (JSON)
-              </label>
-              <input
-                type="file"
-                name="backupFile"
-                accept="application/json"
-                className="block w-full cursor-pointer text-sm text-zinc-700 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--navy)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[var(--navy-light)]"
-                onChange={handleFileChange}
-              />
-              {selectedFileName && (
-                <p className="text-xs text-zinc-700">
-                  File selezionato: <span className="font-medium">{selectedFileName}</span>
+                <Label htmlFor="backup-file-input" className="text-sm font-medium text-zinc-800">
+                  File di backup (JSON)
+                </Label>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <input
+                    ref={fileInputRef}
+                    id="backup-file-input"
+                    type="file"
+                    name="backupFile"
+                    accept="application/json,.json"
+                    className="sr-only"
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 min-h-[44px] w-full touch-manipulation sm:h-10 sm:min-h-0 sm:w-auto"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <FileJson className="h-4 w-4" aria-hidden />
+                    Scegli file…
+                  </Button>
+                  <p className="min-w-0 flex-1 truncate text-sm text-zinc-600" title={selectedFileName ?? undefined}>
+                    {selectedFileName ? (
+                      <>
+                        <span className="text-zinc-500">Selezionato: </span>
+                        <span className="font-medium text-zinc-900">{selectedFileName}</span>
+                      </>
+                    ) : (
+                      <span className="text-zinc-400">Nessun file selezionato</span>
+                    )}
+                  </p>
+                </div>
+                <p className="text-xs leading-relaxed text-zinc-500">
+                  Usa solo file generati da questo servizio. Non caricare JSON di origine sconosciuta.
                 </p>
-              )}
-              <p className="text-xs text-zinc-600">
-                Non caricare file ricevuti da terzi o di cui non conosci l&apos;origine. Il file
-                di backup dovrebbe provenire solo dal tuo calendario.
-              </p>
               </div>
 
-              <div className="space-y-2">
-              <label className="inline-flex items-start gap-2 text-sm text-zinc-700">
-                <input
-                  type="checkbox"
-                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[var(--navy)] focus:ring-[var(--navy-light)]"
+              <div className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-zinc-50/80 p-3">
+                <Checkbox
+                  id="confirm-overwrite"
                   checked={confirmOverwrite}
-                  onChange={(e) => {
-                    setConfirmOverwrite(e.target.checked);
+                  onCheckedChange={(v) => {
+                    setConfirmOverwrite(Boolean(v));
                     setMessage(null);
                   }}
+                  className="mt-0.5"
                 />
-                <span>
-                  Confermo di voler sovrascrivere completamente il mio calendario attuale con i
-                  dati presenti nel file di backup.
-                </span>
-              </label>
+                <Label htmlFor="confirm-overwrite" className="cursor-pointer text-sm font-normal leading-snug text-zinc-700">
+                  Confermo di voler <strong className="font-semibold text-zinc-900">sovrascrivere</strong> il
+                  calendario attuale con i dati del file di backup.
+                </Label>
               </div>
 
-              <div className="space-y-1">
-                <button
+              <div className="flex flex-col gap-3">
+                <Button
                   type="submit"
-                  className="inline-flex items-center rounded-md border border-[var(--gold)] bg-white px-4 py-2 text-sm font-medium text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  variant="destructive"
                   disabled={!canRestore}
+                  className="h-11 min-h-[44px] w-full gap-2 touch-manipulation sm:h-10 sm:min-h-0 sm:w-auto sm:max-w-xs disabled:bg-zinc-200 disabled:text-zinc-500 disabled:opacity-100"
                 >
-                  {isRestoring ? "Ripristino in corso..." : "Ripristina calendario"}
-                </button>
-                <ul className="ml-5 list-disc text-xs text-zinc-600">
-                  <li>1. Clicca su &quot;Seleziona file di backup&quot; e scegli il file JSON.</li>
-                  <li>
-                    2. Verifica che si tratti del backup corretto (controlla la data del file sul
-                    tuo computer).
-                  </li>
-                  <li>3. Spunta la casella di conferma per autorizzare la sovrascrittura.</li>
-                  <li>4. Clicca su &quot;Ripristina calendario&quot; e attendi la conferma.</li>
-                </ul>
+                  {isRestoring ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      Ripristino in corso…
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="h-4 w-4" aria-hidden />
+                      Ripristina calendario
+                    </>
+                  )}
+                </Button>
+                {!canRestore && !isRestoring && (
+                  <p className="text-xs text-zinc-500">
+                    Seleziona un file JSON e spunta la conferma per abilitare il ripristino.
+                  </p>
+                )}
               </div>
+
+              <details className="group rounded-xl border border-zinc-200 bg-zinc-50/60 text-sm">
+                <summary className="cursor-pointer list-none px-3 py-2.5 font-medium text-zinc-700 outline-none marker:hidden [&::-webkit-details-marker]:hidden sm:px-4 sm:py-3">
+                  <span className="flex items-center justify-between gap-2">
+                    Come procedere (passi rapidi)
+                    <span className="text-xs font-normal text-zinc-400 group-open:hidden">Mostra</span>
+                    <span className="hidden text-xs font-normal text-zinc-400 group-open:inline">Nascondi</span>
+                  </span>
+                </summary>
+                <ol className="space-y-2 border-t border-zinc-200 px-3 pb-3 pt-2 text-xs leading-relaxed text-zinc-600 sm:px-4 sm:pb-4">
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-zinc-800">1.</span>
+                    <span>Tocca &quot;Scegli file&quot; e seleziona il backup <code className="rounded bg-white px-1 py-0.5 text-[11px]">.json</code>.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-zinc-800">2.</span>
+                    <span>Controlla sul computer che sia il backup giusto (data e nome file).</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-zinc-800">3.</span>
+                    <span>Spunta la casella di conferma sulla sovrascrittura.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-zinc-800">4.</span>
+                    <span>Premi &quot;Ripristina calendario&quot; e conferma nel popup. Attendi il messaggio di esito.</span>
+                  </li>
+                </ol>
+              </details>
             </form>
           </section>
         </div>
       </SignedIn>
       <SignedOut>
-        <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-6 text-center shadow-sm">
-          <h2 className="mb-2 text-lg font-semibold text-[var(--navy)]">
-            Accedi per gestire i backup
-          </h2>
-          <p className="mb-4 text-sm text-zinc-600">
-            Crea un account o accedi per poter salvare e ripristinare il tuo calendario.
+        <div className="mx-auto w-full min-w-0 max-w-xl rounded-2xl border border-zinc-200 bg-white p-5 text-center shadow-sm sm:p-8">
+          <h2 className="mb-2 text-lg font-semibold text-[var(--navy)]">Accedi per gestire i backup</h2>
+          <p className="mb-6 text-sm leading-relaxed text-zinc-600">
+            Crea un account o accedi per salvare e ripristinare il calendario.
           </p>
           <SignInButton mode="redirect">
-            <button className="rounded-md bg-[var(--navy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--navy-light)]">
+            <button
+              type="button"
+              className="mx-auto min-h-11 w-full max-w-xs rounded-lg bg-[var(--navy)] px-5 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--navy-light)] touch-manipulation sm:w-auto sm:min-h-10 sm:py-2.5"
+            >
               Vai al login
             </button>
           </SignInButton>
@@ -273,4 +380,3 @@ export default function BackupPage() {
     </AppShell>
   );
 }
-
