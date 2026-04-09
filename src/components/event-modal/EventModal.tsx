@@ -2001,7 +2001,7 @@ export function EventModal({
                           disabled={readOnly}
                         />
                         <div className="flex flex-wrap items-center gap-2 sm:justify-between">
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                             <span className="text-xs font-medium text-zinc-500">Scostamento</span>
                             <LinkedEventOffsetDateControls
                               offsetDays={row.offsetDays}
