@@ -10,17 +10,11 @@ import {
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 import { WebView } from "react-native-webview";
-import { ClerkProvider, useAuth, useOAuth } from "@clerk/clerk-expo";
+import { ClerkProvider, useAuth, useSSO } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri } from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
-
-function appendEventId(baseUrl, eventId) {
-  if (!eventId) return baseUrl;
-  const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}eventId=${encodeURIComponent(eventId)}`;
-}
 
 export default function App() {
   const extra = Constants.expoConfig?.extra ?? {};
@@ -28,7 +22,6 @@ export default function App() {
     extra.webBaseUrl || "https://legalcalendar-production.up.railway.app";
   const clerkPublishableKey = extra.clerkPublishableKey || "";
   const oneSignalAppId = extra.oneSignalAppId || "";
-
   const [currentUrl, setCurrentUrl] = useState(webBaseUrl);
   const canUseClerk = Boolean(clerkPublishableKey);
   const canUseOneSignal = Boolean(oneSignalAppId);
@@ -47,16 +40,8 @@ export default function App() {
       removeClickListener = OneSignal.Notifications.addClickListener(
         (event) => {
           const launchUrl = event?.notification?.additionalData?.url;
-          const launchEventId = event?.notification?.additionalData?.eventId;
           if (typeof launchUrl === "string" && launchUrl.length > 0) {
             setCurrentUrl(launchUrl);
-            return;
-          }
-          if (
-            typeof launchEventId === "string" &&
-            launchEventId.length > 0
-          ) {
-            setCurrentUrl(appendEventId(webBaseUrl, launchEventId));
           }
         }
       );
@@ -66,12 +51,12 @@ export default function App() {
     return () => {
       if (typeof removeClickListener === "function") removeClickListener();
     };
-  }, [canUseOneSignal, oneSignalAppId, webBaseUrl]);
+  }, [canUseOneSignal, oneSignalAppId]);
 
   if (!canUseClerk) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.warning}>
+        <View style={styles.card}>
           <Text style={styles.warningTitle}>Config mancante</Text>
           <Text style={styles.warningText}>
             Imposta expo.extra.clerkPublishableKey in app.json per abilitare
@@ -94,11 +79,7 @@ export default function App() {
 
   return (
     <ClerkProvider publishableKey={clerkPublishableKey}>
-      <MobileShell
-        webBaseUrl={webBaseUrl}
-        currentUrl={currentUrl}
-        setCurrentUrl={setCurrentUrl}
-      />
+      <MobileShell webBaseUrl={webBaseUrl} currentUrl={currentUrl} setCurrentUrl={setCurrentUrl} />
     </ClerkProvider>
   );
 }
@@ -106,21 +87,8 @@ export default function App() {
 function MobileShell({ webBaseUrl, currentUrl, setCurrentUrl }) {
   const webViewRef = useRef(null);
   const { getToken } = useAuth();
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
-  const oauthPending = useRef(false);
-  const OAUTH_CALLBACK_PREFIXES = useRef([
-    "legalcalendar://oauth-native-callback",
-    "legalcalendar:///oauth-native-callback",
-  ]);
-
-  const isHttpLikeUrl = useCallback((url) => {
-    return (
-      typeof url === "string" &&
-      (url.startsWith("http://") ||
-        url.startsWith("https://") ||
-        url.startsWith("about:blank"))
-    );
-  }, []);
+  const { startSSOFlow } = useSSO();
+  const [oauthInFlight, setOauthInFlight] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== "web") {
@@ -132,39 +100,63 @@ function MobileShell({ webBaseUrl, currentUrl, setCurrentUrl }) {
   }, []);
 
   const bridgeSessionToWebView = useCallback(async () => {
-    // Clerk can need a short moment after setActive before getToken is ready.
-    // Retry briefly to avoid falling back to the unauthenticated web sign-in.
-    for (let i = 0; i < 8; i += 1) {
-      const token = await getToken();
+    for (let i = 0; i < 30; i += 1) {
+      const token = await getToken({ skipCache: true });
       if (token) {
-        setCurrentUrl(
-          `${webBaseUrl}/api/mobile/exchange?token=${encodeURIComponent(token)}`
-        );
+        const exchangeUrl = `${webBaseUrl}/api/mobile/exchange`;
+        const homeUrl = `${webBaseUrl}/`;
+        const signInUrl = `${webBaseUrl}/sign-in`;
+        const bodyLiteral = JSON.stringify({ token });
+
+        const script = `
+          (function() {
+            fetch(${JSON.stringify(exchangeUrl)}, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: ${JSON.stringify(bodyLiteral)},
+              credentials: "include"
+            })
+              .then(function (res) {
+                if (res.ok) {
+                  window.location.href = ${JSON.stringify(homeUrl)};
+                } else {
+                  window.location.href = ${JSON.stringify(signInUrl)};
+                }
+              })
+              .catch(function () {
+                window.location.href = ${JSON.stringify(signInUrl)};
+              });
+          })();
+          true;
+        `;
+
+        if (webViewRef.current) {
+          webViewRef.current.injectJavaScript(script);
+        } else {
+          setCurrentUrl(
+            `${webBaseUrl}/api/mobile/exchange?token=${encodeURIComponent(token)}`
+          );
+        }
         return true;
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
     return false;
   }, [getToken, setCurrentUrl, webBaseUrl]);
 
   useEffect(() => {
-    let isMounted = true;
+    const callbackPrefixes = [
+      "legalcalendar://oauth-native-callback",
+      "legalcalendar:///oauth-native-callback",
+    ];
 
     const maybeBridgeFromDeepLink = async (url) => {
-      if (
-        !url ||
-        !OAUTH_CALLBACK_PREFIXES.current.some((prefix) =>
-          url.startsWith(prefix)
-        )
-      ) {
+      if (!url || !callbackPrefixes.some((prefix) => url.startsWith(prefix))) {
         return;
       }
-      // Always try bridging when app is opened via OAuth callback deep link.
-      // This makes login robust even when startOAuthFlow doesn't immediately
-      // return createdSessionId on some iOS redirect sequences.
-      await bridgeSessionToWebView();
-      if (isMounted) {
-        oauthPending.current = false;
+      const bridged = await bridgeSessionToWebView();
+      if (!bridged) {
+        setCurrentUrl(`${webBaseUrl}/sign-in`);
       }
     };
 
@@ -177,72 +169,105 @@ function MobileShell({ webBaseUrl, currentUrl, setCurrentUrl }) {
     });
 
     return () => {
-      isMounted = false;
       sub.remove();
     };
-  }, [bridgeSessionToWebView]);
+  }, [bridgeSessionToWebView, setCurrentUrl, webBaseUrl]);
 
   const handleGoogleOAuth = useCallback(async () => {
-    if (oauthPending.current) return;
+    if (oauthInFlight) return;
+    setOauthInFlight(true);
     try {
-      oauthPending.current = true;
       const redirectUrl = makeRedirectUri({
         scheme: "legalcalendar",
         path: "oauth-native-callback",
         isTripleSlashed: true,
       });
-      const { createdSessionId, setActive } = await startOAuthFlow({
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
         redirectUrl,
       });
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
-        const bridged = await bridgeSessionToWebView();
-        if (!bridged) {
-          oauthPending.current = false;
-          setCurrentUrl(`${webBaseUrl}/sign-in`);
-          return;
-        }
-        oauthPending.current = false;
-      } else {
-        oauthPending.current = false;
+      }
+      const bridged = await bridgeSessionToWebView();
+      if (!bridged) {
+        setCurrentUrl(`${webBaseUrl}/sign-in`);
       }
     } catch (err) {
-      oauthPending.current = false;
       console.warn("Google OAuth error:", err);
+    } finally {
+      setOauthInFlight(false);
     }
-  }, [bridgeSessionToWebView, setCurrentUrl, startOAuthFlow, webBaseUrl]);
+  }, [oauthInFlight, startSSOFlow, bridgeSessionToWebView]);
+
+  const isGoogleOAuthUrl = useCallback((url) => {
+    if (!url) return false;
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname.includes("accounts.google.com")) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const injectedGoogleBridge = `
+    (function () {
+      if (window.__legalCalendarGoogleBridgeInstalled) return true;
+      window.__legalCalendarGoogleBridgeInstalled = true;
+
+      function shouldInterceptGoogle(el) {
+        if (!el) return false;
+        var text = ((el.innerText || el.textContent || "") + "").toLowerCase();
+        var href = ((el.getAttribute && el.getAttribute("href")) || "").toLowerCase();
+        return text.indexOf("google") !== -1 || href.indexOf("google") !== -1;
+      }
+
+      document.addEventListener("click", function (event) {
+        var node = event.target;
+        var clickable = node && node.closest
+          ? node.closest('button, a, [role="button"], [data-testid], [aria-label]')
+          : null;
+
+        if (!shouldInterceptGoogle(clickable)) return;
+
+        if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+          window.ReactNativeWebView.postMessage("LC_GOOGLE_SSO");
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      return true;
+    })();
+  `;
+
+  const handleWebViewMessage = useCallback(
+    (event) => {
+      const message = event?.nativeEvent?.data;
+      if (message === "LC_GOOGLE_SSO") {
+        void handleGoogleOAuth();
+      }
+    },
+    [handleGoogleOAuth]
+  );
 
   const handleShouldStartLoad = useCallback(
     (request) => {
       const nextUrl = request?.url ?? "";
-
-      // Never let WebView open app/deep/custom schemes.
-      // Trying to load them as a webpage causes NSURLErrorDomain -1004 on iOS.
-      if (!isHttpLikeUrl(nextUrl)) {
-        return false;
-      }
-
-      if (nextUrl.includes("accounts.google.com")) {
+      const isHttp =
+        nextUrl.startsWith("http://") ||
+        nextUrl.startsWith("https://") ||
+        nextUrl.startsWith("about:blank");
+      if (!isHttp) return false;
+      if (isGoogleOAuthUrl(nextUrl)) {
         handleGoogleOAuth();
         return false;
       }
       return true;
     },
-    [handleGoogleOAuth, isHttpLikeUrl]
-  );
-
-  const handleWebViewError = useCallback(
-    (event) => {
-      const failedUrl = event?.nativeEvent?.url ?? "";
-      const code = event?.nativeEvent?.code;
-
-      // If iOS still reports -1004 on an unexpected non-http callback URL,
-      // force recovery to the web app home instead of the error page.
-      if (code === -1004 || !isHttpLikeUrl(failedUrl)) {
-        setCurrentUrl(webBaseUrl);
-      }
-    },
-    [isHttpLikeUrl, setCurrentUrl, webBaseUrl]
+    [handleGoogleOAuth, isGoogleOAuthUrl]
   );
 
   return (
@@ -256,8 +281,9 @@ function MobileShell({ webBaseUrl, currentUrl, setCurrentUrl }) {
         thirdPartyCookiesEnabled
         setSupportMultipleWindows={false}
         startInLoadingState
+        injectedJavaScriptBeforeContentLoaded={injectedGoogleBridge}
+        onMessage={handleWebViewMessage}
         onShouldStartLoadWithRequest={handleShouldStartLoad}
-        onError={handleWebViewError}
       />
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -269,12 +295,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  warning: {
+  card: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff4e5",
-    borderBottomWidth: 1,
-    borderBottomColor: "#facc15",
   },
   warningTitle: {
     fontSize: 14,
