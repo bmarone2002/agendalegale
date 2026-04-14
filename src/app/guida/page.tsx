@@ -66,23 +66,27 @@ export default function GuidaPage() {
                 </button>
               </SignInButton>
             </SignedOut>
+            <span className="hidden h-5 w-px bg-[var(--navy)]/15 sm:inline-block" />
             <Link
               href="#iniziare"
-              className="text-[var(--navy)] underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--navy)]/15 bg-white px-3.5 py-1.5 font-medium text-[var(--navy)] shadow-sm transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)]"
             >
-              Percorso consigliato per iniziare
+              <span aria-hidden="true">🚀</span>
+              Percorso per iniziare
             </Link>
             <Link
               href="#calendario"
-              className="text-[var(--navy)] underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--navy)]/15 bg-white px-3.5 py-1.5 font-medium text-[var(--navy)] shadow-sm transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)]"
             >
-              Vai subito alla sezione Calendario
+              <span aria-hidden="true">📅</span>
+              Sezione Calendario
             </Link>
             <Link
               href="#backup"
-              className="text-[var(--navy)] underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--navy)]/15 bg-white px-3.5 py-1.5 font-medium text-[var(--navy)] shadow-sm transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)]"
             >
-              Scopri come fare il backup
+              <span aria-hidden="true">💾</span>
+              Backup
             </Link>
           </div>
         </section>

@@ -47,26 +47,29 @@ function LandingPage() {
             </div>
           </div>
 
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/guida"
-              className="hidden text-xs font-medium text-zinc-200/80 transition-colors hover:text-white sm:inline"
-            >
-              Guida
-            </Link>
+          <nav className="flex items-center gap-2 sm:gap-2.5">
             <Link
               href="#funzionalita"
-              className="hidden text-xs font-medium text-zinc-200/80 transition-colors hover:text-white md:inline"
+              className="hidden items-center gap-1.5 rounded-full border border-zinc-400/25 px-3 py-1 text-xs font-medium text-zinc-200/90 transition-colors hover:border-[var(--gold)]/50 hover:text-[var(--gold)] md:inline-flex"
             >
+              <span aria-hidden="true" className="text-[11px]">⚡</span>
               Funzionalità
             </Link>
             <Link
               href="#come-funziona"
-              className="hidden text-xs font-medium text-zinc-200/80 transition-colors hover:text-white md:inline"
+              className="hidden items-center gap-1.5 rounded-full border border-zinc-400/25 px-3 py-1 text-xs font-medium text-zinc-200/90 transition-colors hover:border-[var(--gold)]/50 hover:text-[var(--gold)] md:inline-flex"
             >
+              <span aria-hidden="true" className="text-[11px]">🔍</span>
               Come funziona
             </Link>
-            <span className="mx-1 hidden h-4 w-px bg-zinc-500/40 sm:inline-block" />
+            <Link
+              href="/guida"
+              className="hidden items-center gap-1.5 rounded-full border border-zinc-400/25 px-3 py-1 text-xs font-medium text-zinc-200/90 transition-colors hover:border-[var(--gold)]/50 hover:text-[var(--gold)] sm:inline-flex"
+            >
+              <span aria-hidden="true" className="text-[11px]">📖</span>
+              Guida
+            </Link>
+            <span className="mx-0.5 hidden h-4 w-px bg-zinc-500/30 sm:inline-block" />
             <SignInButton mode="modal">
               <button
                 type="button"
