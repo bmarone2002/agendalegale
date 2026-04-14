@@ -10,7 +10,7 @@ import { toSubEvent } from "@/lib/mappers";
 import type { SubEventCandidate } from "../rules/types";
 import { resolveCalendarUser } from "@/lib/auth/calendar-access";
 import { getOrCreateDbUser } from "@/lib/db/user";
-import { computePhase1Overrides } from "./events";
+import { computePhase1Overrides } from "../phase1-overrides";
 import {
   computePhase1MainPreview,
 } from "../rules/plugins/data-driven-engine";
