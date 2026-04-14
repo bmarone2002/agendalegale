@@ -311,7 +311,6 @@ interface EventSummaryPanelProps {
   highlightSubEventId: string | null;
   highlightRowRef: React.RefObject<HTMLLIElement | null>;
   handleRemovePreviewSubEvent: (id: string) => void;
-  onRigeneraSubEvents: () => void;
   onDeleteSelectedSubEvent: () => void;
   saving: boolean;
   readOnly: boolean;
@@ -333,7 +332,6 @@ function EventSummaryPanel({
   highlightSubEventId,
   highlightRowRef,
   handleRemovePreviewSubEvent,
-  onRigeneraSubEvents,
   onDeleteSelectedSubEvent,
   saving,
   readOnly,
@@ -469,7 +467,7 @@ function EventSummaryPanel({
             <div className="h-full flex items-center justify-center px-4 text-center">
               <p className="text-xs text-white/70">
                 Nessun evento calcolato. Compila i dettagli e, se previsto, usa
-                il pulsante <span className="font-semibold">Calcola</span> per
+                il pulsante <span className="font-semibold">Calcola anteprima</span> per
                 generare scadenze e promemoria.
               </p>
             </div>
@@ -478,18 +476,6 @@ function EventSummaryPanel({
 
         {!readOnly && (
           <div className="px-4 pb-3 pt-2 border-t border-white/10 flex flex-col gap-2">
-            {mode === "edit" && subEvents.length > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-8 border-white/40 text-white hover:bg-white/10"
-                onClick={onRigeneraSubEvents}
-                disabled={saving}
-              >
-                Rigenera sottoeventi
-              </Button>
-            )}
             <Button
               type="button"
               variant="outline"
@@ -576,9 +562,65 @@ export function EventModal({
   const [desktopSummaryWidthPct, setDesktopSummaryWidthPct] = useState<number>(40);
   const resizingRef = useRef(false);
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
-  /** Se true, l'utente ha cliccato "Calcola" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
-  const userHasClickedCalcolaRef = useRef(false);
+  /** Se true, l'utente ha cliccato "Calcola anteprima" almeno una volta: al Salva usiamo la lista preview (anche se vuota). Altrimenti usiamo regenerateSubEvents per creare tutti i sottoeventi. */
+  const [hasClickedCalcola, setHasClickedCalcola] = useState(false);
   const pendingRinvioSaveHandlerRef = useRef<null | (() => Promise<PendingRinvioSaveResult>)>(null);
+  const baselineSnapshotRef = useRef<string | null>(null);
+  const baselineKeyRef = useRef<string>("");
+  const [baselineReady, setBaselineReady] = useState(mode === "create");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const currentUnsavedSnapshot = useMemo(() => JSON.stringify({
+    form: {
+      ...form,
+      startAt: form.startAt?.toISOString() ?? null,
+      endAt: form.endAt?.toISOString() ?? null,
+    },
+    previewSubEvents: previewSubEvents.map((s) => ({
+      id: s.id,
+      title: s.title,
+      dueAt: s.dueAt?.toISOString() ?? null,
+      explanation: s.explanation,
+      ruleId: s.ruleId,
+      kind: s.kind,
+      priority: s.priority ?? null,
+      isPlaceholder: s.isPlaceholder ?? false,
+    })),
+    hasClickedCalcola,
+  }), [form, previewSubEvents, hasClickedCalcola]);
+
+  useEffect(() => {
+    const key = `${mode}:${eventId ?? "new"}`;
+    if (baselineKeyRef.current === key) return;
+    baselineKeyRef.current = key;
+    baselineSnapshotRef.current = null;
+    setHasUnsavedChanges(false);
+    setBaselineReady(mode === "create");
+    setHasClickedCalcola(false);
+  }, [mode, eventId]);
+
+  useEffect(() => {
+    if (!baselineReady) return;
+    if (baselineSnapshotRef.current == null) {
+      baselineSnapshotRef.current = currentUnsavedSnapshot;
+      setHasUnsavedChanges(false);
+      return;
+    }
+    setHasUnsavedChanges(baselineSnapshotRef.current !== currentUnsavedSnapshot);
+  }, [baselineReady, currentUnsavedSnapshot]);
+
+  const handleRequestClose = useCallback((saveDraftBeforeClose: boolean) => {
+    if (!readOnly && hasUnsavedChanges) {
+      const shouldClose = window.confirm(
+        "Hai modifiche non salvate. Vuoi chiudere comunque senza salvare?",
+      );
+      if (!shouldClose) return;
+    }
+    if (saveDraftBeforeClose && !readOnly && mode === "create" && onDraft) {
+      onDraft(draftId ?? null, form);
+    }
+    onClose();
+  }, [readOnly, hasUnsavedChanges, mode, onDraft, draftId, form, onClose]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -793,6 +835,8 @@ export function EventModal({
       const luogo = typeof ident.luogo === "string" ? ident.luogo : "";
       setForm((prev) => ({ ...prev, parti, rg, autorita, luogo }));
       setSubEvents(e.subEvents ?? []);
+      setHasClickedCalcola(false);
+      setBaselineReady(true);
       const subs = e.subEvents ?? [];
       if (highlightSubEventIdProp && subs.some((se) => se.id === highlightSubEventIdProp)) {
         setSelectedSubEventId(highlightSubEventIdProp);
@@ -1001,13 +1045,13 @@ export function EventModal({
       if (!form.macroArea || !form.procedimento || !form.parteProcessuale || !form.eventoCode || !hasBaseDate) {
         setError(
           isNotificaCitazione
-            ? "Inserisci entrambe le date: Data notifica atto di citazione e Data prima udienza, poi clicca Calcola."
+            ? "Inserisci entrambe le date: Data notifica atto di citazione e Data prima udienza, poi clicca Calcola anteprima."
             : isNotificaRicorsoDecretoAppelloLavoro
-              ? "Inserisci entrambe le date: Data comunicazione decreto di fissazione udienza e Data udienza, poi clicca Calcola."
+              ? "Inserisci entrambe le date: Data comunicazione decreto di fissazione udienza e Data udienza, poi clicca Calcola anteprima."
             : richiedeDataPrimaUdienza
                 ? soloDataPrimaUdienza
-                  ? "Inserisci la Data prima udienza, poi clicca Calcola."
-                  : "Inserisci la data dell'evento e la Data prima udienza, poi clicca Calcola."
+                  ? "Inserisci la Data prima udienza, poi clicca Calcola anteprima."
+                  : "Inserisci la data dell'evento e la Data prima udienza, poi clicca Calcola anteprima."
                 : "Seleziona macro area, procedimento, parte e fase, poi inserisci la data prima di procedere."
         );
         return;
@@ -1047,7 +1091,7 @@ export function EventModal({
       };
       const result = await getSubEventsPreview(payload);
       if (result.success && result.data && result.data.length > 0) {
-        userHasClickedCalcolaRef.current = true;
+        setHasClickedCalcola(true);
         setPreviewSubEvents(
           result.data.map((c) => ({
             id: c.id,
@@ -1078,7 +1122,7 @@ export function EventModal({
           } else {
             setError(
               form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE"
-                ? "Inserisci entrambe le date (Data notifica atto di citazione e Data prima udienza) e clicca Calcola."
+                ? "Inserisci entrambe le date (Data notifica atto di citazione e Data prima udienza) e clicca Calcola anteprima."
                 : "Inserire la data base per la fase selezionata (es. data prima udienza) per calcolare le fasi successive dalla tabella."
             );
           }
@@ -1162,7 +1206,7 @@ export function EventModal({
         }
         savedNewEventId = result.data?.id;
         if (result.data && form.generateSubEvents) {
-          const usePreviewList = userHasClickedCalcolaRef.current;
+          const usePreviewList = hasClickedCalcola;
           const regen = usePreviewList
             ? await createSubEventsFromPreview(result.data.id, previewSubEvents.map((p) => p.id), targetUserId)
             : await regenerateSubEvents(result.data.id, targetUserId);
@@ -1209,7 +1253,7 @@ export function EventModal({
           return;
         }
         if (form.generateSubEvents) {
-          const usePreviewList = userHasClickedCalcolaRef.current;
+          const usePreviewList = hasClickedCalcola;
           if (usePreviewList) {
             const regen = await createSubEventsFromPreview(
               eventId,
@@ -1232,69 +1276,13 @@ export function EventModal({
       }
       // Dopo il salvataggio, una eventuale bozza collegata può essere rimossa
       onDraftCleared?.(draftId ?? null);
+      baselineSnapshotRef.current = currentUnsavedSnapshot;
+      setHasUnsavedChanges(false);
       // Non chiudere il popup: l'utente può aggiungere prosecuzione ecc. Chiude solo con la X.
       if (savedNewEventId) {
         onChanged?.(savedNewEventId);
       } else {
         onChanged?.();
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRigenera = async () => {
-    if (mode !== "edit" || !eventId) return;
-    setSaving(true);
-    setError(null);
-    try {
-      let startAt = form.startAt;
-      let endAt = form.endAt;
-      if (usesCalculationDateOnly(form.macroType)) {
-        const primary = getPrimaryDateFromInputs(form.inputs);
-        if (primary) {
-          startAt = primary;
-          endAt = new Date(primary.getTime() + 60 * 60 * 1000);
-        }
-      }
-      const up = await updateEvent(eventId, {
-        title: composePracticeTitle(form) || form.title,
-        description: form.description || null,
-        startAt,
-        endAt,
-        type: form.type,
-        tags: form.tags,
-        notes: form.notes || null,
-        generateSubEvents: form.generateSubEvents,
-        ruleTemplateId: form.ruleTemplateId || null,
-        macroType: form.macroType ?? undefined,
-        macroArea: form.macroArea,
-        procedimento: form.procedimento,
-        parteProcessuale: form.parteProcessuale,
-        eventoCode: form.eventoCode,
-        inputs: serializeInputsForServer({
-          ...((form.inputs as Record<string, unknown> | null) ?? {}),
-          practiceIdentity: {
-            parti: form.parti.trim(),
-            rg: form.rg.trim(),
-            autorita: form.autorita.trim(),
-            luogo: form.luogo.trim(),
-          },
-        }),
-        ruleParams: { reminderOffsets: form.reminderOffsets, linkedEvents: form.linkedEvents },
-        color: form.color,
-        status: form.status,
-      }, targetUserId);
-      if (!up.success) {
-        setError(normalizeDisplayError(up.error));
-        return;
-      }
-      const result = await regenerateSubEvents(eventId, targetUserId);
-      if (result.success && result.data) {
-        setSubEvents(result.data);
-        setSelectedSubEventId(null);
-      } else if (!result.success) {
-        setError(normalizeDisplayError(result.error) ?? "Errore rigenerazione");
       }
     } finally {
       setSaving(false);
@@ -1339,7 +1327,7 @@ export function EventModal({
 
   if (loading && mode === "edit") {
     return (
-      <Dialog open onOpenChange={() => onClose()}>
+      <Dialog open onOpenChange={() => handleRequestClose(false)}>
         <DialogContent>
           <p>Caricamento...</p>
         </DialogContent>
@@ -1352,7 +1340,7 @@ export function EventModal({
       open
       onOpenChange={(open) => {
         if (!open) {
-          onClose();
+          handleRequestClose(false);
         }
       }}
     >
@@ -1376,12 +1364,7 @@ export function EventModal({
             variant="ghost"
             size="sm"
             className="absolute right-0 top-0 flex items-center gap-1.5 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 hover:text-zinc-900"
-            onClick={() => {
-              if (!readOnly && mode === "create" && onDraft) {
-                onDraft(draftId ?? null, form);
-              }
-              onClose();
-            }}
+            onClick={() => handleRequestClose(true)}
           >
             <X className="h-4 w-4" aria-hidden />
             Chiudi
@@ -2236,7 +2219,6 @@ export function EventModal({
               highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
               highlightRowRef={highlightRowRef}
               handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
-              onRigeneraSubEvents={handleRigenera}
               onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
               saving={saving}
               readOnly={readOnly}
@@ -2308,7 +2290,6 @@ export function EventModal({
                   highlightSubEventId={highlightSubEventIdProp ?? selectedSubEventId}
                   highlightRowRef={highlightRowRef}
                   handleRemovePreviewSubEvent={handleRemovePreviewSubEvent}
-                  onRigeneraSubEvents={handleRigenera}
                   onDeleteSelectedSubEvent={handleDeleteSelectedSubEvent}
                   saving={saving}
                   readOnly={readOnly}
@@ -2339,9 +2320,7 @@ export function EventModal({
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={() => handleRequestClose(false)}
               disabled={saving || calculating}
             >
               {readOnly ? "Chiudi" : "Annulla"}
@@ -2354,7 +2333,7 @@ export function EventModal({
                   onClick={handleCalcola}
                   disabled={saving || calculating || !form.ruleTemplateId}
                 >
-                  {calculating ? "Calcolo..." : "Calcola"}
+                  {calculating ? "Calcolo..." : "Calcola anteprima"}
                 </Button>
                 <Button className="btn-save-primary" onClick={handleSave} disabled={saving || calculating}>
                   {saving ? "Salvataggio..." : "Salva"}
