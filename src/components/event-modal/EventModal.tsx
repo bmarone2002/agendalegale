@@ -576,18 +576,7 @@ export function EventModal({
       startAt: form.startAt?.toISOString() ?? null,
       endAt: form.endAt?.toISOString() ?? null,
     },
-    previewSubEvents: previewSubEvents.map((s) => ({
-      id: s.id,
-      title: s.title,
-      dueAt: s.dueAt?.toISOString() ?? null,
-      explanation: s.explanation,
-      ruleId: s.ruleId,
-      kind: s.kind,
-      priority: s.priority ?? null,
-      isPlaceholder: s.isPlaceholder ?? false,
-    })),
-    hasClickedCalcola,
-  }), [form, previewSubEvents, hasClickedCalcola]);
+  }), [form]);
 
   useEffect(() => {
     const key = `${mode}:${eventId ?? "new"}`;
