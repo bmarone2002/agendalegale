@@ -356,6 +356,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const calendarContainerRef = useRef<HTMLDivElement | null>(null);
   const smartPanelScrollRef = useRef<HTMLDivElement | null>(null);
   const listEventRowElsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const subEventFeedbackTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const newPracticeDeepLinkHandledRef = useRef(false);
   const skipFilterEffectRef = useRef(true);
   const [initialView, setInitialView] = useState<string | null>(null);
@@ -401,10 +402,20 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const [draftEvents, setDraftEvents] = useState<DraftEvent[]>([]);
   const [showPending, setShowPending] = useState<boolean>(true);
   const [showDone, setShowDone] = useState<boolean>(false);
+  const [subEventStatusFeedback, setSubEventStatusFeedback] = useState<
+    Record<string, "to-done" | "to-pending">
+  >({});
 
   useLayoutEffect(() => {
     smartPanelScrollRef.current?.scrollTo({ top: 0 });
   }, [panelFocus]);
+
+  useEffect(() => {
+    return () => {
+      subEventFeedbackTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      subEventFeedbackTimeoutsRef.current.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1147,6 +1158,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status = arg.event.extendedProps.status as string | undefined;
       const isDone = status === "done";
       const isReminder = kind === "promemoria";
+      const feedbackState = subEventStatusFeedback[arg.event.id as string];
+      const isAnimatingToDone = feedbackState === "to-done";
+      const isAnimatingToPending = feedbackState === "to-pending";
+      const rowFeedbackClass = isAnimatingToDone
+        ? "calendar-sub-event-feedback calendar-sub-event-feedback-done"
+        : isAnimatingToPending
+          ? "calendar-sub-event-feedback calendar-sub-event-feedback-pending"
+          : "";
       const evStart = arg.event.start;
       const evDay = evStart ? new Date(typeof evStart === "string" ? evStart : evStart.getTime()) : null;
       if (evDay) evDay.setHours(0, 0, 0, 0);
@@ -1158,7 +1177,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const showPracticeLabel = Boolean(practiceLabel && practiceLabel !== subTitleShown);
       return (
         <div
-          className="fc-event-main-frame flex items-center gap-2 rounded border-l-4 pl-1"
+          className={`fc-event-main-frame flex items-center gap-2 rounded border-l-4 pl-1 ${rowFeedbackClass}`}
           style={{ borderLeftColor: borderColor ?? undefined }}
         >
           {canEdit && !isFutureReminder ? (
@@ -1177,6 +1196,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               const result = await updateSubEvent(id, { status: nextStatus as "pending" | "done" }, targetUserId);
               if (result.success && result.data) {
                 const newStatus = result.data.status;
+                const feedbackKey = newStatus === "done" ? "to-done" : "to-pending";
                 const parentTag = arg.event.extendedProps.parentTagColor as string | null | undefined;
                 const newBg = parentTag
                   ? parentTag
@@ -1191,6 +1211,19 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                 arg.event.setExtendedProp("status", newStatus);
                 arg.event.setProp("backgroundColor", newBg);
                 arg.event.setProp("borderColor", newBorder);
+                const existingTimeout = subEventFeedbackTimeoutsRef.current.get(id);
+                if (existingTimeout) clearTimeout(existingTimeout);
+                setSubEventStatusFeedback((prev) => ({ ...prev, [id]: feedbackKey }));
+                const clearTimeoutId = setTimeout(() => {
+                  setSubEventStatusFeedback((prev) => {
+                    if (!(id in prev)) return prev;
+                    const next = { ...prev };
+                    delete next[id];
+                    return next;
+                  });
+                  subEventFeedbackTimeoutsRef.current.delete(id);
+                }, 1400);
+                subEventFeedbackTimeoutsRef.current.set(id, clearTimeoutId);
                 requestAnimationFrame(() => {
                   const row = listEventRowElsRef.current.get(id);
                   if (row) {
@@ -1201,10 +1234,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                   }
                 });
                 if (newStatus === "done" && !showDone) {
-                  arg.event.remove();
+                  window.setTimeout(() => {
+                    arg.event.remove();
+                  }, 380);
                 }
                 if (newStatus === "pending" && !showPending) {
-                  arg.event.remove();
+                  window.setTimeout(() => {
+                    arg.event.remove();
+                  }, 380);
                 }
               }
             }}
@@ -1233,6 +1270,17 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
           <span className="fc-list-event-title min-w-0 flex-1 truncate" style={{ color: "#171717" }}>
             {arg.event.title}
           </span>
+          {feedbackState ? (
+            <span
+              className={`calendar-sub-event-feedback-badge shrink-0 ${
+                isAnimatingToDone
+                  ? "calendar-sub-event-feedback-badge-done"
+                  : "calendar-sub-event-feedback-badge-pending"
+              }`}
+            >
+              {isAnimatingToDone ? "Nei completati" : "Nei da fare"}
+            </span>
+          ) : null}
           {kind && (
             <span className="text-calendar-muted text-xs shrink-0">{kind}</span>
           )}
@@ -1421,7 +1469,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       );
     }
     return true;
-  }, [canEdit, targetUserId, showPending, showDone]);
+  }, [canEdit, targetUserId, showPending, showDone, subEventStatusFeedback]);
 
   return (
       <div className="flex min-h-0 flex-1 min-w-0 flex-col gap-2 sm:gap-3 calendar-theme">
