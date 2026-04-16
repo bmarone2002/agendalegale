@@ -38,6 +38,23 @@ Apri [http://localhost:3000](http://localhost:3000).
   - Copia `Publishable key` in `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` nelle **Variables** dell’app Railway.
   - Copia `Secret key` in `CLERK_SECRET_KEY`.
   - Imposta le URL di redirect in Clerk (Sign-in/Sign-up) a `https://<railway-app-url>/sign-in` e `https://<railway-app-url>/sign-up`.
+- **Stripe**:
+  - Imposta `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_YEARLY`.
+  - Crea endpoint webhook su `https://<railway-app-url>/api/billing/webhook`.
+  - Abilita gli eventi: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`.
+
+### API billing disponibili
+
+- `GET /api/billing/status` restituisce stato abbonamento, trial, override tester e accesso premium effettivo.
+- `POST /api/billing/checkout` crea una sessione Stripe Checkout (`billingCycle: monthly|yearly`, `trialDays` opzionale).
+- `POST /api/billing/portal` apre Stripe Customer Portal per il cliente corrente.
+- `POST /api/billing/webhook` sincronizza Stripe -> DB (usa firma webhook).
+
+### Tester gratuiti durante la beta
+
+- Il modello `User` include `isTester` e `planOverride`.
+- Se `isTester = true` (oppure `planOverride = pro_forced`), l'utente ha accesso premium anche senza subscription Stripe attiva.
+- Per convertire un tester in cliente pagante: imposta `isTester = false` e usa il checkout standard.
 
 ### Seed (opzionale)
 

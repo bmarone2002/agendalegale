@@ -1,0 +1,77 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { getOrCreateDbUser } from "@/lib/db/user";
+import { getStripeServerClient } from "@/lib/billing/stripe";
+
+const checkoutSchema = z.object({
+  billingCycle: z.enum(["monthly", "yearly"]).default("monthly"),
+  trialDays: z.number().int().min(0).max(90).optional(),
+});
+
+function resolvePriceId(billingCycle: "monthly" | "yearly"): string {
+  const priceMonthly = process.env.STRIPE_PRICE_PRO_MONTHLY;
+  const priceYearly = process.env.STRIPE_PRICE_PRO_YEARLY;
+
+  if (billingCycle === "monthly") {
+    if (!priceMonthly) throw new Error("Variabile STRIPE_PRICE_PRO_MONTHLY mancante");
+    return priceMonthly;
+  }
+
+  if (!priceYearly) throw new Error("Variabile STRIPE_PRICE_PRO_YEARLY mancante");
+  return priceYearly;
+}
+
+export async function POST(req: Request) {
+  try {
+    const payload = checkoutSchema.parse(await req.json().catch(() => ({})));
+    const user = await getOrCreateDbUser();
+    const stripe = getStripeServerClient();
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin ?? "http://localhost:3000";
+
+    let stripeCustomerId = user.stripeCustomerId;
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { userId: user.id, clerkUserId: user.clerkUserId },
+      });
+      stripeCustomerId = customer.id;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { stripeCustomerId },
+      });
+    }
+
+    const priceId = resolvePriceId(payload.billingCycle);
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: stripeCustomerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
+      billing_address_collection: "auto",
+      success_url: `${appUrl}/?checkout=success`,
+      cancel_url: `${appUrl}/?checkout=cancelled`,
+      subscription_data: {
+        ...(payload.trialDays != null && payload.trialDays > 0 ? { trial_period_days: payload.trialDays } : {}),
+        metadata: {
+          userId: user.id,
+          clerkUserId: user.clerkUserId,
+          billingCycle: payload.billingCycle,
+        },
+      },
+      metadata: {
+        userId: user.id,
+        clerkUserId: user.clerkUserId,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: { checkoutUrl: session.url, sessionId: session.id },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Errore creazione checkout";
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
+  }
+}

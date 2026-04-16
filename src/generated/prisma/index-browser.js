@@ -126,6 +126,14 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   clerkUserId: 'clerkUserId',
   email: 'email',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  stripePriceId: 'stripePriceId',
+  subscriptionStatus: 'subscriptionStatus',
+  currentPlan: 'currentPlan',
+  trialEndsAt: 'trialEndsAt',
+  isTester: 'isTester',
+  planOverride: 'planOverride',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -241,6 +249,14 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  free: 'free',
+  trialing: 'trialing',
+  active: 'active',
+  past_due: 'past_due',
+  canceled: 'canceled'
+};
+
 exports.SharePermission = exports.$Enums.SharePermission = {
   VIEW_ONLY: 'VIEW_ONLY',
   FULL: 'FULL'

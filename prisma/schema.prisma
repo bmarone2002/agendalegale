@@ -11,18 +11,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SubscriptionStatus {
+  free
+  trialing
+  active
+  past_due
+  canceled
+}
+
 model User {
-  id          String   @id @default(cuid())
-  clerkUserId String   @unique
-  email       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String             @id @default(cuid())
+  clerkUserId        String             @unique
+  email              String?
+  stripeCustomerId   String?            @unique
+  stripeSubscriptionId String?          @unique
+  stripePriceId      String?
+  subscriptionStatus SubscriptionStatus @default(free)
+  currentPlan        String             @default("free")
+  trialEndsAt        DateTime?
+  isTester           Boolean            @default(false)
+  planOverride       String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   events                 Event[]
   notificationDevices    NotificationDevice[]
   eventNotificationPrefs EventNotificationPreference[]
   sharedByMe             CalendarShare[] @relation("SharedByMe")
   sharedWithMe           CalendarShare[] @relation("SharedWithMe")
+
+  @@index([subscriptionStatus])
+  @@index([isTester])
 }
 
 model Event {

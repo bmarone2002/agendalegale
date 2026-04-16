@@ -11,18 +11,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SubscriptionStatus {
+  free
+  trialing
+  active
+  past_due
+  canceled
+}
+
 model User {
-  id          String   @id @default(cuid())
-  clerkUserId String   @unique
-  email       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                   String             @id @default(cuid())
+  clerkUserId          String             @unique
+  email                String?
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  subscriptionStatus   SubscriptionStatus @default(free)
+  currentPlan          String             @default("free")
+  trialEndsAt          DateTime?
+  isTester             Boolean            @default(false)
+  planOverride         String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   events                 Event[]
   notificationDevices    NotificationDevice[]
   eventNotificationPrefs EventNotificationPreference[]
   sharedByMe             CalendarShare[]               @relation("SharedByMe")
   sharedWithMe           CalendarShare[]               @relation("SharedWithMe")
+
+  @@index([subscriptionStatus])
+  @@index([isTester])
 }
 
 model Event {
@@ -43,8 +62,6 @@ model Event {
   procedimento      String? // CITAZIONE_CIVILE | RICORSO_TRIBUTARIO | ...
   parteProcessuale  String? // ATTORE | CONVENUTO
   eventoCode        String? // PRIMA_UDIENZA | NOTIFICA_CITAZIONE | ...
-  actionType        String? // Legacy: CITAZIONE | RICORSO_OPPOSIZIONE | ...
-  actionMode        String? // Legacy: COSTITUZIONE | DA_NOTIFICARE
   inputs            String? // JSON: date e selezioni per regole
   color             String? // hex colore tag (evento + sottoeventi)
   status            String   @default("pending") // pending | done
@@ -62,6 +79,8 @@ model Event {
   @@index([startAt])
   @@index([endAt])
   @@index([userId, startAt])
+  @@index([userId, macroType])
+  @@index([userId, type])
   @@index([orgId, startAt])
 }
 
@@ -141,6 +160,7 @@ model EventNotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, enabled])
 }
 
 enum SharePermission {
