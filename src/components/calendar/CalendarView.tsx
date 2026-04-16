@@ -357,8 +357,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   const smartPanelScrollRef = useRef<HTMLDivElement | null>(null);
   const listEventRowElsRef = useRef<Map<string, HTMLElement>>(new Map());
   const subEventFeedbackTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-  const preserveAgendaScrollOnceRef = useRef(false);
-  const preservedAgendaScrollTopRef = useRef<number | null>(null);
+  const lastViewTypeRef = useRef<string | null>(null);
   const newPracticeDeepLinkHandledRef = useRef(false);
   const skipFilterEffectRef = useRef(true);
   const [initialView, setInitialView] = useState<string | null>(null);
@@ -495,43 +494,10 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     });
   }, []);
 
-  const preserveAgendaScrollForNextRefresh = useCallback(() => {
-    const api = calendarRef.current?.getApi();
-    if (!api || api.view.type !== "listFromToday") return;
-    const root = calendarContainerRef.current;
-    if (!root) return;
-    const scroller = root.querySelector(".fc-scroller") as HTMLElement | null;
-    if (!scroller) return;
-    preserveAgendaScrollOnceRef.current = true;
-    preservedAgendaScrollTopRef.current = scroller.scrollTop;
-  }, []);
-
-  const restorePreservedAgendaScroll = useCallback((): boolean => {
-    if (!preserveAgendaScrollOnceRef.current) return false;
-    const api = calendarRef.current?.getApi();
-    const root = calendarContainerRef.current;
-    if (!api || api.view.type !== "listFromToday" || !root) {
-      preserveAgendaScrollOnceRef.current = false;
-      preservedAgendaScrollTopRef.current = null;
-      return false;
-    }
-    const scroller = root.querySelector(".fc-scroller") as HTMLElement | null;
-    const preservedTop = preservedAgendaScrollTopRef.current;
-    if (!scroller || preservedTop == null) {
-      preserveAgendaScrollOnceRef.current = false;
-      preservedAgendaScrollTopRef.current = null;
-      return false;
-    }
-    requestAnimationFrame(() => {
-      scroller.scrollTop = preservedTop;
-    });
-    preserveAgendaScrollOnceRef.current = false;
-    preservedAgendaScrollTopRef.current = null;
-    return true;
-  }, []);
-
   const handleDatesSet = useCallback(
     (arg: { start: Date; end: Date; view: { type: string; title: string } }) => {
+      const previousViewType = lastViewTypeRef.current;
+      lastViewTypeRef.current = arg.view.type;
       setCurrentView(arg.view.type);
       if (arg.view.type === "listFromToday") {
         const today = new Date();
@@ -544,8 +510,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("calendar:lastView", arg.view.type);
       }
-      if (arg.view.type === "listFromToday") {
-        if (restorePreservedAgendaScroll()) return;
+      const enteringAgendaView =
+        arg.view.type === "listFromToday" && previousViewType !== "listFromToday";
+      if (enteringAgendaView) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             scrollAgendaToFirstUsefulDay();
@@ -557,9 +524,9 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   );
 
   const handleEventsSet = useCallback(() => {
-    if (restorePreservedAgendaScroll()) return;
-    scrollAgendaToFirstUsefulDay();
-  }, [restorePreservedAgendaScroll, scrollAgendaToFirstUsefulDay]);
+    // Nella vista Agenda non re-ancoriamo durante i refresh interni:
+    // altrimenti un toggle stato sposta l'utente via dal punto in cui sta lavorando.
+  }, []);
 
   const handleEventDidMount = useCallback((info: EventMountArg) => {
     if (!isListViewType(info.view.type)) return;
@@ -1232,7 +1199,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
               e.stopPropagation();
               const id = arg.event.id as string;
               const nextStatus = isDone ? "pending" : "done";
-              preserveAgendaScrollForNextRefresh();
               const result = await updateSubEvent(id, { status: nextStatus as "pending" | "done" }, targetUserId);
               if (result.success && result.data) {
                 const newStatus = result.data.status;
@@ -1283,9 +1249,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                     arg.event.remove();
                   }, 380);
                 }
-              } else {
-                preserveAgendaScrollOnceRef.current = false;
-                preservedAgendaScrollTopRef.current = null;
               }
             }}
           >
@@ -1518,7 +1481,6 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
     showPending,
     showDone,
     subEventStatusFeedback,
-    preserveAgendaScrollForNextRefresh,
   ]);
 
   return (
