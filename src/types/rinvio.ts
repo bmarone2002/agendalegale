@@ -86,7 +86,7 @@ export interface Rinvio {
   id: string;
   parentEventId: string;
   numero: number;
-  /** Se true, il rinvio è trattato come udienza (es. inclusione nel Pannello intelligente → Prossime udienze). */
+  /** Se true: udienza; se false: adempimento (tutto ciò che non è udienza), es. escluso da Prossime udienze. */
   isUdienza?: boolean;
   dataUdienza: Date;
   tipoUdienza: string;

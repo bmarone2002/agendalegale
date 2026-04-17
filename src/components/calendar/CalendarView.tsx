@@ -168,8 +168,8 @@ type DraftEvent = {
 };
 
 /**
- * Pannello Udienze: termini/attività con titolo in whitelist (tabella / rinvio Prosecuzione con fase elencata);
- * niente promemoria. I rinvii usano «Udienza: …» (con alias sui tipi Prosecuzione dove serve).
+ * Pannello Udienze: termini/attività con titolo in whitelist (tabella / rinvio Prosecuzione con udienza elencata);
+ * niente promemoria. I rinvii usano «Udienza: …» (con alias sui tipi Prosecuzione dove serve); gli adempimenti «Adempimento: …» restano fuori.
  */
 function sottoeventoPannelloUdienze(se: SubEvent): boolean {
   if (se.kind === "promemoria") return false;
