@@ -731,8 +731,9 @@ export function ProsecuzionePanel({
                     />
                   </div>
                   <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
-                    Se disattivato, il rinvio è un adempimento e non compare nel{" "}
-                    <span className="font-medium text-zinc-700">Pannello intelligente</span> (Prossime udienze).
+                    Se disattivato, il rinvio è un adempimento: compare nel{" "}
+                    <span className="font-medium text-zinc-700">Pannello intelligente</span> (scheda Adempimenti), non in
+                    Prossime udienze.
                   </p>
                 </div>
               )}

@@ -65,7 +65,7 @@ function fcEventClassNames(arg: { event: { extendedProps: Record<string, unknown
 import { useCalendarTagFilters } from "@/hooks/useCalendarTagFilters";
 import { getEvents, updateEvent, deleteEvent } from "@/lib/actions/events";
 import { regenerateSubEvents, updateSubEvent, deleteSubEvent } from "@/lib/actions/sub-events";
-import type { Event as AppEvent, SubEvent } from "@/types";
+import type { Event as AppEvent, EventType, SubEvent } from "@/types";
 import { EventModal } from "@/components/event-modal/EventModal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -187,6 +187,30 @@ function isAdempimentoCollegatoLinkedSubEvent(se: SubEvent): boolean {
   if (p.linkedEvent === true || p.linkedEvent === "true") return true;
   const tipo = typeof p.tipo === "string" ? p.tipo : null;
   return tipo === "evento-collegato";
+}
+
+const EVENT_TYPE_LABEL_SMART_PANEL: Record<EventType, string> = {
+  udienza: "Udienza",
+  notifica: "Notifica",
+  deposito: "Deposito",
+  scadenza: "Scadenza",
+  altro: "Altro",
+};
+
+function badgeForAdempimentoSubEvent(se: SubEvent): { label: string; badgeClass: string } {
+  if (isAdempimentoCollegatoLinkedSubEvent(se)) {
+    return { label: "Ev. collegato", badgeClass: "bg-amber-50 text-amber-700 ring-amber-200" };
+  }
+  if (se.kind === "promemoria") {
+    return { label: "Promemoria", badgeClass: "bg-violet-50 text-violet-700 ring-violet-200" };
+  }
+  if (se.kind === "termine") {
+    return { label: "Termine", badgeClass: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
+  }
+  if (se.kind === "attivita") {
+    return { label: "Attività", badgeClass: "bg-teal-50 text-teal-700 ring-teal-200" };
+  }
+  return { label: "Adempimento", badgeClass: "bg-slate-50 text-slate-700 ring-slate-200" };
 }
 
 function TrashIcon({ className }: { className?: string }) {
@@ -647,26 +671,56 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       });
     };
 
-    const addEventoCollegato = (parent: AppEvent, se: SubEvent) => {
+    /** Tutto ciò che non è udienza nel senso del pannello: promemoria, termini/attività fuori whitelist, «Adempimento: …», ecc. */
+    const addAdempimentoMother = (ev: AppEvent) => {
+      if (madreNelPannelloUdienze(ev)) return;
+      const title = (ev.title ?? "").trim();
+      if (!title) return;
+      const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
+      const startAt = new Date(ev.startAt);
+      const fase = getFaseDisplayString(ev);
+      const practiceLabel = getPracticeTitleFromEvent(ev);
+      out.push({
+        id: `sp-ad-m-${ev.id}`,
+        parentEventId: ev.id,
+        date: startAt,
+        dateLabel: dateLabel(startAt),
+        title,
+        subtitle: fase,
+        practiceLabel,
+        badgeLabel: EVENT_TYPE_LABEL_SMART_PANEL[ev.type],
+        badgeClass: "bg-slate-50 text-slate-700 ring-slate-200",
+        status,
+      });
+    };
+
+    const addAdempimentoSubEvent = (parent: AppEvent, se: SubEvent) => {
       if (se.isPlaceholder || !se.dueAt || se.dueAt.getTime() === 0) return;
-      if (!isAdempimentoCollegatoLinkedSubEvent(se)) return;
+      if (sottoeventoPannelloUdienze(se)) return;
+
       const title = (se.title ?? "").trim();
       if (!title) return;
       const status: "pending" | "done" = se.status === "done" ? "done" : "pending";
       const fase = getFaseDisplayString(parent);
-      const sotto = fase ? `Evento collegato · ${fase}` : "Evento collegato";
       const practiceLabel = getPracticeTitleFromEvent(parent);
+      const { label: badgeLabel, badgeClass } = badgeForAdempimentoSubEvent(se);
+      const subtitle = isAdempimentoCollegatoLinkedSubEvent(se)
+        ? fase
+          ? `Evento collegato · ${fase}`
+          : "Evento collegato"
+        : fase;
+
       out.push({
-        id: `sp-a-se-${se.id}`,
+        id: `sp-ad-se-${se.id}`,
         parentEventId: parent.id,
         subEventId: se.id,
         date: se.dueAt,
         dateLabel: dateLabel(se.dueAt),
         title,
-        subtitle: sotto,
+        subtitle,
         practiceLabel,
-        badgeLabel: "Ev. collegato",
-        badgeClass: "bg-amber-50 text-amber-700 ring-amber-200",
+        badgeLabel,
+        badgeClass,
         status,
       });
     };
@@ -676,7 +730,8 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
         addUdienzaMother(ev);
         for (const se of ev.subEvents ?? []) addUdienzaSubEvent(ev, se);
       } else {
-        for (const se of ev.subEvents ?? []) addEventoCollegato(ev, se);
+        addAdempimentoMother(ev);
+        for (const se of ev.subEvents ?? []) addAdempimentoSubEvent(ev, se);
       }
     }
 
@@ -1946,10 +2001,19 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             >
               {smartPanelItems.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-500">
-                  Nessuna voce in questo resoconto. Compaiono le pratiche con fase nell’elenco udienze, quelle manuali
-                  contrassegnate come «È un&apos;udienza», e i rinvii in Prosecuzione coerenti con quelle fasi (titolo
-                  «Udienza: …»). Gli adempimenti collegati restano nell’altra scheda; il resoconto ignora filtri
-                  colore/stato del calendario.
+                  {panelFocus === "udienze" ? (
+                    <>
+                      Nessuna voce in questo resoconto. Compaiono le pratiche con fase nell&apos;elenco udienze, quelle
+                      manuali contrassegnate come «È un&apos;udienza», e i rinvii in Prosecuzione coerenti con quelle fasi
+                      (titolo «Udienza: …»). Il resoconto ignora filtri colore/stato del calendario.
+                    </>
+                  ) : (
+                    <>
+                      Nessuna voce in questo resoconto. Compaiono le pratiche madri che non rientrano tra le udienze
+                      sopra, e tutti i sottoeventi che non sono udienze (termini, promemoria, attività, «Adempimento: …»
+                      da rinvio, eventi collegati, ecc.). Il resoconto ignora filtri colore/stato del calendario.
+                    </>
+                  )}
                 </p>
               ) : (
                 <ul className="space-y-3">
