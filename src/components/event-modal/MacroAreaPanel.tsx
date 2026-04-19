@@ -263,6 +263,16 @@ export function MacroAreaPanel({
       eventoCode === "MEMORIA_171TER_2" ||
       eventoCode === "MEMORIA_171TER_3");
 
+  /** Decreto ingiuntivo (fase opposizione): costituzione opposto, prima udienza e memorie 171-ter da sola data prima udienza. */
+  const soloDataPrimaUdienzaOpposizioneDI =
+    procedimento === "DECRETO_INGIUNTIVO" &&
+    (eventoCode === "COSTITUZIONE_CONVENUTO_OPPO_DI" ||
+      eventoCode === "COSTITUZIONE_OPPOSTO_DI_ATTORE" ||
+      eventoCode === "PRIMA_UDIENZA_OPPO_DI" ||
+      eventoCode === "MEMORIA_171TER_OPPO_DI_1" ||
+      eventoCode === "MEMORIA_171TER_OPPO_DI_2" ||
+      eventoCode === "MEMORIA_171TER_OPPO_DI_3");
+
   /** Per Citazione civile: Data prima udienza serve fino a Memoria 3 (ordine 7) per creare Prima udienza e Memorie 1,2,3. */
   const showDataPrimaUdienza =
     procedimento === "CITAZIONE_CIVILE" && selectedEvento && selectedEvento.ordine <= 7;
@@ -440,10 +450,27 @@ export function MacroAreaPanel({
           </p>
         </div>
       )}
+      {selectedEvento && soloDataPrimaUdienzaOpposizioneDI && (
+        <div className="pt-2 border-t border-zinc-200">
+          <Label className="text-sm font-semibold text-zinc-700">
+            Data prima udienza (opposizione)
+          </Label>
+          <DatePickerWithOptionalTime
+            value={strInput(inputs, "dataPrimaUdienzaOpposizioneDI")}
+            onChange={handleDateChange("dataPrimaUdienzaOpposizioneDI")}
+            placeholder="Inserisci data prima udienza"
+          />
+          <p className="text-xs text-zinc-500 mt-1">
+            Data ancora della pratica in fase di opposizione: da questa si calcolano a ritroso le memorie ex art. 171-ter
+            c.p.c. e, per l&apos;intimato opposto, la scadenza di costituzione (70 giorni prima, art. 166 c.p.c.).
+          </p>
+        </div>
+      )}
       {selectedEvento &&
         !isNotificaCitazioneConDueDate &&
         !isNotificaRicorsoDecretoAppelloLavoroConDueDate &&
-        !soloDataPrimaUdienza && (
+        !soloDataPrimaUdienza &&
+        !soloDataPrimaUdienzaOpposizioneDI && (
         <div className="pt-2 border-t border-zinc-200 space-y-4">
           <div>
             <Label className="text-sm font-semibold text-zinc-700">
