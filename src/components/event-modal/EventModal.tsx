@@ -294,6 +294,8 @@ interface EventSummaryPanelProps {
   mode: ModalMode;
   form: EventFormState;
   subEvents: SubEvent[];
+  /** Dopo «Calcola anteprima» in modifica, la colonna blu segue l'anteprima anche se esistono sottoeventi salvati. */
+  hasClickedCalcola: boolean;
   previewSubEvents: Array<{
     id: string;
     title: string;
@@ -325,6 +327,7 @@ function EventSummaryPanel({
   mode,
   form,
   subEvents,
+  hasClickedCalcola,
   previewSubEvents,
   selectedSubEventId,
   setSelectedSubEventId,
@@ -339,7 +342,11 @@ function EventSummaryPanel({
   phase1MainExplanation,
 }: EventSummaryPanelProps) {
   const baseEventsToShow =
-    mode === "edit" && subEvents.length > 0 ? subEvents : previewSubEvents;
+    hasClickedCalcola && previewSubEvents.length > 0
+      ? previewSubEvents
+      : mode === "edit" && subEvents.length > 0
+        ? subEvents
+        : previewSubEvents;
 
   // "Promuovi fase1": in anteprima la data segue il motore regole; se manca la base, resta il giorno cliccato sul calendario.
   const mainDate = phase1MainDueAt ?? form.startAt;
@@ -395,7 +402,10 @@ function EventSummaryPanel({
             <ScrollArea className="h-full pr-2">
               <ul className="space-y-2">
                 {eventsToShow.map((s, idx) => {
-                  const isSavedSub = mode === "edit" && subEvents.length > 0;
+                  const isSavedSub =
+                    mode === "edit" &&
+                    subEvents.length > 0 &&
+                    !(hasClickedCalcola && previewSubEvents.length > 0);
                   const currentId = (s as { id?: string }).id ?? `sub-${idx}`;
                   const isMainEvent = (s as { __isMainEvent?: boolean }).__isMainEvent === true;
                   const isSelected = isSavedSub && selectedSubEventId === currentId;
@@ -1086,7 +1096,43 @@ export function EventModal({
               inputs: { reminderOffsets: form.reminderOffsets, linkedEvents: form.linkedEvents },
             }),
       };
-      const result = await getSubEventsPreview(payload);
+      const mergedInputsDataDriven = {
+        ...serializeInputsForServer(form.inputs),
+        macroArea: form.macroArea,
+        procedimento: form.procedimento,
+        parteProcessuale: form.parteProcessuale,
+        reminderOffsets: form.reminderOffsets,
+        linkedEvents: form.linkedEvents,
+      };
+      const phase1Promise =
+        form.ruleTemplateId === "data-driven" &&
+        form.macroArea &&
+        form.procedimento &&
+        form.parteProcessuale &&
+        form.eventoCode
+          ? getPhase1MainPreview({
+              macroArea: form.macroArea,
+              procedimento: form.procedimento,
+              parteProcessuale: form.parteProcessuale,
+              eventoCode: form.eventoCode,
+              inputs: mergedInputsDataDriven,
+            })
+          : Promise.resolve({
+              success: true as const,
+              data: { dueAt: null as string | null, explanation: "" },
+            });
+
+      const [result, phase1Result] = await Promise.all([getSubEventsPreview(payload), phase1Promise]);
+
+      if (phase1Result.success && phase1Result.data) {
+        setPhase1Preview({
+          dueAt: phase1Result.data.dueAt ? new Date(phase1Result.data.dueAt) : null,
+          explanation: phase1Result.data.explanation ?? "",
+        });
+      } else {
+        setPhase1Preview({ dueAt: null, explanation: "" });
+      }
+
       if (result.success && result.data && result.data.length > 0) {
         setHasClickedCalcola(true);
         setPreviewSubEvents(
@@ -1105,6 +1151,7 @@ export function EventModal({
         setError(null);
       } else {
         setPreviewSubEvents([]);
+        setHasClickedCalcola(false);
         if (
           result.success &&
           (!result.data || result.data.length === 0) &&
@@ -1271,6 +1318,7 @@ export function EventModal({
           }
         }
       }
+      setHasClickedCalcola(false);
       // Dopo il salvataggio, una eventuale bozza collegata può essere rimossa
       onDraftCleared?.(draftId ?? null);
       baselineSnapshotRef.current = currentUnsavedSnapshot;
@@ -2173,6 +2221,7 @@ export function EventModal({
                       const result = await getEventById(eventId, targetUserId);
                       if (result.success && result.data) {
                         setSubEvents(result.data.subEvents ?? []);
+                        setHasClickedCalcola(false);
                       }
                     }
                     onChanged?.();
@@ -2210,6 +2259,7 @@ export function EventModal({
               mode={mode}
               form={form}
               subEvents={subEvents}
+              hasClickedCalcola={hasClickedCalcola}
               previewSubEvents={previewSubEvents}
               selectedSubEventId={selectedSubEventId}
               setSelectedSubEventId={setSelectedSubEventId}
@@ -2281,6 +2331,7 @@ export function EventModal({
                   mode={mode}
                   form={form}
                   subEvents={subEvents}
+                  hasClickedCalcola={hasClickedCalcola}
                   previewSubEvents={previewSubEvents}
                   selectedSubEventId={selectedSubEventId}
                   setSelectedSubEventId={setSelectedSubEventId}
