@@ -204,7 +204,11 @@ function sottoeventoPannelloUdienze(se: SubEvent): boolean {
 
 /** Stessa logica del pannello «Udienze»: evento madre che conta come udienza in calendario. */
 function isUdienzaMotherEvent(ev: AppEvent): boolean {
-  return matchesUdienzaPanelPhaseLabel(getFaseDisplayString(ev)) || ev.type === "udienza";
+  const isDataDrivenPractice = ev.macroType === "ATTO_GIURIDICO";
+  if (isDataDrivenPractice) {
+    return matchesUdienzaPanelPhaseLabel(getFaseDisplayString(ev));
+  }
+  return ev.type === "udienza";
 }
 
 function isUdienzaSubCalendar(se: SubEvent, isRinvioUdienzaSubEvent: boolean): boolean {
@@ -715,9 +719,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       return `${datePart.toUpperCase()} · ${d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}`;
     };
 
-    /** Fase in whitelist oppure pratica manuale con «È un'udienza» in modale. */
-    const madreNelPannelloUdienze = (ev: AppEvent) =>
-      matchesUdienzaPanelPhaseLabel(getFaseDisplayString(ev)) || ev.type === "udienza";
+    /** Per ATTO_GIURIDICO usa solo whitelist fasi udienza; per pratiche manuali usa type=udienza. */
+    const madreNelPannelloUdienze = (ev: AppEvent) => {
+      const isDataDrivenPractice = ev.macroType === "ATTO_GIURIDICO";
+      if (isDataDrivenPractice) {
+        return matchesUdienzaPanelPhaseLabel(getFaseDisplayString(ev));
+      }
+      return ev.type === "udienza";
+    };
 
     const out: SmartPanelItem[] = [];
 
