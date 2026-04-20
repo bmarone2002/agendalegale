@@ -856,7 +856,11 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
   useLayoutEffect(() => {
     if (smartPanelItems.length === 0 || smartPanelFirstUsefulIndex < 0) return;
     queueMicrotask(() => {
-      smartPanelAnchorRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+      const container = smartPanelScrollRef.current;
+      const anchor = smartPanelAnchorRef.current;
+      if (!container || !anchor) return;
+      const topWithinContainer = anchor.offsetTop - container.offsetTop;
+      container.scrollTop = Math.max(0, topWithinContainer - 8);
     });
   }, [panelFocus, smartPanelItems, smartPanelFirstUsefulIndex]);
 
