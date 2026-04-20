@@ -28,7 +28,7 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--surface)]" style={{ backgroundColor: "var(--surface)" }}>
-      <div className="flex min-h-screen w-full flex-1">
+      <div className="flex min-h-0 w-full flex-1">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <header
