@@ -58,7 +58,7 @@ import { getEventiDisponibiliPerProsecuzione } from "@/types/macro-areas";
 
 interface ProsecuzionePanelProps {
   eventId: string;
-  onSubEventsChanged?: () => void;
+  onSubEventsChanged?: () => void | Promise<void>;
   targetUserId?: string;
   readOnly?: boolean;
   isManualPractice?: boolean;
@@ -360,6 +360,12 @@ export function ProsecuzionePanel({
       .map(adempimentoFormToData)
       .filter((a) => a.titolo && a.scadenza);
 
+    const invalidLinkedEventIndex = linkedEvents.findIndex((row) => row.title.trim().length === 0);
+    if (invalidLinkedEventIndex >= 0) {
+      setError("Inserire un titolo per ogni adempimento collegato.");
+      return false;
+    }
+
     setSaving(true);
     try {
       const [hours, minutes] = customTime.split(":").map((n) => Number(n));
@@ -406,7 +412,7 @@ export function ProsecuzionePanel({
         if (result.success) {
           resetForm();
           await loadRinvii();
-          onSubEventsChanged?.();
+          await onSubEventsChanged?.();
           return true;
         }
 
@@ -436,7 +442,7 @@ export function ProsecuzionePanel({
       if (result.success) {
         resetForm();
         await loadRinvii();
-        onSubEventsChanged?.();
+        await onSubEventsChanged?.();
         return true;
       }
 

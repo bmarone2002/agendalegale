@@ -482,8 +482,7 @@ function EventSummaryPanel({
           ) : (
             <div className="h-full flex items-center justify-center px-4 text-center">
               <p className="text-xs text-white/70">
-                Nessun evento calcolato. Compila i dettagli e, se previsto, usa
-                il pulsante <span className="font-semibold">Calcola anteprima</span> per
+                Nessun evento calcolato. Compila i dettagli e salva la pratica per
                 generare scadenze e promemoria.
               </p>
             </div>
@@ -2244,6 +2243,7 @@ export function EventModal({
                       if (result.success && result.data) {
                         setSubEvents(result.data.subEvents ?? []);
                         setHasClickedCalcola(false);
+                        setPreviewSubEvents([]);
                       }
                     }
                     onChanged?.();
@@ -2397,14 +2397,6 @@ export function EventModal({
             </Button>
             {!readOnly && (
               <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCalcola}
-                  disabled={saving || calculating || !form.ruleTemplateId}
-                >
-                  {calculating ? "Calcolo..." : "Calcola anteprima"}
-                </Button>
                 <Button className="btn-save-primary" onClick={handleSave} disabled={saving || calculating}>
                   {saving ? "Salvataggio..." : "Salva"}
                 </Button>
