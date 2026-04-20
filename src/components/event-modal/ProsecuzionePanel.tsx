@@ -390,6 +390,7 @@ export function ProsecuzionePanel({
           {
             isUdienza,
             dataUdienza: normalizedDataUdienza,
+            hasExplicitTime: useCustomTime,
             // In UI gestiamo solo la “fase/evento” selezionata, quindi persistiamo
             // la label come tipoUdienzaCustom.
             tipoUdienza: "ALTRO",
@@ -418,6 +419,7 @@ export function ProsecuzionePanel({
           parentEventId: eventId,
           isUdienza,
           dataUdienza: normalizedDataUdienza,
+          hasExplicitTime: useCustomTime,
           // Manteniamo tipoUdienza = "ALTRO" e usiamo la descrizione personalizzata
           // per mostrare in lista la fase selezionata.
           tipoUdienza: "ALTRO",

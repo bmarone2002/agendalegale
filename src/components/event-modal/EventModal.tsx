@@ -997,6 +997,21 @@ export function EventModal({
   const handleCalcola = useCallback(async () => {
     setError(null);
 
+    // Coerenza con "Salva": se in Prosecuzione c'è un rinvio in bozza, lo persistiamo prima
+    // del calcolo anteprima, così la colonna Eventi & Scadenze include anche quei sottoeventi.
+    if (mode === "edit" && eventId && !readOnly) {
+      const pendingResult = await pendingRinvioSaveHandlerRef.current?.();
+      if (pendingResult === "failed") {
+        return;
+      }
+      if (pendingResult === "saved") {
+        const updated = await getEventById(eventId, targetUserId);
+        if (updated.success && updated.data) {
+          setSubEvents(updated.data.subEvents ?? []);
+        }
+      }
+    }
+
       if (form.macroType === "ATTO_GIURIDICO" && form.ruleTemplateId === "data-driven") {
       const isNotificaCitazione =
         form.procedimento === "CITAZIONE_CIVILE" && form.eventoCode === "NOTIFICA_CITAZIONE";
@@ -1181,7 +1196,7 @@ export function EventModal({
     } finally {
       setCalculating(false);
     }
-  }, [form]);
+  }, [eventId, form, mode, readOnly, targetUserId]);
 
   const handleRemovePreviewSubEvent = (id: string) => {
     setPreviewSubEvents((prev) => prev.filter((s) => s.id !== id));

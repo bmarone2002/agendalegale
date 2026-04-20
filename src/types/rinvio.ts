@@ -108,6 +108,8 @@ export interface CreateRinvioInput {
   parentEventId: string;
   isUdienza?: boolean;
   dataUdienza: Date;
+  /** True se l'utente ha scelto un orario specifico nel form rinvio. */
+  hasExplicitTime?: boolean;
   tipoUdienza: string;
   tipoUdienzaCustom?: string | null;
   note?: string | null;
@@ -129,6 +131,8 @@ export interface CreateRinvioInput {
 export interface UpdateRinvioInput {
   isUdienza?: boolean;
   dataUdienza?: Date;
+  /** True se l'utente ha scelto un orario specifico nel form rinvio. */
+  hasExplicitTime?: boolean;
   tipoUdienza?: string;
   tipoUdienzaCustom?: string | null;
   note?: string | null;

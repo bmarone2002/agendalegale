@@ -41,6 +41,7 @@ const createRinvioSchema = z.object({
   parentEventId: z.string().min(1),
   isUdienza: z.boolean().optional(),
   dataUdienza: z.coerce.date(),
+  hasExplicitTime: z.boolean().optional(),
   tipoUdienza: z.string().min(1, "Tipo udienza obbligatorio"),
   tipoUdienzaCustom: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
@@ -53,6 +54,7 @@ const createRinvioSchema = z.object({
 const updateRinvioSchema = z.object({
   isUdienza: z.boolean().optional(),
   dataUdienza: z.coerce.date().optional(),
+  hasExplicitTime: z.boolean().optional(),
   tipoUdienza: z.string().min(1).optional(),
   tipoUdienzaCustom: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
@@ -66,10 +68,6 @@ function toDateOnlyString(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
-}
-
-function hasExplicitRinvioTime(d: Date): boolean {
-  return d.getHours() !== 12 || d.getMinutes() !== 0 || d.getSeconds() !== 0 || d.getMilliseconds() !== 0;
 }
 
 function applyTimeFromReference(date: Date, ref: Date): Date {
@@ -179,13 +177,14 @@ async function generateSubEventsForRinvio(
   reminderOffsetsFromInput?: number[] | null,
   linkedEventsFromInput?: LinkedEventSpec[] | null,
   isUdienza: boolean = true,
+  hasExplicitTimeFromInput?: boolean | null,
 ): Promise<void> {
   const settings = await getSettings();
   const udienzaLabel = resolveUdienzaLabel(
     udienzaInfo.tipoUdienza,
     udienzaInfo.tipoUdienzaCustom
   );
-  const preserveExplicitTime = hasExplicitRinvioTime(udienzaInfo.dataUdienza);
+  const preserveExplicitTime = hasExplicitTimeFromInput === true;
 
   const udienzaDueAt = preserveExplicitTime
     ? new Date(udienzaInfo.dataUdienza)
@@ -631,6 +630,7 @@ export async function createRinvio(
       data.reminderOffsets ?? null,
       data.linkedEvents ?? null,
       isUdienzaCreate,
+      data.hasExplicitTime ?? false,
     );
 
     return { success: true, data: toRinvio(rinvio, undefined, undefined, isUdienzaCreate) };
@@ -706,6 +706,7 @@ export async function updateRinvio(
         data.reminderOffsets ?? null,
         data.linkedEvents ?? null,
         isUdienzaForResponse,
+        data.hasExplicitTime ?? false,
       );
     }
 
