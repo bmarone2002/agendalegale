@@ -30,7 +30,7 @@ export function SharedCalendarView({ ownerId }: SharedCalendarViewProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex min-h-0 flex-1 items-center justify-center py-12">
         <p className="text-sm text-zinc-500">Verifica accesso al calendario...</p>
       </div>
     );
@@ -38,7 +38,7 @@ export function SharedCalendarView({ ownerId }: SharedCalendarViewProps) {
 
   if (error || !permission) {
     return (
-      <div className="mx-auto max-w-xl rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+      <div className="mx-auto flex min-h-0 max-w-xl flex-1 items-center rounded-xl border border-red-200 bg-red-50 p-6 text-center">
         <h2 className="mb-2 text-lg font-semibold text-red-700">
           Accesso non consentito
         </h2>
@@ -50,8 +50,8 @@ export function SharedCalendarView({ ownerId }: SharedCalendarViewProps) {
   }
 
   return (
-    <div>
-      <div className="mb-4 flex items-center gap-3">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="mb-4 shrink-0 flex items-center gap-3">
         <p className="text-sm text-zinc-600">
           Agenda di <span className="font-medium text-zinc-800">{ownerEmail ?? "utente"}</span>
         </p>
@@ -65,7 +65,9 @@ export function SharedCalendarView({ ownerId }: SharedCalendarViewProps) {
           {permission === "FULL" ? "Accesso completo" : "Solo visualizzazione"}
         </span>
       </div>
-      <CalendarView targetUserId={ownerId} permission={permission} />
+      <div className="min-h-0 flex-1">
+        <CalendarView targetUserId={ownerId} permission={permission} />
+      </div>
     </div>
   );
 }

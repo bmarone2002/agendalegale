@@ -23,7 +23,9 @@ export default async function SharedCalendarPage({ params }: SharedCalendarPageP
       }
     >
       <SignedIn>
-        <SharedCalendarView ownerId={ownerId} />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <SharedCalendarView ownerId={ownerId} />
+        </div>
       </SignedIn>
       <SignedOut>
         <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-6 text-center shadow-sm">
