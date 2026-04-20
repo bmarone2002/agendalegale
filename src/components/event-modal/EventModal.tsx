@@ -341,9 +341,16 @@ function EventSummaryPanel({
   phase1MainDueAt,
   phase1MainExplanation,
 }: EventSummaryPanelProps) {
+  const rinvioSubEventsPersisted =
+    mode === "edit" ? subEvents.filter((s) => s.ruleId === "rinvio-udienza") : [];
+
   const baseEventsToShow =
     hasClickedCalcola && previewSubEvents.length > 0
-      ? previewSubEvents
+      ? [...rinvioSubEventsPersisted, ...previewSubEvents].filter((s, idx, arr) => {
+          const sid = (s as { id?: string }).id;
+          if (!sid) return true;
+          return arr.findIndex((x) => (x as { id?: string }).id === sid) === idx;
+        })
       : mode === "edit" && subEvents.length > 0
         ? subEvents
         : previewSubEvents;
