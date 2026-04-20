@@ -737,14 +737,17 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
       const status: "pending" | "done" = ev.status === "done" ? "done" : "pending";
       const startAt = new Date(ev.startAt);
       const fase = getFaseDisplayString(ev);
+      const faseTitle = fase.trim();
       const practiceLabel = getPracticeTitleFromEvent(ev);
       out.push({
         id: `sp-u-m-${ev.id}`,
         parentEventId: ev.id,
         date: startAt,
         dateLabel: scheduleLabelForPanelItem(startAt),
-        title,
-        subtitle: fase,
+        // Nel pannello udienze mostriamo anche gli eventi madre come i sottoeventi:
+        // titolo = fase udienza, pratica mostrata a destra.
+        title: faseTitle || title,
+        subtitle: "",
         practiceLabel,
         badgeLabel: "Udienza",
         badgeClass: "bg-blue-50 text-blue-700 ring-blue-200",
@@ -2176,14 +2179,14 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
                               </p>
                             ) : null}
                           </div>
-                          <div className="flex max-w-[min(45vw,13rem)] shrink-0 flex-col items-end gap-1.5 text-right">
+                          <div className="flex min-w-0 max-w-[min(60vw,22rem)] shrink-0 flex-col items-end gap-1.5 text-right">
                             {item.practiceLabel &&
                             item.practiceLabel.trim() !== item.title.trim() ? (
                               <span
                                 className="inline-flex max-w-full items-center justify-end rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm"
                                 title={item.practiceLabel}
                               >
-                                <span className="truncate">
+                                <span className="whitespace-normal break-words">
                                   {item.subEventId ? `Pratica: ${item.practiceLabel}` : item.practiceLabel}
                                 </span>
                               </span>
