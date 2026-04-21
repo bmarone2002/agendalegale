@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AcceptLegalPage() {
-  const router = useRouter();
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +28,7 @@ export default function AcceptLegalPage() {
       if (!response.ok || !json?.success) {
         throw new Error(json?.error ?? "Errore nel salvataggio del consenso");
       }
-      router.replace("/");
-      router.refresh();
+      window.location.assign("/");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Errore inatteso";
       setError(message);

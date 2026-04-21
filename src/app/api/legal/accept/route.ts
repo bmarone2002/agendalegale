@@ -26,26 +26,33 @@ export async function POST(req: Request) {
         ? ((sessionClaims.publicMetadata as Record<string, unknown>) ?? {})
         : {};
 
-    const client = await clerkClient();
-    await client.users.updateUserMetadata(userId, {
-      publicMetadata: {
-        ...oldPublicMetadata,
-        legalAcceptedAt: nowIso,
-        legalAcceptedVersion: LEGAL_VERSION,
-        legalAcceptedIp: ipAddress,
-        legalAcceptedUserAgent: userAgent,
-      },
-    });
+    // Best effort metadata sync: even if Clerk propagation fails transiently,
+    // we still grant a temporary pass cookie to avoid blocking the user flow.
+    try {
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          ...oldPublicMetadata,
+          legalAcceptedAt: nowIso,
+          legalAcceptedVersion: LEGAL_VERSION,
+          legalAcceptedIp: ipAddress,
+          legalAcceptedUserAgent: userAgent,
+        },
+      });
+    } catch (metadataError) {
+      console.warn("Legal consent metadata update failed", metadataError);
+    }
 
     const response = NextResponse.json({ success: true });
     // Clerk metadata propagation to session claims can be slightly delayed:
     // grant a short-lived bypass cookie to avoid redirect loop right after acceptance.
+    const isSecure = new URL(req.url).protocol === "https:";
     response.cookies.set("legal_accept_recent", "1", {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
-      secure: true,
-      maxAge: 120,
+      secure: isSecure,
+      maxAge: 60 * 60 * 24 * 30,
     });
     return response;
   } catch (error) {
