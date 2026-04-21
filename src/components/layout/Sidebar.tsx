@@ -8,7 +8,7 @@ const navItems = [
   { href: "/", label: "Calendario", icon: CalendarIcon },
   { href: "/pratiche", label: "Pratiche", icon: PracticeIcon },
   { href: "/shared", label: "Condivisioni", icon: ShareIcon },
-  { href: "/billing", label: "Billing", icon: BillingIcon },
+  { href: "/profilo", label: "Il mio profilo", icon: BillingIcon },
   { href: "/backup", label: "Backup", icon: BackupIcon },
   { href: "/guida", label: "Guida", icon: GuideIcon },
 ];
