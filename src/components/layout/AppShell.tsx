@@ -58,7 +58,7 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
         const hasAccess = Boolean(json?.success && json?.data?.hasPremiumAccess);
 
         if (!hasAccess) {
-          router.replace("/profilo?billing_required=1");
+          router.replace("/onboarding/billing?billing_required=1");
           return;
         }
 
@@ -75,7 +75,10 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
     };
   }, [isLoaded, isSignedIn, pathname, router]);
 
-  const needsBillingCheck = isSignedIn && pathname !== "/profilo";
+  const needsBillingCheck =
+    isSignedIn &&
+    pathname !== "/profilo" &&
+    !pathname.startsWith("/onboarding/billing");
   const showBlockingLoader = needsBillingCheck && !billingChecked;
 
   return (

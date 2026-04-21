@@ -32,7 +32,7 @@ export default function RootLayout({
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
           afterSignInUrl="/"
-          afterSignUpUrl="/"
+          afterSignUpUrl="/onboarding/billing"
         >
           <WheelScrollSupport />
           {children}
