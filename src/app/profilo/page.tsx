@@ -61,7 +61,6 @@ function ProfilePanel() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
-  const [loadingDiag, setLoadingDiag] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fullName = useMemo(() => {
@@ -147,48 +146,17 @@ function ProfilePanel() {
     }
   }
 
-  async function runDiagnostics() {
-    setLoadingDiag(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/billing/test-mode");
-      const json = await res.json();
-      if (!res.ok || !json?.success) {
-        throw new Error(json?.error ?? "Errore diagnostica Stripe");
-      }
-      setDiag(json.data as DiagnosticData);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore inatteso");
-    } finally {
-      setLoadingDiag(false);
-    }
-  }
-
   return (
     <div className="mx-auto w-full max-w-6xl">
       <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--gold)]">Area Admin</p>
-        <h1 className="mt-1 text-2xl font-bold text-[var(--navy)]">Il mio profilo</h1>
+        <h1 className="text-2xl font-bold text-[var(--navy)]">Abbonamento</h1>
         <p className="mt-2 text-sm text-zinc-600">
-          Gestisci dati account, stato abbonamento e strumenti di pagamento in un unico pannello.
+          Gestisci il tuo piano, la prova gratuita e il rinnovo in un unico pannello.
         </p>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-[var(--navy)]">Dati account</h2>
-          <div className="mt-3 space-y-2 text-sm text-zinc-700">
-            <p><span className="font-medium">Nome:</span> {fullName}</p>
-            <p><span className="font-medium">Email:</span> {user?.primaryEmailAddress?.emailAddress ?? "-"}</p>
-            <p>
-              <span className="font-medium">Profilo creato:</span>{" "}
-              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString("it-IT") : "-"}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm lg:col-span-2">
-          <h2 className="text-sm font-semibold text-[var(--navy)]">Stato abbonamento</h2>
+      <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-[var(--navy)]">Stato del piano</h2>
           {loadingStatus ? (
             <p className="mt-3 text-sm text-zinc-500">Caricamento stato in corso...</p>
           ) : status ? (
@@ -196,24 +164,20 @@ function ProfilePanel() {
               <StatCard label="Piano" value={status.currentPlan.toUpperCase()} />
               <StatBadgeCard label="Stato" value={statusInfo.label} badgeClass={statusInfo.badgeClass} />
               <StatCard label="Premium" value={status.hasPremiumAccess ? "SI" : "NO"} />
-              <StatCard label="Tester" value={status.isTester ? "SI" : "NO"} />
+              <StatCard label="Account" value={user?.primaryEmailAddress?.emailAddress ?? "-"} />
               <div className="sm:col-span-2 lg:col-span-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
                 <span className="font-medium">Fine trial:</span>{" "}
                 {status.trialEndsAt ? new Date(status.trialEndsAt).toLocaleString("it-IT") : "-"}
               </div>
-              {status.planOverride && (
-                <div className="sm:col-span-2 lg:col-span-4 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-sm text-[var(--navy)]">
-                  <span className="font-medium">Override piano:</span> {status.planOverride}
+              {!status.hasPremiumAccess && (
+                <div className="sm:col-span-2 lg:col-span-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  Il tuo piano non risulta attivo. Per continuare ad usare le funzionalita' del calendario, attiva o rinnova l'abbonamento.
                 </div>
               )}
-              <p>
-                <span className="font-medium">Customer Stripe:</span> {status.stripeCustomerId ? "Configurato" : "Non configurato"}
-              </p>
             </div>
           ) : (
             <p className="mt-3 text-sm text-zinc-500">Stato non disponibile.</p>
           )}
-        </div>
       </div>
 
       <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -250,31 +214,6 @@ function ProfilePanel() {
           </button>
         </div>
       </div>
-
-      <details className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <summary className="cursor-pointer text-sm font-semibold text-[var(--navy)]">
-          Strumenti tecnici Stripe (admin)
-        </summary>
-        <p className="mt-2 text-sm text-zinc-600">
-          Verifica rapida della configurazione Stripe in ambiente corrente.
-        </p>
-        <button
-          onClick={runDiagnostics}
-          disabled={loadingDiag}
-          className="mt-3 rounded-md bg-[var(--navy)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-        >
-          {loadingDiag ? "Verifica in corso..." : "Verifica configurazione Stripe"}
-        </button>
-        {diag && (
-          <div className="mt-3 space-y-1 text-sm text-zinc-700">
-            <p>Account Stripe: {diag.stripeAccountId}</p>
-            <p>Modalita': {diag.stripeMode}</p>
-            <p>Webhook secret presente: {diag.webhookConfigured ? "SI" : "NO"}</p>
-            <p>Price monthly configurato: {diag.monthlyPriceConfigured ? "SI" : "NO"}</p>
-            <p>Price yearly configurato: {diag.yearlyPriceConfigured ? "SI" : "NO"}</p>
-          </div>
-        )}
-      </details>
 
       {error && (
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
