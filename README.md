@@ -69,6 +69,7 @@ Apri [http://localhost:3000](http://localhost:3000).
 
 - Il modello `User` include `isTester` e `planOverride`.
 - Se `isTester = true` (oppure `planOverride = pro_forced`), l'utente ha accesso premium anche senza subscription Stripe attiva.
+- Facoltativo: imposta `LEGACY_PREMIUM_CUTOFF_ISO` per dare accesso premium automatico agli utenti registrati prima di una data (senza aggiornare il DB utente).
 - Per convertire un tester in cliente pagante: imposta `isTester = false` e usa il checkout standard.
 
 ### Seed (opzionale)
