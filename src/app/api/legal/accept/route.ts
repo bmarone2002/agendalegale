@@ -37,7 +37,17 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    // Clerk metadata propagation to session claims can be slightly delayed:
+    // grant a short-lived bypass cookie to avoid redirect loop right after acceptance.
+    response.cookies.set("legal_accept_recent", "1", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      maxAge: 120,
+    });
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Errore salvataggio consenso";
     return NextResponse.json({ success: false, error: message }, { status: 400 });

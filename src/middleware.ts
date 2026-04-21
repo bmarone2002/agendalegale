@@ -14,6 +14,7 @@ const ALLOWED_PATH_PREFIXES = [
 export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims } = await auth();
   const pathname = req.nextUrl.pathname;
+  const recentlyAcceptedCookie = req.cookies.get("legal_accept_recent")?.value === "1";
 
   const isApiRoute = pathname.startsWith("/api");
   const isAllowedPath = ALLOWED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -22,7 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  if (!hasAcceptedLegal(sessionClaims)) {
+  if (!hasAcceptedLegal(sessionClaims) && !recentlyAcceptedCookie) {
     const redirectUrl = new URL("/accept-legal", req.url);
     return NextResponse.redirect(redirectUrl);
   }
