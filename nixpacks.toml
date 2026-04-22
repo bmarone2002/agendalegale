@@ -2,6 +2,6 @@
 [variables]
 NIXPACKS_NODE_VERSION = "20"
 
-# Usa npm install invece di npm ci così package.json ha priorità (pdf-parse@1.1.1)
+# Usa npm install invece di npm ci così package.json ha priorità (pdf-parse-debugging-disabled@1.1.1)
 [phases.install]
 cmds = ["npm install"]

@@ -14,8 +14,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:seed:prosecuzione": "npx tsx prisma/seed-prosecuzione-demo.ts",
-    "test:calcoli": "npx tsx src/lib/rules/plugins/atto-giuridico.calcolo.test.ts"
+    "db:seed:prosecuzione": "npx tsx prisma/seed-prosecuzione-demo.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

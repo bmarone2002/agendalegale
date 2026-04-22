@@ -6,20 +6,22 @@ Agenda personale per avvocato con interfaccia stile Outlook: viste Mese/Settiman
 
 ## Stack
 
-- **Next.js 14+** (App Router), **React**, **TypeScript**
-- **Prisma** + **PostgreSQL**
+- **Next.js 16** (App Router), **React 19**, **TypeScript 5**
+- **Prisma 5** + **PostgreSQL** (Railway)
+- **Clerk** (autenticazione)
+- **Stripe** (billing / subscription)
 - **FullCalendar** (viste month/week, drag & drop)
-- **shadcn/ui** (Dialog, Tabs, Select, Input, ecc.)
+- **Tailwind CSS 4** + componenti stile shadcn/ui (Dialog, Tabs, Select, Input, ecc.)
 
 ## Requisiti
 
-- Node.js 18+
+- Node.js 20+
 - npm
 
 ## Installazione e avvio
 
-1. Copia `.env.example` in `.env` e imposta `DATABASE_URL` con la URL del tuo PostgreSQL (locale o Railway).
-2. Dalla cartella `legal-calendar`:
+1. Copia `.env.example` in `.env` e valorizza almeno `DATABASE_URL`, le chiavi Clerk e Stripe.
+2. Dalla root del progetto:
 
 ```bash
 npm install
@@ -58,12 +60,9 @@ Apri [http://localhost:3000](http://localhost:3000).
    - `STRIPE_SECRET_KEY` deve iniziare con `sk_test_`
    - `STRIPE_WEBHOOK_SECRET` dal webhook creato in Stripe CLI/dashboard test
    - `STRIPE_PRICE_PRO_MONTHLY` e `STRIPE_PRICE_PRO_YEARLY` con Price ID test (`price_...`)
-3. Avvia app e apri pagina interna `http://localhost:3000/billing`.
-4. Clicca **Verifica configurazione Stripe**.
-5. Se stato "Pronto per test end-to-end", prova:
-   - **Apri Checkout Test**
-   - completa con carta test Stripe (es. `4242 4242 4242 4242`)
-   - verifica aggiornamento utente via webhook.
+3. Avvia app, entra nell'area `/profilo` e verifica che la sezione abbonamento risponda correttamente.
+4. Per smoke-test della config server lato Stripe puoi chiamare `GET /api/billing/test-mode`.
+5. Per il flusso completo prova `POST /api/billing/checkout` dalla pagina `/profilo` e completa con carta test Stripe (es. `4242 4242 4242 4242`), quindi verifica aggiornamento utente via webhook.
 
 ### Tester gratuiti durante la beta
 
@@ -77,7 +76,7 @@ Apri [http://localhost:3000](http://localhost:3000).
 Per avere un evento di esempio con sottoeventi:
 
 ```bash
-npx tsx prisma/seed.ts
+npm run db:seed
 ```
 
 ## Istruzioni di test manuale
@@ -117,8 +116,6 @@ npx tsx prisma/seed.ts
 10. **Appello civile**: Breve = notifica sentenza + 30; Lungo = pubblicazione + 6 mesi.
 11. **Ricorso Cassazione – Costituzione**: Ultima notifica ricorso + 20 gg (art. 369 c.p.c.).
 
-Unit test: `npm run test:calcoli`.
-
 ## Script utili
 
 - `npm run dev` – avvio in sviluppo
@@ -134,10 +131,11 @@ Unit test: `npm run test:calcoli`.
 - `src/components/event-modal/` – modale create/edit a tab
 - `src/components/ui/` – componenti shadcn (button, dialog, tabs, …)
 - `src/lib/actions/` – Server Actions (CRUD eventi e sottoeventi, preview)
-- `src/lib/rules/` – rule engine e plugin (reminder, generic-deadline, checklist, **atto-giuridico**)
-- `src/types/atto-giuridico.ts` – tipi e enum per ATTO GIURIDICO (actionType, actionMode, inputs)
+- `src/lib/rules/` – rule engine e plugin (reminder, generic-deadline, checklist, data-driven engine per atti giuridici)
+- `src/types/macro-areas.ts` – tipi, enum e tabelle MACRO AREA / PROCEDIMENTO / PARTE / EVENTO
 - `src/lib/settings.ts` – impostazioni (promemoria, defaultTimeForDeadlines, termini 120/150, ecc.)
 - `prisma/` – schema e migrazioni PostgreSQL
+- `docs/` – documentazione di deploy, regole CSV e testi legali
 
 ## Multi-tenant e Fase 2 (Organizations)
 
@@ -154,3 +152,13 @@ Unit test: `npm run test:calcoli`.
 - **Modale**: tab "Promemoria" e "Avanzate" sono placeholder per future periferiche/controlli.
 - **Regole**: nuove regole si registrano in `lib/rules/registry.ts` e si aggiungono al template in `types` (RULE_TEMPLATES).
 - **Settings**: `lib/settings.ts` e tabella `Setting` consentono di aggiungere gestione weekend/festivi e sospensione feriale.
+
+## Documentazione aggiuntiva
+
+Tutta la documentazione operativa vive sotto `docs/`:
+
+- [`docs/deploy/railway-deploy.md`](docs/deploy/railway-deploy.md) — guida completa di deploy su Railway (repo GitHub → Railway → variabili → build).
+- [`docs/deploy/railway-database.md`](docs/deploy/railway-database.md) — collegare PostgreSQL al servizio applicazione su Railway e troubleshooting `DATABASE_URL` / migrazioni mancanti.
+- [`docs/deploy/prisma-troubleshooting.md`](docs/deploy/prisma-troubleshooting.md) — come rigenerare il client Prisma quando compaiono errori tipo "Unknown argument".
+- [`docs/legal/`](docs/legal) — testi legali (privacy, termini, cookie, abbonamento) renderizzati nelle pagine `/legal/*`.
+- [`docs/*.csv`](docs) — tabelle di regole per procedimenti civili (citazione, opposizione DI, rito semplificato).

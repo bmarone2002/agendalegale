@@ -171,7 +171,7 @@ function ProfilePanel() {
               </div>
               {!status.hasPremiumAccess && (
                 <div className="sm:col-span-2 lg:col-span-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                  Il tuo piano non risulta attivo. Per continuare ad usare le funzionalita' del calendario, attiva o rinnova l'abbonamento.
+                  Il tuo piano non risulta attivo. Per continuare ad usare le funzionalita&apos; del calendario, attiva o rinnova l&apos;abbonamento.
                 </div>
               )}
             </div>

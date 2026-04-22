@@ -18,7 +18,6 @@ const eslintConfig = defineConfig([
     "**/node_modules/**",
     "src/generated/**",
     "prisma/generated/**",
-    "legal-calendar/**",
   ]),
   {
     rules: {
