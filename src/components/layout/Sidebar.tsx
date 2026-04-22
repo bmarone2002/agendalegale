@@ -11,7 +11,7 @@ const navItems = [
   { href: "/profilo", label: "Il mio profilo", icon: BillingIcon },
   { href: "/backup", label: "Backup", icon: BackupIcon },
   { href: "/guida", label: "Guida", icon: GuideIcon },
-  { href: "/supporto", label: "Supporto", icon: SupportIcon },
+  { href: "/guida#supporto", label: "Supporto", icon: SupportIcon },
 ];
 
 function CalendarIcon({ className }: { className?: string }) {
