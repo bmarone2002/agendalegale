@@ -2109,7 +2109,7 @@ export function CalendarView({ targetUserId, permission }: CalendarViewProps = {
             </div>
             <div
               ref={smartPanelScrollRef}
-              className="max-h-[min(28rem,55vh)] overflow-y-auto border-t border-zinc-100 p-4"
+              className="h-[18rem] sm:h-[clamp(16rem,34vh,22rem)] overflow-y-auto border-t border-zinc-100 p-4"
             >
               {smartPanelItems.length === 0 ? (
                 <p className="py-6 text-center text-sm text-slate-500">
