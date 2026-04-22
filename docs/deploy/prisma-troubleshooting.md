@@ -8,7 +8,7 @@ Il client Prisma non è aggiornato con i campi `macroType`, `actionType`, `actio
    Nella finestra dove gira `npm run dev` premi **Ctrl+C** e attendi che si chiuda.
 
 2. **Rigenera il client Prisma**  
-   Nella cartella del progetto (`legal-calendar`) esegui:
+   Nella cartella del progetto (`agenda-legale`) esegui:
    ```bash
    npx prisma generate
    ```

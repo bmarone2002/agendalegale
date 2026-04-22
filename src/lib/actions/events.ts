@@ -195,7 +195,7 @@ export async function createEvent(data: CreateEventInput, targetUserId?: string)
         });
         const externalUserIds = users.map((u) => u.clerkUserId).filter(Boolean);
         if (externalUserIds.length > 0) {
-          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://legalcalendar-production.up.railway.app";
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agendalegale-production.up.railway.app";
           await sendOneSignalNotification({
             externalUserIds,
             title: "Nuovo evento in agenda",

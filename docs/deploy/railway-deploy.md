@@ -1,4 +1,4 @@
-# Guida al deploy – Legal Calendar online
+# Guida al deploy – Agenda Legale online
 
 Questa guida spiega come mettere l’app su internet (uso da più dispositivi) e come continuare a modificarla da Cursor.
 
@@ -15,21 +15,21 @@ Questa guida spiega come mettere l’app su internet (uso da più dispositivi) e
 ## Passo 1 – Crea il repository su GitHub
 
 1. Vai su [github.com/new](https://github.com/new).
-2. **Repository name:** `legal-calendar` (o un altro nome che preferisci).
+2. **Repository name:** `agenda-legale` (o un altro nome che preferisci).
 3. Lascia **Public**.
 4. **Non** spuntare “Add a README” (il progetto esiste già).
 5. Clicca **Create repository**.
 
-Tieni aperta la pagina del repo: ti servirà l’URL (es. `https://github.com/TUO-USERNAME/legal-calendar`).
+Tieni aperta la pagina del repo: ti servirà l’URL (es. `https://github.com/TUO-USERNAME/agenda-legale`).
 
 ---
 
 ## Passo 2 – Collega il progetto e fai il primo push
 
-Apri il **terminale in Cursor** (cartella `legal-calendar`) ed esegui, **sostituendo `TUO-USERNAME`** con il tuo username GitHub:
+Apri il **terminale in Cursor** (cartella `agenda-legale`) ed esegui, **sostituendo `TUO-USERNAME`** con il tuo username GitHub:
 
 ```bash
-git remote add origin https://github.com/TUO-USERNAME/legal-calendar.git
+git remote add origin https://github.com/TUO-USERNAME/agenda-legale.git
 git add .
 git commit -m "Preparazione deploy: .gitignore, script start:prod, guida DEPLOY"
 git branch -M main
@@ -54,7 +54,7 @@ Da questo momento: **ogni modifica che fai in Cursor** la metti online con `git 
 
 1. Vai su [railway.app](https://railway.app) e accedi con **GitHub**.
 2. **New Project** → **Deploy from GitHub repo**.
-3. Scegli il repo **legal-calendar** (autorizza Railway su GitHub se richiesto).
+3. Scegli il repo **agenda-legale** (autorizza Railway su GitHub se richiesto).
 4. Railway crea un “service” collegato al repo.
 
 ### 3.2 Aggiungi il database PostgreSQL
@@ -66,7 +66,7 @@ Da questo momento: **ogni modifica che fai in Cursor** la metti online con `git 
 
 ### 3.3 Collega il database all’app (obbligatorio)
 
-1. Clicca sul **servizio dell’app** (Legal Calendar), **non** sul servizio PostgreSQL.
+1. Clicca sul **servizio dell’app** (Agenda Legale), **non** sul servizio PostgreSQL.
 2. Vai su **Variables** (o **Settings** → **Variables**).
 3. **+ New Variable** e aggiungi:
    - **Name:** `DATABASE_URL`
@@ -99,7 +99,7 @@ Salva le modifiche. Railway eseguirà il build e poi avvierà l’app con `start
 1. Vai su **Settings** → **Networking** (o **Generate Domain**).
 2. Clicca **Generate Domain** (o **Public Networking**).
 3. Railway assegna un URL tipo:  
-   `https://legal-calendar-production-xxxx.up.railway.app`
+   `https://agenda-legale-production-xxxx.up.railway.app`
 
 Quell’URL è il tuo **Calendario online**: puoi aprirlo da PC, telefono, tablet; tutti vedono gli stessi dati.
 
@@ -124,8 +124,8 @@ Nessun bisogno di rifare a mano i passi 3.1–3.5: basta push da Cursor.
 
 | Cosa                    | Dove / Come |
 |-------------------------|------------|
-| Codice e modifiche      | Cursor (cartella `legal-calendar`) |
-| Versione online         | GitHub (repo `legal-calendar`) |
+| Codice e modifiche      | Cursor (cartella `agenda-legale`) |
+| Versione online         | GitHub (repo `agenda-legale`) |
 | App online              | Railway (URL generato al passo 3.5) |
 | Database                | PostgreSQL gestito Railway (servizio Database) |
 | Aggiornare il sito      | `git add .` → `git commit -m "..."` → `git push` |

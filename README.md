@@ -34,9 +34,9 @@ Apri [http://localhost:3000](http://localhost:3000).
 
 ### Configurazione Railway
 
-- **DATABASE_URL**: nella dashboard Railway del servizio App (Legal Calendar) vai in **Variables** e aggiungi `DATABASE_URL` copiando la connection string dal servizio PostgreSQL (sezione **Variables** o **Connect** del database).
+- **DATABASE_URL**: nella dashboard Railway del servizio App (Agenda Legale) vai in **Variables** e aggiungi `DATABASE_URL` copiando la connection string dal servizio PostgreSQL (sezione **Variables** o **Connect** del database).
 - **Clerk**:
-  - Crea una nuova applicazione in Clerk per `legal-calendar`.
+  - Crea una nuova applicazione in Clerk per `agenda-legale`.
   - Copia `Publishable key` in `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` nelle **Variables** dell’app Railway.
   - Copia `Secret key` in `CLERK_SECRET_KEY`.
   - Imposta le URL di redirect in Clerk (Sign-in/Sign-up) a `https://<railway-app-url>/sign-in` e `https://<railway-app-url>/sign-up`.

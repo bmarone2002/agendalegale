@@ -30,7 +30,7 @@ function getTicketId(now = new Date()): string {
   const rand = Math.floor(Math.random() * 10000)
     .toString()
     .padStart(4, "0");
-  return `LC-${y}${m}${d}-${rand}`;
+  return `AL-${y}${m}${d}-${rand}`;
 }
 
 function escapeHtml(input: string): string {
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     const safeMessage = escapeHtml(payload.message);
     const safeSubject = escapeHtml(payload.subject);
 
-    const internalSubject = `[Legal Calendar][${categoryLabel}][${payload.priority}] ${payload.subject}`;
+    const internalSubject = `[Agenda Legale][${categoryLabel}][${payload.priority}] ${payload.subject}`;
     const internalText = [
       `Ticket ID: ${ticketId}`,
       `Ricevuto: ${receivedAt}`,
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
       "",
       "Se vuoi aggiungere dettagli, rispondi a questa email indicando il codice pratica.",
       "",
-      "Supporto Legal Calendar",
+      "Supporto Agenda Legale",
     ].join("\n");
 
     const userHtml = `
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
       <p>abbiamo ricevuto la tua richiesta di assistenza con codice <strong>${ticketId}</strong>.</p>
       <p>Ti risponderemo entro <strong>24/48 ore lavorative</strong>.</p>
       <p>Se vuoi aggiungere dettagli, rispondi a questa email indicando il codice pratica.</p>
-      <p>Supporto Legal Calendar</p>
+      <p>Supporto Agenda Legale</p>
     `;
 
     await sendResendEmail({

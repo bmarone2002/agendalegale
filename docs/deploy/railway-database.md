@@ -5,7 +5,7 @@ Se vedi **"Environment variable not found: DATABASE_URL"** su Railway, l’app n
 ## Passi (da fare nel dashboard Railway)
 
 1. Apri il **progetto** su [railway.app](https://railway.app).
-2. Clicca sul **servizio dell’app** (Legal Calendar / legalcalendar), **non** sul servizio PostgreSQL.
+2. Clicca sul **servizio dell’app** (Agenda Legale / agendalegale), **non** sul servizio PostgreSQL.
 3. Vai in **Variables** (o **Settings** → **Variables**).
 4. Aggiungi la variabile in uno di questi modi:
 
@@ -52,7 +52,7 @@ Dopo il deploy, all'avvio l'app esegue `prisma migrate deploy` e crea le tabelle
 Se vuoi creare le tabelle subito senza aspettare un nuovo deploy:
 
 1. Copia la **`DATABASE_URL`** dal servizio PostgreSQL su Railway (Variables).
-2. Dalla cartella **legal-calendar** nel terminale (PowerShell):
+2. Dalla cartella **agenda-legale** nel terminale (PowerShell):
 
 ```powershell
 $env:DATABASE_URL="incolla_qui_la_url_completa"

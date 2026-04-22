@@ -1,4 +1,4 @@
-// Legal Calendar - Prisma schema
+// Agenda Legale - Prisma schema
 // PostgreSQL su Railway (database gestito)
 
 generator client {
