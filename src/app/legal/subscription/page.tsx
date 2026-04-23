@@ -1,22 +1,33 @@
 export default function SubscriptionPage() {
   return (
-    <article className="prose prose-sm max-w-none">
-      <h1>Condizioni Abbonamento e Recesso</h1>
-      <p>Versione 2026-04-21.</p>
-      <h2>Rinnovo automatico</h2>
-      <p>
-        I piani in abbonamento si rinnovano automaticamente alla scadenza del periodo, salvo disdetta prima del rinnovo.
-      </p>
-      <h2>Disdetta</h2>
-      <p>
-        La disdetta si effettua dal Customer Portal Stripe e blocca i rinnovi futuri; il servizio resta attivo fino alla fine
-        del periodo gia&apos; pagato.
-      </p>
-      <h2>Diritto di recesso</h2>
-      <p>
-        Per i consumatori, ove applicabile, resta fermo il diritto di recesso entro 14 giorni, con eventuali eccezioni previste
-        dalla normativa sui contenuti digitali.
-      </p>
+    <article className="space-y-4">
+      <header className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
+        <h2 className="text-xl font-semibold text-[var(--navy)]">Condizioni Abbonamento e Recesso</h2>
+        <p className="mt-1 text-sm text-zinc-500">Versione 2026-04-21</p>
+      </header>
+
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+        <h3 className="text-base font-semibold text-[var(--navy)]">Rinnovo automatico</h3>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-700">
+          I piani in abbonamento si rinnovano automaticamente alla scadenza del periodo, salvo disdetta prima del rinnovo.
+        </p>
+      </section>
+
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+        <h3 className="text-base font-semibold text-[var(--navy)]">Disdetta</h3>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-700">
+          La disdetta si effettua dal Customer Portal Stripe e blocca i rinnovi futuri; il servizio resta attivo fino alla fine
+          del periodo gia&apos; pagato.
+        </p>
+      </section>
+
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+        <h3 className="text-base font-semibold text-[var(--navy)]">Diritto di recesso</h3>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-700">
+          Per i consumatori, ove applicabile, resta fermo il diritto di recesso entro 14 giorni, con eventuali eccezioni previste
+          dalla normativa sui contenuti digitali.
+        </p>
+      </section>
     </article>
   );
 }
