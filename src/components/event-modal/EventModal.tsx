@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { createEvent, updateEvent, getEventById, deleteEvent, completeEventWithSubEvents } from "@/lib/actions/events";
+import { createEvent, updateEvent, getEventById, deleteEvent } from "@/lib/actions/events";
 import { parseDocumentForEvent } from "@/lib/actions/parse-document";
 import {
   regenerateSubEvents,
@@ -2116,75 +2116,6 @@ export function EventModal({
                   placeholder="Adempimenti o note"
                   disabled={readOnly}
                 />
-              </div>
-
-              {/* 6. Stato completamento evento */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (readOnly) return;
-                    // In creazione aggiorniamo solo lo stato locale; in modifica persistiamo anche su server + sottoeventi
-                    if (mode === "edit" && eventId) {
-                      setError(null);
-                      setSaving(true);
-                      try {
-                        const result = await completeEventWithSubEvents(eventId, targetUserId);
-                        if (!result.success || !result.data) {
-                          setError(
-                            !result.success
-                              ? normalizeDisplayError(result.error)
-                              : "Impossibile completare la pratica"
-                          );
-                          return;
-                        }
-                        const e = result.data;
-                        const nextStatus = e.status === "done" ? "done" : "pending";
-                        setForm((f) => ({
-                          ...f,
-                          status: nextStatus,
-                        }));
-                        setSubEvents(e.subEvents ?? []);
-                        setSelectedSubEventId(null);
-                        // Allinea subito calendario/pannello padre: anche i sottoeventi
-                        // devono riflettere il cambio stato senza attendere altri salvataggi.
-                        onChanged?.();
-                      } finally {
-                        setSaving(false);
-                      }
-                    } else {
-                      setForm((f) => ({ ...f, status: f.status === "done" ? "pending" : "done" }));
-                    }
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                    form.status === "done"
-                      ? "bg-green-100 border-green-400 text-green-800 hover:bg-green-200"
-                      : "bg-white border-zinc-300 text-zinc-600 hover:bg-zinc-50"
-                  }`}
-                  aria-label={
-                    form.status === "done"
-                      ? "Segna pratica e tutto ciò che è collegato (sottoeventi inclusi) come da fare"
-                      : "Segna pratica e tutto ciò che è collegato (sottoeventi inclusi) come completato"
-                  }
-                  disabled={saving || readOnly}
-                >
-                  <span
-                    className={`inline-block w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                      form.status === "done"
-                        ? "bg-green-500 border-green-500"
-                        : "border-zinc-400"
-                    }`}
-                  >
-                    {form.status === "done" && (
-                      <svg viewBox="0 0 16 16" fill="none" className="w-full h-full">
-                        <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  {form.status === "done"
-                    ? "Segna pratica + tutto il collegato (anche sottoeventi) come da fare"
-                    : "Segna pratica + tutto il collegato (anche sottoeventi) come completato"}
-                </button>
               </div>
 
               {/* 7. Colore tag: applicato a evento e sottoeventi in calendario */}
