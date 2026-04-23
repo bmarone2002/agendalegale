@@ -2146,6 +2146,9 @@ export function EventModal({
                         }));
                         setSubEvents(e.subEvents ?? []);
                         setSelectedSubEventId(null);
+                        // Allinea subito calendario/pannello padre: anche i sottoeventi
+                        // devono riflettere il cambio stato senza attendere altri salvataggi.
+                        onChanged?.();
                       } finally {
                         setSaving(false);
                       }
@@ -2160,8 +2163,8 @@ export function EventModal({
                   }`}
                   aria-label={
                     form.status === "done"
-                      ? "Segna la pratica e gli adempimenti collegati come da fare"
-                      : "Segna la pratica e gli adempimenti collegati come completati"
+                      ? "Segna pratica e tutto ciò che è collegato (sottoeventi inclusi) come da fare"
+                      : "Segna pratica e tutto ciò che è collegato (sottoeventi inclusi) come completato"
                   }
                   disabled={saving || readOnly}
                 >
@@ -2179,8 +2182,8 @@ export function EventModal({
                     )}
                   </span>
                   {form.status === "done"
-                    ? "Segna pratica + adempimenti collegati come da fare"
-                    : "Segna pratica + adempimenti collegati come completati"}
+                    ? "Segna pratica + tutto il collegato (anche sottoeventi) come da fare"
+                    : "Segna pratica + tutto il collegato (anche sottoeventi) come completato"}
                 </button>
               </div>
 
