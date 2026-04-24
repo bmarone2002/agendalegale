@@ -32,7 +32,11 @@
   --font-sans: var(--font-geist-sans);
 }
 
-html, body { overflow-x: hidden; }
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
 body {
   background: #fff;
   color: #171717;

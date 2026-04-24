@@ -82,7 +82,7 @@ export function AppShell({ children, headerTitle }: AppShellProps) {
   const showBlockingLoader = needsBillingCheck && !billingChecked;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--surface)]" style={{ backgroundColor: "var(--surface)" }}>
+    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-[var(--surface)]" style={{ backgroundColor: "var(--surface)" }}>
       <div className="flex min-h-0 w-full flex-1">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
